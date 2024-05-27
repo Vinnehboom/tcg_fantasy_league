@@ -1,0 +1,62 @@
+
+require:
+  - rubocop-rails
+  - rubocop-rspec
+inherit_mode:
+  merge:
+    - Exclude
+
+Layout/LineLength:
+  Max: 120
+Metrics/BlockLength:
+  Max: 30
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - staging
+    - test
+    - development
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+RSpec/MultipleExpectations:
+  Max: 6
+RSpec/MultipleMemoizedHelpers:
+  Max: 8
+RSpec/InstanceVariable:
+  Enabled: false
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/ImplicitSubject:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 100
+RSpec/ExampleLength:
+  Max: 20
+Metrics/MethodLength:
+  Max: 20
+Metrics/AbcSize:
+  Max: 32
+Style/Documentation:
+  Enabled: false
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+Layout/EmptyLinesAroundClassBody:
+  EnforcedStyle: empty_lines
+Layout/EmptyLinesAroundModuleBody:
+  EnforcedStyle: empty_lines
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*.rb'
+    - 'db/seeds/*'
+    - 'config/**/*.rb'
+    - 'bin/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'db/data/*'
