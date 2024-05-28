@@ -23,5 +23,9 @@ module TcgFantasyDraft
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    #
+    def self.credentials
+      @credentials ||= Rails.application.credentials
+    end
   end
 end
