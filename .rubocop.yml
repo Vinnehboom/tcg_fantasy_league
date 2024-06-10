@@ -2,6 +2,8 @@
 require:
   - rubocop-rails
   - rubocop-rspec
+  - rubocop-rspec_rails
+  - rubocop-factory_bot
 inherit_mode:
   merge:
     - Exclude

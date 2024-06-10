@@ -6,6 +6,7 @@
 
 # Ignore bundler config.
 /.bundle
+/.byebug_history
 
 # Ignore all environment files (except templates).
 /.env*
@@ -44,3 +45,5 @@
 /config/credentials/test.key
 
 /config/credentials/staging.key
+
+.DS_Store
