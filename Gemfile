@@ -3,7 +3,10 @@ source 'https://rubygems.org'
 ruby '3.2.4'
 
 gem 'cssbundling-rails'
+gem 'factory_bot_rails'
+gem 'httparty'
 gem 'jsbundling-rails'
+gem 'nokogiri'
 gem 'pg'
 gem 'puma', '>= 5.0'
 gem 'rails', '~> 7.1.3', '>= 7.1.3.2'
@@ -11,6 +14,8 @@ gem 'sprockets-rails'
 gem 'sqlite3', '~> 1.4'
 gem 'stimulus-rails'
 gem 'turbo-rails'
+
+gem 'faker', '~> 3.4'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
@@ -35,6 +40,7 @@ gem 'bootsnap', require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'byebug'
   gem 'debug', platforms: %i[mri windows]
   gem 'rubocop'
   gem 'rubocop-rails'
