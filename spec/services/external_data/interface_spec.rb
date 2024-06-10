@@ -76,4 +76,46 @@ RSpec.describe ExternalData::Interface do
       end
     end
   end
+
+  describe '#update_players' do
+    let(:players) do
+      [
+        { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791' },
+        { name: 'Efrain Herman', country: 'MQ', external_id: '/players/6', external_points: '399' },
+        { name: 'Guadalupe Ernser', country: 'MF', external_id: '/players/7', external_points: '460' },
+        { name: 'Janyce Gusikowski V', country: 'DO', external_id: '/players/8', external_points: '163' }
+      ]
+    end
+
+    describe 'when a game with a corresponding adapter is given' do
+      before do
+        allow(ExternalData::OfflineAdapter).to receive(:players).and_return(players)
+      end
+
+      describe 'when the player data exists' do
+        let(:player) { players.sample }
+
+        before do
+          create(:player, **player, external_points: '100', game_id: game.id)
+        end
+
+        it 'updates the players information' do
+          interface.update_players
+          expect(Player.find_by(name: player[:name]).external_points).to eq(player[:external_points])
+        end
+      end
+
+      describe 'when the players data does not exist yet' do
+        it 'saves the players information' do
+          expect { interface.update_players }.to change(Player, :count).by(4)
+        end
+      end
+    end
+
+    describe 'when a game without a corresponding adapter is given' do
+      it 'raises an exception' do
+        expect { interface.update_players }.to raise_error(CustomException)
+      end
+    end
+  end
 end

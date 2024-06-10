@@ -13,6 +13,16 @@ module ExternalData
       players.compact_blank.map { |player| { game_id: @game.id, **player } }
     end
 
+    def update_players
+      ActiveRecord::Base.transaction do
+        players.each do |player|
+          db_player = Player.find_or_initialize_by(external_id: player[:external_id], game_id: player[:game_id])
+          db_player.assign_attributes(player)
+          db_player.save!
+        end
+      end
+    end
+
     private
 
     def select_adapter
