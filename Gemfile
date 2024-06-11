@@ -70,3 +70,7 @@ group :test do
   gem 'capybara'
   gem 'selenium-webdriver'
 end
+
+gem 'kaminari', '~> 1.2'
+
+gem 'rails-controller-testing', '~> 1.0'

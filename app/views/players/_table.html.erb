@@ -1,0 +1,35 @@
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Country</th>
+      <th>Game</th>
+      <th>External score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @players.each_with_index do |player, index| %>
+    <% game = player.game %>
+    <tr>
+      <td>
+        <%= index+1 %>
+      </td>
+        <td>
+          <%= link_to(player.name, "#{game.base_uri}#{player.external_id}",target: "_blank") %>
+        </td>
+      <td>
+        <%= player.country %>
+      </td>
+    <td>
+      <%= game.name %>
+    </td>
+      <td>
+        <%= player.external_points %>
+      </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= paginate @players %>
