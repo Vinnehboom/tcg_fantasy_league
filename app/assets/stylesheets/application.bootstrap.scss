@@ -1,0 +1,11 @@
+// Entry point for your Sass build
+@import "variables";
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons';
+
+.flash-bar {
+  position: absolute;
+  width: 100%;
+  animation: appear-then-fade 4s both;
+}
+
