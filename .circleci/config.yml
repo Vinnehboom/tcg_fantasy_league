@@ -1,0 +1,61 @@
+version: 2.1
+
+orbs:
+  ruby: circleci/ruby@1.4.0
+  node: circleci/node@5.0.0
+
+executors:
+  lite-container:
+    resource_class: small
+    docker:
+      - image: cimg/base:2022.03
+  lite-ruby-container:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:3.2.4
+  test-container:
+    resource_class: medium
+    docker:
+      - image: cimg/ruby:3.2.4-browsers
+      - image: cimg/postgres:14.0
+        environment:
+          POSTGRES_USER: tcg_fantasy_draft
+          POSTGRES_DB: tcg_fantasy_draft_test
+          POSTGRES_PASSWORD: tcg_fantasy_draft
+    environment:
+      BUNDLE_JOBS: "3"
+      BUNDLE_RETRY: "3"
+      PGHOST: 127.0.0.1
+      RAILS_ENV: test
+
+jobs:
+  test:
+    executor: test-container
+    steps:
+      - checkout
+      - run: sudo apt update && sudo apt install zlib1g-dev
+      - ruby/install-deps
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Database setup
+          command: bundle exec rails db:create && bundle exec rails db:schema:load --trace
+      - run:
+          name: Assets precompile
+          command: bundle exec rake assets:precompile
+      - run:
+          name: Lint
+          command: bundle exec rubocop -P
+      - run:
+          name: Tests
+          command: bundle exec rspec
+
+workflows:
+  version: 2
+  CI:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: main
