@@ -1,0 +1,17 @@
+$xs: 0;
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1200px;
+$xxl: 1400px;
+$xxxl: 1921px;
+$xxxxl: 2561px;
+
+@keyframes appear-then-fade {
+  0%, 100% {
+    opacity: 0
+  }
+  5%, 60% {
+    opacity: 1
+  }
+}

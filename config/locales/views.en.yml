@@ -1,0 +1,7 @@
+en:
+  views:
+    layout:
+      header:
+        navlink: TCG Fantasy Draft
+        logout: Log out
+        login: Log in
