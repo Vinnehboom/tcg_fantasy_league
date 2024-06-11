@@ -14,8 +14,10 @@ gem 'sprockets-rails'
 gem 'sqlite3', '~> 1.4'
 gem 'stimulus-rails'
 gem 'turbo-rails'
-
 gem 'faker', '~> 3.4'
+gem 'kaminari', '~> 1.2'
+gem 'rails-controller-testing', '~> 1.0'
+gem 'devise', '~> 4.9'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
@@ -71,6 +73,4 @@ group :test do
   gem 'selenium-webdriver'
 end
 
-gem 'kaminari', '~> 1.2'
 
-gem 'rails-controller-testing', '~> 1.0'
