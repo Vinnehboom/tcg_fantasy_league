@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_11_093246) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_13_065746) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -32,6 +32,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_11_093246) do
     t.index ["game_id"], name: "index_players_on_game_id"
   end
 
+  create_table "tournaments", force: :cascade do |t|
+    t.string "name"
+    t.string "external_id"
+    t.string "country"
+    t.bigint "game_id", null: false
+    t.string "format"
+    t.date "starting_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_tournaments_on_game_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "username", default: "", null: false
@@ -46,4 +58,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_11_093246) do
     t.index ["username"], name: "unique_usernames", unique: true
   end
 
+  add_foreign_key "tournaments", "games"
 end
