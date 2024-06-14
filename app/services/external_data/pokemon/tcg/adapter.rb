@@ -10,6 +10,10 @@ module ExternalData
           ExternalData::Pokemon::Tcg::Players.all
         end
 
+        def self.upcoming_tournaments
+          ExternalData::Pokemon::Tcg::Tournaments.upcoming_tournaments
+        end
+
       end
 
     end
