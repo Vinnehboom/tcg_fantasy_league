@@ -5,4 +5,6 @@ class Player < ApplicationRecord
   validates :external_points, presence: true
   belongs_to :game
 
+  include ExternalResource
+
 end

@@ -4,7 +4,27 @@ en:
       user:
         one: User
         other: Users
+      player:
+        one: Player
+        other: Players
+      tournament:
+        one: Tournament
+        other: Tournaments
     attributes:
       user:
         email: Email
         username: Username
+      player:
+        name: Name
+        country: Country
+        external_id: External id
+        external_points: External points
+        game_id: Game
+      tournament:
+        name: Name
+        country: Country
+        external_id: External id
+        starting_date: Starting date
+        format: Format
+        game_id: Game
+
