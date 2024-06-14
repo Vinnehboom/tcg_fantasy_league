@@ -1,6 +1,6 @@
 module ExternalData
 
-  class Interface < ApplicationService
+  class Interface
 
     def initialize(game)
       @game = game
@@ -10,20 +10,31 @@ module ExternalData
 
     def players
       players = @adapter.players
-      players.compact_blank.map { |player| { game_id: @game.id, **player } }
+      players.each { |player| player.game_id = @game.id }
+      players
     end
 
     def update_players
-      ActiveRecord::Base.transaction do
-        players.each do |player|
-          db_player = Player.find_or_initialize_by(external_id: player[:external_id], game_id: player[:game_id])
-          db_player.assign_attributes(player)
-          db_player.save!
-        end
-      end
+      save_objects(players)
+    end
+
+    def upcoming_tournaments
+      tournaments = @adapter.upcoming_tournaments
+      tournaments.each { |tournament| tournament.game_id = @game.id }
+      tournaments
+    end
+
+    def update_upcoming_tournaments
+      save_objects(upcoming_tournaments)
     end
 
     private
+
+    def save_objects(objects)
+      ActiveRecord::Base.transaction do
+        objects.each(&:save)
+      end
+    end
 
     def select_adapter
       case @game.name
