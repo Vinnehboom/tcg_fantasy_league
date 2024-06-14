@@ -7,4 +7,6 @@ class Tournament < ApplicationRecord
 
   enum format: { standard: 0, expanded: 1 }
 
+  include ExternalResource
+
 end

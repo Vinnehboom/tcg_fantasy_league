@@ -1,29 +1,24 @@
-<table>
+<table class="table-dark table table-striped rounded-2 overflow-hidden">
   <thead>
     <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>Country</th>
-      <th>Game</th>
-      <th>External score</th>
+      <th><%= t("activerecord.attributes.player.game_id") %></th>
+      <th><%= t("activerecord.attributes.player.name") %></th>
+      <th><%= t("activerecord.attributes.player.country") %></th>
+      <th><%= t("activerecord.attributes.player.external_points") %></th>
     </tr>
   </thead>
   <tbody>
-    <% @players.each_with_index do |player, index| %>
-    <% game = player.game %>
+    <% @players.each do |player| %>
     <tr>
       <td>
-        <%= index+1 %>
+        <%= player.game.name %>
       </td>
         <td>
-          <%= link_to(player.name, "#{game.base_uri}#{player.external_id}",target: "_blank") %>
+          <%= link_to(player.name, player.external_url ,target: "_blank") %>
         </td>
       <td>
         <%= player.country %>
       </td>
-    <td>
-      <%= game.name %>
-    </td>
       <td>
         <%= player.external_points %>
       </td>
