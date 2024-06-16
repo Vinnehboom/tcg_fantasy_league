@@ -10,6 +10,21 @@ en:
       tournament:
         one: Tournament
         other: Tournaments
+      price:
+        one: Price
+        other: Prices
+      pricing_rule:
+        one: Pricing rule
+        other: Pricing rules
+      price_pricing_rules:
+        one: Price pricing rule
+        other: Price pricing rules
+      gradual_scaling_price:
+        one: Gradual scaling price
+        other: Gradual scaling prices
+      gradual_price_scale:
+        one: Gradual price scale
+        other: Gradual price scales
     attributes:
       user:
         email: Email
@@ -27,4 +42,24 @@ en:
         starting_date: Starting date
         format: Format
         game_id: Game
-
+      price:
+        player: Player
+        player_id: Player
+        external_points: External points
+        start_time: Valid from
+        end_time: Valid until
+        value: Value
+      pricing_rule:
+        type: Type
+        name: Name
+      price_pricing_rules:
+        price: Price
+        price_id: Price
+        pricing_rule: Pricing rule
+        pricing_rule_id: Pricing rule
+        other: Price pricing rules
+      gradual_scaling_price:
+        gradual_price_scales: Price scales
+      gradual_price_scale:
+        gradual_scaling_price: Gradual scaling price
+        gradual_scaling_price_id: Gradual scaling price

@@ -5,7 +5,7 @@ FactoryBot.define do
     sequence :external_id do |n|
       "/players/#{n}"
     end
-    external_points { rand(1500) }
+    external_points { rand(1500).to_s }
     game
   end
 end
