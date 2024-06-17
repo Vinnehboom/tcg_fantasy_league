@@ -4,6 +4,7 @@
     <th><%= t('activerecord.attributes.gradual_price_scale.point_coefficient') %></th>
     <th><%= t('activerecord.attributes.gradual_price_scale.minimum_price') %></th>
     <th><%= t('activerecord.attributes.gradual_price_scale.maximum_price') %></th>
+    <th><%= t('views.table.actions.header') %></th>
   </tr>
   </thead>
   <tbody>
@@ -17,6 +18,15 @@
         </td>
         <td>
           <%= scale.maximum_price %>
+        </td>
+        <td class="d-flex justify-content-center">
+          <%= link_to edit_gradual_scaling_price_gradual_price_scale_path(@gradual_scaling_price, scale), class: 'text-success' do %>
+          <%= bootstrap_icon('pencil-square') %>
+          <% end %>
+
+          <%= link_to gradual_scaling_price_gradual_price_scale_path(@gradual_scaling_price, scale), class: 'text-danger', data: { 'turbo-method': :delete, 'turbo-confirm': t('gradual_scaling_prices.show.destroy_warning') } do %>
+            <%= bootstrap_icon('trash3-fill') %>
+          <% end %>
         </td>
       </tr>
     <% end %>

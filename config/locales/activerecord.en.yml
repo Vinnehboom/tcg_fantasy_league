@@ -78,5 +78,20 @@ en:
   gradual_scaling_prices:
     show:
       title: Gradual scaling price
+      add_scale: Add price scale
+      destroy_warning: Are you certain you want to delete this price scale?
       name: Name
       gradual_price_scales: Gradual price scales
+  gradual_price_scales:
+    new:
+      title: New price scale
+    edit:
+      title: Edit price scale
+    create:
+      success: Price scale added!
+      error: Price scale failed to save. Please check the validations below and try again.
+    update:
+      success: Price scale updated!
+      error: Price scale failed to update. Please check the validations below and try again.
+    destroy:
+      success: Price scale destroyed.

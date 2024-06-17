@@ -1,0 +1,7 @@
+<%= simple_form_for [@gradual_scaling_price, gradual_price_scale] do |f| %>
+  <%= f.input :point_coefficient %>
+  <%= f.input :minimum_price %>
+  <%= f.input :maximum_price %>
+
+  <%= f.button :submit %>
+<% end %>
