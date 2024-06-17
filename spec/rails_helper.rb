@@ -62,10 +62,9 @@ RSpec.configure do |config|
   # https://rspec.info/features/6-0/rspec-rails
   config.infer_spec_type_from_file_location!
 
-  # config.include Devise::Test::IntegrationHelpers, type: :request
-  # config.include Devise::Test::ControllerHelpers, type: :controller
-  # config.include ActiveStorageValidations::Matchers
-  # config.include RSpecHtmlMatchers
+  config.include Devise::Test::IntegrationHelpers, type: :request
+  config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include RSpecHtmlMatchers
 
   # add sign in helpers for request specs
 

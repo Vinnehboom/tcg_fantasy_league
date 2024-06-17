@@ -1,0 +1,8 @@
+<h2><%= t('.title') %></h2>
+
+<%= simple_form_for @pricing_rule, url: pricing_rules_path, as: :pricing_rule do |f| %>
+  <%= f.input :name %>
+  <%= f.input :type, as: :select, collection: @pricing_rule_types %>
+
+  <%= f.button :submit %>
+<% end %>

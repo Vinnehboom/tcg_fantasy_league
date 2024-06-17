@@ -1,0 +1,10 @@
+<h3><%= t('.title') %></h3>
+
+<table class="table table-primary table-bordered w-50">
+  <tr>
+    <td class="fw-bold"><%= t('.name') %></td>
+    <td><%= @gradual_scaling_price.name %></td>
+  </tr>
+</table>
+<h4 class="my-2"><%= t('.gradual_price_scales') %></h4>
+<%= render partial: "gradual_price_scales/table", locals: { gradual_price_scales: @gradual_scaling_price.gradual_price_scales } %>

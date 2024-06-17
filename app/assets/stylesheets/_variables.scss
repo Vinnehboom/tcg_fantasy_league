@@ -1,5 +1,4 @@
 
-
 $xs: 0;
 $sm: 576px;
 $md: 768px;
@@ -20,6 +19,7 @@ $xxxxl: 2561px;
 
 $dark: #14213d;
 $primary: #293F7A;
+$secondary: #758ED1;
 $warning: #fca311;
 $light: #e5e5e5;
 $danger: #d62828;
@@ -27,7 +27,7 @@ $success: #588157;
 $white: #fff;
 $black: #000;
 
-$link-color: #567AC8;
+$link-color: $secondary;
 $body-bg: $light;
 $link-hover-color: #fff;
 

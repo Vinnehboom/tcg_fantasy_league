@@ -10,4 +10,6 @@ Rails.application.routes.draw do
   resources :users
   resources :players
   resources :tournaments
+  resources :pricing_rules, only: %i[new index create]
+  resources :gradual_scaling_prices, only: %i[show]
 end

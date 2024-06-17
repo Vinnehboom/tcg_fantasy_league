@@ -10,6 +10,7 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 fs-6">
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.player.other'), path: players_path } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.tournament.other'), path: tournaments_path } %>
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.pricing_rule.other'), path: pricing_rules_path } %>
       </ul>
       <div id="user-block" class="text-end d-flex pe-3 me-4">
         <% if current_user %>

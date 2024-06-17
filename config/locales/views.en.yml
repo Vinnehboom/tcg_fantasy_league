@@ -5,3 +5,6 @@ en:
         navlink: TCG Fantasy Draft
         logout: Log out
         login: Log in
+    table:
+      actions:
+        header: Actions

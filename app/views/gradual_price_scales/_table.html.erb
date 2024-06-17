@@ -1,0 +1,24 @@
+<table class="table-dark table table-striped rounded-2 overflow-hidden">
+<thead>
+  <tr>
+    <th><%= t('activerecord.attributes.gradual_price_scale.point_coefficient') %></th>
+    <th><%= t('activerecord.attributes.gradual_price_scale.minimum_price') %></th>
+    <th><%= t('activerecord.attributes.gradual_price_scale.maximum_price') %></th>
+  </tr>
+  </thead>
+  <tbody>
+    <% gradual_price_scales.each do |scale| %>
+      <tr>
+        <td>
+          <%= scale.point_coefficient %>
+        </td>
+        <td>
+          <%= scale.minimum_price %>
+        </td>
+        <td>
+          <%= scale.maximum_price %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

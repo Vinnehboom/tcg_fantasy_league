@@ -1,0 +1,6 @@
+<div class="d-flex justify-content-between mb-2">
+  <h2><%= t('.title') %></h2>
+
+  <%= link_to t('.add'), new_pricing_rule_path, class: "btn btn-secondary mb-1" %>
+</div>
+<%= render partial: "table", locals: { pricing_rules: @pricing_rules } %>

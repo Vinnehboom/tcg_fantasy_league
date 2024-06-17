@@ -63,3 +63,20 @@ en:
       gradual_price_scale:
         gradual_scaling_price: Gradual scaling price
         gradual_scaling_price_id: Gradual scaling price
+        minimum_price: Minimum price
+        maximum_price: Maximum price
+        point_coefficient: Point coefficient
+  pricing_rules:
+    index:
+      title: Pricing rules
+      add: Add pricing rule
+    new:
+      title: New pricing rule
+    create:
+      success: Pricing rule created.
+      error: Pricing rule failed to save. Please check the validations below and try again.
+  gradual_scaling_prices:
+    show:
+      title: Gradual scaling price
+      name: Name
+      gradual_price_scales: Gradual price scales

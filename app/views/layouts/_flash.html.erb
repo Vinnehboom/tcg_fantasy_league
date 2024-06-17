@@ -1,5 +1,5 @@
 <% flash.each do |key, value| %>
-  <div class="alert flash-bar alert-<%= flash_key_mapping(key) %>"
+  <div class="alert m-0 flash-bar alert-<%= flash_key_mapping(key) %>"
        role="alert"
        data-controller="removals"
        data-action="animationend->removals#remove">

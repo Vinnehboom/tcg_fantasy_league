@@ -1,0 +1,28 @@
+<table class="table-dark table table-striped rounded-2 overflow-hidden">
+<thead>
+    <tr>
+      <th><%= t("activerecord.attributes.pricing_rule.type") %></th>
+      <th><%= t("activerecord.attributes.pricing_rule.name") %></th>
+      <th><%= t("views.table.actions.header") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @pricing_rules.each do |pricing_rule| %>
+    <tr>
+      <td>
+        <%= pricing_rule.type %>
+      </td>
+      <td>
+        <%= pricing_rule.name %>
+      </td>
+      <td>
+        <%= link_to(pricing_rule) do %>
+          <%= bootstrap_icon('eye') %>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= paginate @pricing_rules %>
