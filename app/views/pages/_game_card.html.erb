@@ -1,0 +1,9 @@
+<%= link_to game_root_path(game: game.name), class: "text-decoration-none" do %>
+  <div class="card bg-dark p-5 m-5 landing-card">
+    <div class="card-body">
+      <h1 class="fw-bold text-light">
+        <%= game.name %>
+      </h1>
+    </div>
+  </div>
+<% end %>
