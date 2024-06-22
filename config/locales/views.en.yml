@@ -5,3 +5,5 @@ en:
         navlink: TCG Fantasy Draft
         logout: Log out
         login: Log in
+  application:
+    unauthorized: You are not permitted to visit this page.
