@@ -1,0 +1,11 @@
+<div class="vh-100">
+  <h1 class="text-center text-warning fw-bold"><%= t('.title') %></h1>
+
+  <div class="d-flex justify-content-center align-items-center h-75">
+    <% @games.each do | game| %>
+      <%= render partial: 'pages/game_card', locals: { game: } %>
+    <% end %>
+  </div>
+
+
+</div>

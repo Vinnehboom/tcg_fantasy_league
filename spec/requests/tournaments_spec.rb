@@ -1,9 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe 'Tournaments' do
+  let(:game) { create(:game) }
+
   describe '#index' do
     it 'shows all tournaments' do
-      get tournaments_path
+      get game_tournaments_path(game: game.name)
       expect(response).to render_template('tournaments/index')
     end
   end

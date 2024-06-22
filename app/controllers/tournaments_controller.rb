@@ -1,7 +1,7 @@
-class TournamentsController < ApplicationController
+class TournamentsController < ScopedGameController
 
   def index
-    @tournaments = Tournament.order('starting_date').page(params[:page])
+    @tournaments = @game.tournaments.order('starting_date').page(params[:page])
   end
 
 end

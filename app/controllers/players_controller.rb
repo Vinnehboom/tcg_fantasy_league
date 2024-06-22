@@ -1,7 +1,7 @@
-class PlayersController < ApplicationController
+class PlayersController < ScopedGameController
 
   def index
-    @players = Player.order('external_points::integer desc').page(params[:page])
+    @players = @game.players.order('external_points::integer desc').page(params[:page])
   end
 
 end

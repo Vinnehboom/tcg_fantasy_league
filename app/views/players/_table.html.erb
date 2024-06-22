@@ -1,7 +1,9 @@
 <table class="table-dark table table-striped rounded-2 overflow-hidden">
   <thead>
     <tr>
-      <th><%= t("activerecord.attributes.player.game_id") %></th>
+      <% unless @game %>
+        <th><%= t("activerecord.attributes.player.game_id") %></th>
+      <% end %>
       <th><%= t("activerecord.attributes.player.name") %></th>
       <th><%= t("activerecord.attributes.player.country") %></th>
       <th><%= t("activerecord.attributes.player.external_points") %></th>
@@ -10,9 +12,11 @@
   <tbody>
     <% @players.each do |player| %>
     <tr>
-      <td>
-        <%= player.game.name %>
-      </td>
+      <% unless @game %>
+        <td>
+          <%= player.game.name %>
+        </td>
+        <% end %>
         <td>
           <%= link_to(player.name, player.external_url ,target: "_blank") %>
         </td>
