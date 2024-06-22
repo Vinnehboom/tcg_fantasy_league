@@ -2,7 +2,9 @@
   <thead>
     <tr>
       <th>#</th>
-      <th><%= t("activerecord.attributes.tournament.game_id") %></th>
+      <% unless @game %>
+        <th><%= t("activerecord.attributes.tournament.game_id") %></th>
+      <% end %>
       <th><%= t("activerecord.attributes.tournament.name") %></th>
       <th><%= t("activerecord.attributes.tournament.country") %></th>
       <th><%= t("activerecord.attributes.tournament.format") %></th>
@@ -15,9 +17,13 @@
       <td>
         <%= index+1 %>
       </td>
-      <td>
-        <%= tournament.game.name %>
-      </td>
+      <% unless @game %>
+        <td>
+          <%= tournament.game.name %>
+
+        </td>
+      <% end %>
+
         <td>
           <%= link_to(tournament.name, tournament.external_url ,target: "_blank", class: 'text-opacity-75') %>
         </td>

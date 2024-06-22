@@ -1,10 +1,10 @@
-class PlayersController < ApplicationController
+class PlayersController < ScopedGameController
 
   def index
-    @players = Player.joins(:external_scores)
-                     .group('players.id')
-                     .order('max(external_scores.score) desc')
-                     .page(params[:page])
+    @players = @game.players.joins(:external_scores)
+                    .group('players.id')
+                    .order('max(external_scores.score) desc')
+                    .page(params[:page])
   end
 
 end

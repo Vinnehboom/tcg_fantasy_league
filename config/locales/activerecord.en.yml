@@ -27,6 +27,11 @@ en:
         starting_date: Starting date
         format: Format
         game_id: Game
+  games:
+    not_found: Game not found. Please select a valid game to continue.
+  pages:
+    landing:
+      title: TCG Fantasy League
   users:
     show:
       title: Profile
