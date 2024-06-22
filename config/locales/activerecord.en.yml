@@ -27,4 +27,8 @@ en:
         starting_date: Starting date
         format: Format
         game_id: Game
-
+  users:
+    show:
+      title: Profile
+      username: Username
+      email: Email
