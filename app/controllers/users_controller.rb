@@ -1,4 +1,4 @@
-class UsersController < ApplicationController
+class UsersController < ScopedGameController
 
   before_action :authenticate_user!
 

@@ -5,7 +5,17 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :unauthorized
 
+  layout :layout_by_resource
+
   private
+
+  def layout_by_resource
+    if devise_controller?
+      'no_header'
+    else
+      'application'
+    end
+  end
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:username])
