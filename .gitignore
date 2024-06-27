@@ -47,3 +47,4 @@
 /config/credentials/staging.key
 
 .DS_Store
+/config/credentials/production.key
