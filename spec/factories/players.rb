@@ -5,7 +5,9 @@ FactoryBot.define do
     sequence :external_id do |n|
       "/players/#{n}"
     end
-    external_points { rand(1500) }
     game
+    after(:build) do |player, _context|
+      player.external_scores << build(:external_score, player:)
+    end
   end
 end

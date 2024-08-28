@@ -2,7 +2,7 @@ module ExternalData
 
   class Interface
 
-    def initialize(game)
+    def initialize(game:)
       @game = game
       @adapter = select_adapter
       super()
@@ -15,7 +15,7 @@ module ExternalData
     end
 
     def update_players
-      save_objects(players)
+      save_objects(objects: players)
     end
 
     def upcoming_tournaments
@@ -25,15 +25,22 @@ module ExternalData
     end
 
     def update_upcoming_tournaments
-      save_objects(upcoming_tournaments)
+      save_objects(objects: upcoming_tournaments)
     end
 
     private
 
-    def save_objects(objects)
-      ActiveRecord::Base.transaction do
-        objects.each(&:save)
+    def save_objects(objects:)
+      @errors = []
+      count = objects.count
+      @processed = 0
+      objects.each do |object|
+        @processed += 1 if object.save!
+      rescue ActiveRecord::RecordInvalid => e
+        @errors << [object, e.message]
       end
+      Rails.logger.debug { "invalid objects: #{@errors} \n" }
+      Rails.logger.debug { "#{@processed} out of #{count} processed" }
     end
 
     def select_adapter

@@ -1,7 +1,10 @@
 class PlayersController < ApplicationController
 
   def index
-    @players = Player.order('external_points::integer desc').page(params[:page])
+    @players = Player.joins(:external_scores)
+                     .group('players.id')
+                     .order('max(external_scores.score) desc')
+                     .page(params[:page])
   end
 
 end
