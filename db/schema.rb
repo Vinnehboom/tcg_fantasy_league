@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_13_065746) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_27_165332) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "external_scores", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.integer "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_external_scores_on_player_id"
+    t.index ["score", "player_id"], name: "index_external_scores_on_score_and_player_id", unique: true
+  end
 
   create_table "games", force: :cascade do |t|
     t.string "name"
@@ -21,15 +30,51 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_13_065746) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "gradual_price_scales", force: :cascade do |t|
+    t.bigint "gradual_scaling_price_id", null: false
+    t.decimal "point_coefficient"
+    t.decimal "minimum_price"
+    t.decimal "maximum_price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gradual_scaling_price_id"], name: "index_gradual_price_scales_on_gradual_scaling_price_id"
+  end
+
   create_table "players", force: :cascade do |t|
     t.string "name"
     t.string "country"
     t.string "external_id"
-    t.string "external_points"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "game_id"
     t.index ["game_id"], name: "index_players_on_game_id"
+  end
+
+  create_table "price_pricing_rules", force: :cascade do |t|
+    t.bigint "price_id", null: false
+    t.bigint "pricing_rule_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["price_id"], name: "index_price_pricing_rules_on_price_id"
+    t.index ["pricing_rule_id"], name: "index_price_pricing_rules_on_pricing_rule_id"
+  end
+
+  create_table "prices", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.string "external_points"
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.decimal "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_prices_on_player_id"
+  end
+
+  create_table "pricing_rules", force: :cascade do |t|
+    t.string "type"
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "tournaments", force: :cascade do |t|
@@ -58,5 +103,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_13_065746) do
     t.index ["username"], name: "unique_usernames", unique: true
   end
 
+  add_foreign_key "external_scores", "players"
+  add_foreign_key "gradual_price_scales", "pricing_rules", column: "gradual_scaling_price_id"
+  add_foreign_key "price_pricing_rules", "prices"
+  add_foreign_key "price_pricing_rules", "pricing_rules"
+  add_foreign_key "prices", "players"
   add_foreign_key "tournaments", "games"
 end

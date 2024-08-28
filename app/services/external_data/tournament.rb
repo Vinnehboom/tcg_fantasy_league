@@ -4,16 +4,26 @@ module ExternalData
 
     attr_accessor :name, :starting_date, :country, :format
 
-    def initialize(attrs = {})
-      super
-      @name = attrs[:name]
-      @starting_date = attrs[:starting_date]
-      @country = attrs[:country]
-      @format = attrs[:format]
-    end
+    private
 
     def db_class
       ::Tournament
+    end
+
+    def post_initialize(attributes: {})
+      @name = attributes[:name]
+      @starting_date = attributes[:starting_date]
+      @country = attributes[:country]
+      @format = attributes[:format]
+    end
+
+    def instance_attributes
+      {
+        name:,
+        country:,
+        starting_date:,
+        format:
+      }
     end
 
   end

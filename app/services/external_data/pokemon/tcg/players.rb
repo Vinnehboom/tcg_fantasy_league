@@ -8,10 +8,10 @@ module ExternalData
 
         def self.all
           player_pages = get_all_pages('/players')
-          parse_players(player_pages)
+          parse_players(html_content: player_pages)
         end
 
-        def self.parse_players(html_content)
+        def self.parse_players(html_content:)
           players = []
           content = Nokogiri.HTML5(html_content)
           player_table_rows = content.search('tr')
@@ -19,12 +19,12 @@ module ExternalData
             cells = table_row.search('td')
             next if cells.blank?
 
-            players = parse_row(cells, players)
+            players = parse_row(cells:, players:)
           end
           players
         end
 
-        def self.parse_row(cells, players)
+        def self.parse_row(cells:, players:)
           player = Player.new
           return players unless cells[4].children[0]&.text
 

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ExternalData::Interface do
   let(:game) { create(:game) }
-  let(:interface) { described_class.new(game) }
+  let(:interface) { described_class.new(game:) }
 
   describe 'players' do
     let(:players) do
@@ -11,7 +11,7 @@ RSpec.describe ExternalData::Interface do
         { name: 'Efrain Herman', country: 'MQ', external_id: '/players/6', external_points: '399' },
         { name: 'Guadalupe Ernser', country: 'MF', external_id: '/players/7', external_points: '460' },
         { name: 'Janyce Gusikowski V', country: 'DO', external_id: '/players/8', external_points: '163' }
-      ].map { |attrs| ExternalData::Player.new(**attrs) }
+      ].map { |attributes| ExternalData::Player.new(attributes:) }
     end
 
     describe '#players' do
@@ -44,14 +44,26 @@ RSpec.describe ExternalData::Interface do
 
         describe 'when the player data exists' do
           let(:player) { players.sample }
-
-          before do
-            create(:player, **player.instance_values, external_points: '100', game_id: game.id)
-          end
+          let!(:db_player) { create(:player, **player.instance_values.slice!('external_points'), game_id: game.id) }
 
           it 'updates the players information' do
             interface.update_players
-            expect(Player.find_by(name: player.name).external_points).to eq(player.external_points)
+            expect(Player.find_by(name: player.name).country).to eq(player.country)
+          end
+
+          describe 'when the external score has been updated' do
+            it 'creates a new score' do
+              allow(ExternalData::OfflineAdapter).to receive(:players).and_return([player])
+              expect { interface.update_players }.to change(ExternalScore, :count).by(1)
+            end
+          end
+
+          describe 'when the external score has not changed' do
+            it 'creates a new score' do
+              create(:external_score, player: db_player, score: player.external_points)
+              allow(ExternalData::OfflineAdapter).to receive(:players).and_return([player])
+              expect { interface.update_players }.not_to change(ExternalScore, :count)
+            end
           end
         end
 
@@ -76,7 +88,7 @@ RSpec.describe ExternalData::Interface do
         { name: 'WC 2024', country: 'US', external_id: '/tournaments/1', starting_date: Faker::Date.forward },
         { name: 'Special Event Barcelona', country: 'ES', external_id: '/tournaments/2',
           starting_date: Faker::Date.forward }
-      ].map { |attrs| ExternalData::Tournament.new(attrs) }
+      ].map { |attributes| ExternalData::Tournament.new(attributes:) }
     end
 
     describe '#upcoming_tournaments' do
