@@ -1,0 +1,22 @@
+<div class="bg-primary">
+  <table class="table table-dark table-bordered">
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.tournament") %></td>
+      <td>
+        <%= link_to(@salary_draft.tournament.name, @salary_draft.tournament.external_url ,target: "_blank", class: 'text-opacity-75') %>
+      </td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.price_cap") %></td>
+      <td>
+        <%= @salary_draft.price_cap %>
+      </td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.roster_size") %></td>
+      <td>
+        <%= @salary_draft.roster_size %>
+      </td>
+    </tr>
+  </table>
+</div>

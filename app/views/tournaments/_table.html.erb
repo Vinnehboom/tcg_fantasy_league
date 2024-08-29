@@ -12,7 +12,7 @@
     </tr>
   </thead>
   <tbody>
-    <% @tournaments.each_with_index do |tournament, index| %>
+    <% tournaments.each_with_index do |tournament, index| %>
     <tr>
       <td>
         <%= index+1 %>
@@ -41,4 +41,4 @@
   </tbody>
 </table>
 
-<%= paginate @tournaments %>
+<%= paginate tournaments %>
