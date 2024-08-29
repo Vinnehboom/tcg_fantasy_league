@@ -41,6 +41,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
     t.index ["game_id"], name: "index_players_on_game_id"
   end
 
+  create_table "salary_drafts", force: :cascade do |t|
+    t.bigint "tournament_id", null: false
+    t.integer "price_cap"
+    t.integer "roster_size"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tournament_id"], name: "index_salary_drafts_on_tournament_id"
+  end
+
   create_table "tournaments", force: :cascade do |t|
     t.string "name"
     t.string "external_id"
@@ -70,4 +79,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
   add_foreign_key "external_scores", "players"
   add_foreign_key "players", "games"
   add_foreign_key "tournaments", "games"
+  add_foreign_key "salary_drafts", "tournaments"
 end

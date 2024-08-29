@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Players' do
-  let(:game) { create(:game) }
+  let!(:game) { create(:game, name: 'PTCG') }
 
   describe '#index' do
     it 'shows all players' do
