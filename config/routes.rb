@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     resources :players
     resources :tournaments
     resources :users
+    resources :salary_drafts
   end
 
 end

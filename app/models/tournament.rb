@@ -1,5 +1,6 @@
 class Tournament < ApplicationRecord
 
+  scope :upcoming, -> { where('starting_date > ?', DateTime.current) }
   belongs_to :game
   validates :name, presence: true
   validates :external_id, presence: true

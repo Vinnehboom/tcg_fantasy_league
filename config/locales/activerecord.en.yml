@@ -10,6 +10,9 @@ en:
       tournament:
         one: Tournament
         other: Tournaments
+      salary_drafts:
+        one: Draft
+        other: Drafts
     attributes:
       user:
         email: Email
@@ -27,6 +30,11 @@ en:
         starting_date: Starting date
         format: Format
         game_id: Game
+      salary_draft:
+        tournament: Tournament
+        tournament_id: Tournament
+        price_cap: Maximum roster price
+        roster_size: Roster size
   games:
     not_found: Game not found. Please select a valid game to continue.
   pages:

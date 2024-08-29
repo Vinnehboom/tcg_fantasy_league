@@ -7,6 +7,6 @@ FactoryBot.define do
     country { Faker::Address.country_code }
     game
     format { Tournament.formats.keys.sample }
-    starting_date { '2024-06-13' }
+    starting_date { rand(1..30).days.from_now }
   end
 end
