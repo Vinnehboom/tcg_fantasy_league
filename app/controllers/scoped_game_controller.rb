@@ -5,7 +5,7 @@ class ScopedGameController < ApplicationController
   private
 
   def set_game
-    @game = Game.find_by(name: params[:game])
+    @game = Game.find_by(id: params[:game])
     return if @game
 
     redirect_to root_path, error: t('games.not_found')

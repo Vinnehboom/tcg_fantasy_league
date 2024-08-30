@@ -6,7 +6,7 @@ class PagesController < ApplicationController
   end
 
   def home
-    @game = Game.find_by(name: params[:game])
+    @game = Game.find_by(id: params[:game])
   end
 
 end
