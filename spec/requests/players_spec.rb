@@ -5,7 +5,7 @@ RSpec.describe 'Players' do
 
   describe '#index' do
     it 'shows all players' do
-      get game_players_path(game: game.name)
+      get game_players_path(game:)
       expect(response).to render_template('players/index')
     end
   end

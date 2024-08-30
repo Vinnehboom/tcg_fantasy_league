@@ -44,7 +44,7 @@ module ExternalData
     end
 
     def select_adapter
-      case @game.name
+      case @game.id
       when 'PTCG'
         Pokemon::Tcg::Adapter
       else
