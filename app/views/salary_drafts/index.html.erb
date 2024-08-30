@@ -1,1 +1,8 @@
+<% if policy(:salary_draft).new? %>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end">
+    <%= link_to new_game_salary_draft_path(game: @game), class: 'btn btn-success' do %>
+      <%= t(".add") %>
+    <% end %>
+  </div>
+<% end %>
 <%= render partial: "table", locals: { salary_drafts: @salary_drafts } %>

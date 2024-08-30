@@ -45,3 +45,13 @@ en:
       title: Profile
       username: Username
       email: Email
+  salary_drafts:
+    create:
+      success: Salary draft successfully created.
+      failed: Salary draft failed to save.
+    update:
+      success: Salary draft successfully updated.
+      failed: Salary draft failed to update.
+    destroy:
+      success: Salary draft successfully deleted.
+      failed: Salary draft failed to delete.
