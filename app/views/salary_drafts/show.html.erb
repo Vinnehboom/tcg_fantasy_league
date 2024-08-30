@@ -1,3 +1,18 @@
+<% if policy(@salary_draft).edit? || policy(@salary_draft).destroy?  %>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end">
+    <% if policy(@salary_draft).edit? %>
+      <%= link_to edit_game_salary_draft_path(@salary_draft, game: @game), class: 'btn btn-success' do %>
+        <%= t(".edit") %>
+      <% end %>
+    <% end %>
+    <% if policy(@salary_draft).destroy? %>
+      <%= link_to game_salary_draft_path(game: @game), data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_destroy') }, class: 'btn btn-danger' do %>
+        <%= t(".destroy") %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="bg-primary">
   <table class="table table-dark table-bordered">
     <tr>

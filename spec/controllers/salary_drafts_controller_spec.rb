@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe SalaryDraftsController do
-  let(:game) { create(:game, name: 'PTCG') }
+  let(:game) { create(:game) }
 
   describe '#index' do
     it 'shows the available drafts for all upcoming tournaments' do
@@ -9,7 +9,7 @@ RSpec.describe SalaryDraftsController do
       tournament.update(starting_date: 2.days.ago)
       draft = create(:salary_draft, tournament:)
       draft2 = create(:salary_draft, tournament: tournament2)
-      get :index, params: { game: game.name }
+      get :index, params: { game: }
       expect(assigns(:salary_drafts)).to include(draft2)
       expect(assigns(:salary_drafts)).not_to include(draft)
     end

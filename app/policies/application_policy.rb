@@ -9,34 +9,6 @@ class ApplicationPolicy
     @record = record
   end
 
-  def index?
-    false
-  end
-
-  def show?
-    false
-  end
-
-  def create?
-    false
-  end
-
-  def new?
-    create?
-  end
-
-  def update?
-    false
-  end
-
-  def edit?
-    update?
-  end
-
-  def destroy?
-    false
-  end
-
   class Scope
 
     def initialize(user, scope)
@@ -52,6 +24,12 @@ class ApplicationPolicy
 
     attr_reader :user, :scope
 
+  end
+
+  private
+
+  def admin?
+    @user.has_role?(:admin)
   end
 
 end

@@ -9,5 +9,16 @@ en:
       actions: Actions
       show: Show
       edit: Edit
+  salary_drafts:
+    index:
+      add: New draft
+    new:
+      title: New draft
+    edit:
+      title: New draft
+    show:
+      edit: Edit
+      destroy: Remove
+      confirm_destroy: Are you sure you want to remove this draft?
   application:
     unauthorized: You are not permitted to visit this page.

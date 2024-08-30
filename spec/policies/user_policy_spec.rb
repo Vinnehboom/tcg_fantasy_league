@@ -7,9 +7,7 @@ RSpec.describe UserPolicy, type: :policy do
   let(:other_user) { create(:user) }
 
   permissions :show? do
-    context 'when the user is not an admin' do
-      it { is_expected.to permit(user, user) }
-      it { is_expected.not_to permit(user, other_user) }
-    end
+    it { is_expected.to permit(user, user) }
+    it { is_expected.not_to permit(user, other_user) }
   end
 end

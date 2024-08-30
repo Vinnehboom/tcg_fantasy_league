@@ -34,6 +34,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
     t.string "name"
     t.string "country"
     t.string "external_id"
+    t.string "external_points"
     t.string "game_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -95,6 +96,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
 
   add_foreign_key "external_scores", "players"
   add_foreign_key "players", "games"
-  add_foreign_key "tournaments", "games"
   add_foreign_key "salary_drafts", "tournaments"
+  add_foreign_key "tournaments", "games"
 end

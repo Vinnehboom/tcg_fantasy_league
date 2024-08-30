@@ -36,7 +36,7 @@
         <%= salary_draft.price_cap %>
       </td>
       <td>
-        <%= link_to(game_salary_draft_path(salary_draft, game: @game.name), class: 'text-opacity-75') do %>
+        <%= link_to([@game, salary_draft], class: 'text-opacity-75') do %>
         <%= bootstrap_icon("eye") %>
         <% end %>
       </td>
