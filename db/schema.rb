@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_31_071129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,6 +28,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
     t.string "base_uri"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "participations", force: :cascade do |t|
+    t.bigint "draft_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["draft_id"], name: "index_participations_on_draft_id"
+    t.index ["user_id", "draft_id"], name: "index_participations_on_user_id_and_draft_id", unique: true
+    t.index ["user_id"], name: "index_participations_on_user_id"
   end
 
   create_table "players", force: :cascade do |t|
@@ -95,6 +105,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_30_133948) do
   end
 
   add_foreign_key "external_scores", "players"
+  add_foreign_key "participations", "salary_drafts", column: "draft_id"
+  add_foreign_key "participations", "users"
   add_foreign_key "players", "games"
   add_foreign_key "salary_drafts", "tournaments"
   add_foreign_key "tournaments", "games"
