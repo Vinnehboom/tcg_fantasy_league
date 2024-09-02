@@ -20,5 +20,7 @@ en:
       edit: Edit
       destroy: Remove
       confirm_destroy: Are you sure you want to remove this draft?
+      add_participation: Participate
+      view_participation: View participation
   application:
     unauthorized: You are not permitted to visit this page.

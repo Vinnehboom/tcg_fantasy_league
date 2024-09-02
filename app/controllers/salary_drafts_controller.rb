@@ -10,6 +10,7 @@ class SalaryDraftsController < ScopedGameController
 
   def show
     @salary_draft = SalaryDraft.find(params[:id])
+    @participation = current_user.participations.find_by(draft: @salary_draft)
   end
 
   def new

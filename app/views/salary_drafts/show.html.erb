@@ -1,5 +1,5 @@
 <% if policy(@salary_draft).edit? || policy(@salary_draft).destroy?  %>
-  <div class="d-flex p-2 m-2 w-100 justify-content-end">
+  <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
     <% if policy(@salary_draft).edit? %>
       <%= link_to edit_game_salary_draft_path(@salary_draft, game: @game), class: 'btn btn-success' do %>
         <%= t(".edit") %>
@@ -34,4 +34,17 @@
       </td>
     </tr>
   </table>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
+  <% if policy(Participation.new(user: current_user, draft: @salary_draft)).create? %>
+    <%= link_to game_participations_path(game: @game, participation: {draft_id: @salary_draft.id, user_id: current_user.id}), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
+      <%= t(".add_participation") %>
+    <% end %>
+  <% end %>
+  <% if @participation %>
+    <%= link_to [@game, @participation], class: 'btn btn-success' do %>
+      <%= t(".view_participation") %>
+    <% end %>
+  <% end %>
+  </div>
+
 </div>

@@ -9,6 +9,6 @@ class User < ApplicationRecord
 
   validates :email, presence: true
   validates :username, presence: true, uniqueness: true
-  has_many :participations
+  has_many :participations, dependent: :destroy
 
 end
