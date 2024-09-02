@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_31_071129) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_02_101331) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,6 +61,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_31_071129) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
   end
 
+  create_table "roster_players", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "roster_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_roster_players_on_player_id"
+    t.index ["roster_id"], name: "index_roster_players_on_roster_id"
+  end
+
+  create_table "rosters", force: :cascade do |t|
+    t.bigint "participation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["participation_id"], name: "index_rosters_on_participation_id"
+  end
+
   create_table "salary_drafts", force: :cascade do |t|
     t.bigint "tournament_id", null: false
     t.integer "price_cap"
@@ -108,6 +124,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_31_071129) do
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
   add_foreign_key "players", "games"
+  add_foreign_key "roster_players", "players"
+  add_foreign_key "roster_players", "rosters"
+  add_foreign_key "rosters", "participations"
   add_foreign_key "salary_drafts", "tournaments"
   add_foreign_key "tournaments", "games"
 end
