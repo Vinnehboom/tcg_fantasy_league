@@ -11,6 +11,7 @@
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.player.other'), path: game_players_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.tournament.other'), path: game_tournaments_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.salary_drafts.other'), path: game_salary_drafts_path(game: @game) } %>
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.participations.other'), path: game_participations_path(game: @game) } %>
       </ul>
       <div id="user-block" class="text-end d-flex pe-3 me-4">
         <% if current_user %>

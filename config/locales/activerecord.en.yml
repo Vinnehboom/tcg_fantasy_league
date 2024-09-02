@@ -13,6 +13,9 @@ en:
       salary_drafts:
         one: Draft
         other: Drafts
+      participations:
+        one: Participation
+        other: Participations
     attributes:
       user:
         email: Email
@@ -35,6 +38,12 @@ en:
         tournament_id: Tournament
         price_cap: Maximum roster price
         roster_size: Roster size
+      particpation:
+        draft: Draft
+        draft_id: Draft
+        user: User
+        user_id: User
+        tournament: Tournament
   games:
     not_found: Game not found. Please select a valid game to continue.
   pages:
@@ -55,3 +64,10 @@ en:
     destroy:
       success: Salary draft successfully deleted.
       failed: Salary draft failed to delete.
+  participations:
+    create:
+      success: Thank you for participating in this draft!
+      failed: Failed to participate, please try again.
+    destroy:
+      success: Participation successfully cancelled.
+      failed: Failed to cancel participation, please try again.
