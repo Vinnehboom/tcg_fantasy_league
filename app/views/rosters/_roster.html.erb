@@ -9,7 +9,7 @@
         <%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %>
         </td>
         <td>
-          <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
+          <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], **@filters, roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
         </td>
       </tr>
 
