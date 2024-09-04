@@ -4,5 +4,6 @@ class Participation < ApplicationRecord
   belongs_to :user
   validates :user, uniqueness: { scope: :draft }
   has_one :tournament, through: :draft
+  has_many :rosters, dependent: :nullify
 
 end

@@ -38,12 +38,24 @@ en:
         tournament_id: Tournament
         price_cap: Maximum roster price
         roster_size: Roster size
-      particpation:
+      participation:
         draft: Draft
         draft_id: Draft
         user: User
         user_id: User
         tournament: Tournament
+      roster:
+        participation: Participation
+        participation_id: Participation
+        user: User
+        tournament: Tournament
+        players: Players
+    errors:
+      models:
+        roster:
+          attributes:
+            players:
+              roster_too_big: This roster is full
   games:
     not_found: Game not found. Please select a valid game to continue.
   pages:
@@ -64,6 +76,16 @@ en:
     destroy:
       success: Salary draft successfully deleted.
       failed: Salary draft failed to delete.
+  rosters:
+    create:
+      success: Roster successfully created.
+      failed: Roster failed to save.
+    update:
+      success: Roster successfully updated.
+      failed: Roster failed to update.
+    destroy:
+      success: Roster successfully deleted.
+      failed: Roster failed to delete.
   participations:
     create:
       success: Thank you for participating in this draft!

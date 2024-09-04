@@ -1,0 +1,30 @@
+<% if policy(@roster).destroy?  %>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
+    <% if policy(@roster).destroy? %>
+      <%= link_to game_roster_path(id: @roster.id, game: @game), data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_destroy') }, class: 'btn btn-danger' do %>
+        <%= t(".destroy") %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="bg-primary">
+  <table class="table table-dark table-bordered">
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.roster.tournament") %></td>
+      <td>
+        <%= link_to(@roster.tournament.name, @roster.tournament.external_url ,target: "_blank", class: 'text-opacity-75') %>
+      </td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.roster.players") %></td>
+      <td>
+        <ul>
+          <% @roster.players.each do |player| %>
+            <li><%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %></li>
+          <% end %>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</div>

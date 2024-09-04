@@ -22,5 +22,25 @@ en:
       confirm_destroy: Are you sure you want to remove this draft?
       add_participation: Participate
       view_participation: View participation
+  participations:
+    show:
+      destroy: Cancel participation
+      confirm_destroy: Are you sure you want to cancel your participation?
+      add_roster: Add roster
+      destroy_roster: Remove
+      confirm_destroy_roster: Are you sure you want to remove this roster?
+      rosters: Roster
+      edit_roster: Edit
+      edit: Edit
+  rosters:
+    show:
+      destroy: Remove
+      confirm_destroy: Are you sure you want to remove this roster?
+    edit:
+      roster_title: Current roster
+      roster_size: Player count
+      players: Players
+      add_player: Add player
+      remove_player: Remove
   application:
     unauthorized: You are not permitted to visit this page.

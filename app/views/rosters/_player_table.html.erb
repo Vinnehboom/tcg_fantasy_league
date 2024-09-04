@@ -1,0 +1,34 @@
+<h2 class="my-2"><%= t("rosters.edit.players") %></h2>
+
+<table class="table-dark table table-striped rounded-2 my-2 overflow-hidden">
+  <thead>
+  <tr>
+    <th><%= t("activerecord.attributes.player.name") %></th>
+    <th><%= t("activerecord.attributes.player.country") %></th>
+    <th><%= t("activerecord.attributes.player.external_points") %></th>
+    <th><%= t("views.tables.actions") %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @players.each do |player| %>
+    <tr>
+      <td>
+        <%= link_to(player.name, player.external_url ,target: "_blank") %>
+      </td>
+      <td>
+        <%= player.country %>
+      </td>
+      <td>
+        <%= player.current_score %>
+      </td>
+      <td>
+        <% unless @roster.players.include?(player) %>
+          <%= link_to t("rosters.edit.add_player"), game_roster_path(id: @roster.id, game: @game, page: params[:page], roster: {  roster_players_attributes: [{player_id: player.id}] } ), data: { 'turbo-method': :patch } %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<%= paginate @players, params: { controller: "rosters", action: "edit", id: @roster.id, page: params[:page ]} %>

@@ -1,5 +1,7 @@
 class ParticipationsController < ScopedGameController
 
+  before_action :authenticate_user!
+
   def index
     @participations = current_user.participations.includes(draft: :tournament)
                                   .where('tournament.game': @game)
@@ -8,6 +10,7 @@ class ParticipationsController < ScopedGameController
 
   def show
     @participation = Participation.find(params[:id])
+    @rosters = @participation.rosters
     authorize @participation
   end
 
