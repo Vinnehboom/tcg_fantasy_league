@@ -1,0 +1,32 @@
+<h2><%= t('.tournament') %></h2>
+
+<div class="bg-primary">
+  <table class="table table-dark table-bordered">
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.participation.tournament") %></td>
+      <td>
+        <%= link_to(@roster.participation.tournament.name, @roster.participation.tournament.external_url ,target: "_blank", class: 'text-opacity-75') %>
+      </td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.price_cap") %></td>
+      <td>
+        <%= @roster.participation.draft.price_cap %>
+      </td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.roster_size") %></td>
+      <td>
+        <%= @roster.participation.draft.roster_size %>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<%= turbo_frame_tag @roster do %>
+ <%= render partial: "roster", locals: { roster: @roster } %>
+<% end %>
+
+<%= turbo_frame_tag 'player_table' do %>
+  <%= render partial: "player_table" %>
+<% end %>

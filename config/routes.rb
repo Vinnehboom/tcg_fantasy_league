@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     resources :users
     resources :salary_drafts
     resources :participations, only: %i[destroy create show index]
+    resources :rosters
   end
 
 end

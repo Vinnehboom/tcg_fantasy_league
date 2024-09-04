@@ -1,0 +1,27 @@
+<% roster ||= @roster %>
+<div class="w-50 mx-auto p-2 my-3 bg-light text-dark">
+  <h3><%= t('rosters.edit.roster_title') %></h3>
+  <table class="table table-striped table-light">
+    <% roster.reload.roster_players.each do |roster_player| %>
+      <% player = roster_player.player %>
+      <tr class="mx-2">
+        <td>
+        <%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %>
+        </td>
+        <td>
+          <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
+        </td>
+      </tr>
+
+  <% end %>
+  </table>
+  <div class="d-flex justify-content-end me-2"> <%= t('rosters.edit.roster_size') %> - <%= roster.players.count %></div>
+
+  <% if @roster.errors %>
+    <div class="text-danger">
+      <% @roster.errors.each do |error| %>
+        <p><%= error.message %></p>
+      <% end %>
+    </div>
+<% end %>
+</div>

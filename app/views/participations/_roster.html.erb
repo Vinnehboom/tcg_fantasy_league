@@ -1,0 +1,24 @@
+<div class="border p-2 bg-light justify-content-between">
+  <table class="table table-striped table-light">
+      <% roster.players.each do |player| %>
+      <tr>
+
+      <td><%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %></td>
+      </tr>
+
+  <% end %>
+  </table>
+  <div class="d-flex justify-content-end gap-2">
+  <% if policy(roster).edit? %>
+      <%= link_to edit_game_roster_path(roster, game: @game), class: 'btn btn-success' do %>
+        <%= t("participations.show.edit_roster") %>
+      <% end %>
+  <% end %>
+  <% if policy(roster).destroy? %>
+      <%= link_to game_roster_path(roster, game: @game), data: { 'turbo-method': :delete, 'turbo-confirm': t('participations.show.confirm_destroy_roster') }, class: 'btn btn-danger' do %>
+        <%= t("participations.show.destroy_roster") %>
+      <% end %>
+  <% end %>
+  </div>
+
+</div>

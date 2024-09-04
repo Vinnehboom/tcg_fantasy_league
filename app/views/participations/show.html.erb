@@ -1,7 +1,7 @@
 <% if policy(@participation).destroy?  %>
   <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
     <% if policy(@participation).destroy? %>
-      <%= link_to game_participation_path(game: @game), data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_destroy') }, class: 'btn btn-danger' do %>
+      <%= link_to game_participation_path(id: @participation.id, game: @game), data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_destroy') }, class: 'btn btn-danger' do %>
         <%= t(".destroy") %>
       <% end %>
     <% end %>
@@ -17,16 +17,30 @@
       </td>
     </tr>
     <tr>
-      <td class="fw-bold"><%= t("activerecord.attributes.participation.price_cap") %></td>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.price_cap") %></td>
       <td>
         <%= @participation.draft.price_cap %>
       </td>
     </tr>
     <tr>
-      <td class="fw-bold"><%= t("activerecord.attributes.participation.roster_size") %></td>
+      <td class="fw-bold"><%= t("activerecord.attributes.salary_draft.roster_size") %></td>
       <td>
         <%= @participation.draft.roster_size %>
       </td>
     </tr>
   </table>
 </div>
+
+<div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
+  <% if policy(Roster.new(user: current_user, participation: @participation)).create? %>
+    <%= link_to game_rosters_path(game: @game, roster: {participation_id: @participation.id }), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
+      <%= t(".add_roster") %>
+    <% end %>
+  <% end %>
+</div>
+<% if @rosters %>
+  <h3><%= t('.rosters') %></h3>
+  <% @rosters.each do |roster| %>
+    <%= render partial: "participations/roster", locals: { roster: } %>
+  <% end %>
+<% end %>
