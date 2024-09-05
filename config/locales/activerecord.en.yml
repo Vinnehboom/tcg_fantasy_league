@@ -25,6 +25,7 @@ en:
         country: Country
         external_id: External id
         external_points: External points
+        cost: Cost
         game_id: Game
       tournament:
         name: Name
@@ -55,7 +56,8 @@ en:
         roster:
           attributes:
             players:
-              roster_too_big: This roster is full
+              roster_too_big: This roster is full.
+              total_cost_exceeded: Price cap exceeded. Please remove players before adding the selected player.
   games:
     not_found: Game not found. Please select a valid game to continue.
   pages:

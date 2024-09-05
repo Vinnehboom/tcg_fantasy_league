@@ -9,5 +9,11 @@ FactoryBot.define do
     after(:build) do |player, _context|
       player.external_scores << build(:external_score, player:)
     end
+
+    trait :without_scores do
+      after(:build) do |player, _context|
+        player.external_scores = []
+      end
+    end
   end
 end

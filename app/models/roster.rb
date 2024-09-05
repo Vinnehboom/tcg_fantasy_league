@@ -10,6 +10,11 @@ class Roster < ApplicationRecord
   accepts_nested_attributes_for :roster_players, allow_destroy: true
 
   validate :roster_size
+  validate :roster_cost
+
+  def total_cost
+    roster_players.sum { |roster_player| roster_player.player_cost.to_f }.round(2)
+  end
 
   private
 
@@ -17,6 +22,12 @@ class Roster < ApplicationRecord
     return true unless draft && roster_players.length > draft.roster_size
 
     errors.add(:players, :roster_too_big)
+  end
+
+  def roster_cost
+    return true unless draft && total_cost > draft.price_cap
+
+    errors.add(:players, :total_cost_exceeded)
   end
 
 end

@@ -9,3 +9,6 @@ application.register("hello", HelloController)
 
 import RemovalsController from "./removals_controller"
 application.register("removals", RemovalsController)
+
+import TableFiltersController from "./table_filters_controller"
+application.register("table-filters", TableFiltersController)

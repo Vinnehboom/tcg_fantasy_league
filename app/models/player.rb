@@ -1,5 +1,7 @@
 class Player < ApplicationRecord
 
+  attr_accessor :cost
+
   validates :name, presence: true
   validates :external_id, presence: true
   belongs_to :game
@@ -8,6 +10,14 @@ class Player < ApplicationRecord
 
   def current_score
     external_scores.order('created_at desc').first&.score
+  end
+
+  def latest_score_before(date:)
+    external_scores.order('created_at desc').where(created_at: ..date).first&.score
+  end
+
+  def decorated_cost
+    format('%0.02f', cost)
   end
 
   include ExternalResource
