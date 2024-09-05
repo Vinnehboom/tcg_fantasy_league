@@ -39,6 +39,7 @@ en:
     edit:
       roster_title: Current roster
       roster_size: Player count
+      total_cost: Total cost
       players: Players
       add_player: Add player
       remove_player: Remove

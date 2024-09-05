@@ -76,10 +76,11 @@ class RostersController < ScopedGameController
   end
 
   def set_page_variables
-    @players = @game.players
+    @players = @game.players.includes(:external_scores)
     @countries = @players.pluck(:country).uniq.sort
     @players = apply_filters(players: @players)
     @players = @players.page(params[:page]).per(25)
+    @players.each { |player| player.cost = @roster.draft.cost_for(player:) }
     @filters = filter_params
   end
 

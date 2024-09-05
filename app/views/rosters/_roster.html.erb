@@ -1,12 +1,31 @@
 <% roster ||= @roster %>
+
 <div class="w-50 mx-auto p-2 my-3 bg-light text-dark">
   <h3><%= t('rosters.edit.roster_title') %></h3>
   <table class="table table-striped table-light">
+    <thead>
+    <tr>
+      <th>
+      </th>
+      <th>
+        <%= t('activerecord.attributes.player.external points') %>
+      </th>
+      <th>
+        <%= t('activerecord.attributes.player.cost') %>
+      </th>
+    </tr>
+    </thead>
     <% roster.reload.roster_players.each do |roster_player| %>
       <% player = roster_player.player %>
       <tr class="mx-2">
         <td>
-        <%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %>
+        <%= link_to(player.name, player.external_url ,target: "_blank") %>
+        </td>
+        <td>
+          <%= player.current_score %>
+        </td>
+        <td>
+          <%= roster_player.decorated_player_cost %>
         </td>
         <td>
           <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], **@filters, roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
@@ -15,7 +34,27 @@
 
   <% end %>
   </table>
-  <div class="d-flex justify-content-end me-2"> <%= t('rosters.edit.roster_size') %> - <%= roster.players.count %></div>
+  <div class="d-flex justify-content-end">
+    <table class="w-50 table table-striped">
+      <tr>
+        <td>
+          <%= t('rosters.edit.roster_size') %>
+        </td>
+        <td>
+          <%= "#{roster.players.count} / #{roster.draft.roster_size}" %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <%= t('rosters.edit.total_cost') %>
+        </td>
+        <td>
+          <%= "#{roster.total_cost} / #{roster.draft.price_cap}" %>
+        </td>
+      </tr>
+    </table>
+
+  </div>
 
   <% if @roster.errors %>
     <div class="text-danger">

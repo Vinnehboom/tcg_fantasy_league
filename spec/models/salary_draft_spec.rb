@@ -5,4 +5,14 @@ RSpec.describe SalaryDraft do
   it { is_expected.to validate_presence_of(:price_cap) }
   it { is_expected.to belong_to(:tournament) }
   it { is_expected.to have_many(:participations) }
+
+  describe '#cost_for' do
+    let(:player) { create(:player, :without_scores) }
+    let(:draft) { create(:salary_draft) }
+
+    it 'reflects the cost for the player for the related tournament' do
+      create(:external_score, player:, score: 500)
+      expect(draft.cost_for(player:)).to eq(40.0)
+    end
+  end
 end
