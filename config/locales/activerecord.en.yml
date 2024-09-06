@@ -80,7 +80,7 @@ en:
       failed: Salary draft failed to delete.
   rosters:
     create:
-      success: Roster successfully created.
+      success: Roster successfully created. Please continue by adding players!
       failed: Roster failed to save.
     update:
       success: Roster successfully updated.

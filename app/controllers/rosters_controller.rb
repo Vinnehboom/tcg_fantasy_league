@@ -20,10 +20,9 @@ class RostersController < ScopedGameController
     @roster = Roster.new(roster_params)
     authorize @roster
     if @roster.save
-      redirect_to [@game, @roster], notice: t('.success')
+      redirect_to edit_game_roster_path(id: @roster.id, game: @game), notice: t('.success')
     else
-      flash[:error] = t('.failed')
-      render :new, status: :unprocessable_entity
+      redirect_to [@game, @roster.participation], error: t('.failed')
     end
   end
 
@@ -49,7 +48,7 @@ class RostersController < ScopedGameController
     @roster = Roster.find(params[:id])
     authorize @roster
     if @roster.destroy
-      redirect_to game_rosters_path, notice: t('.success')
+      redirect_to [@game, @roster.participation], notice: t('.success')
     else
       redirect_to [@game, @roster], error: t('.failed')
     end

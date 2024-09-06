@@ -38,10 +38,10 @@ RSpec.describe 'Rosters' do
         expect { post game_rosters_path(game:), params: }.to change(Roster, :count).by(1)
       end
 
-      it 'show the new roster' do
+      it 'show the roster form to add players' do
         post(game_rosters_path(game:), params:)
         roster = Roster.last
-        expect(response).to redirect_to(game_roster_path(id: roster.id, game:))
+        expect(response).to redirect_to(edit_game_roster_path(id: roster.id, game:))
       end
     end
   end
