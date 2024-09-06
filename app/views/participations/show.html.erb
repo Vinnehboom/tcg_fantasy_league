@@ -33,8 +33,10 @@
 
 <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
   <% if policy(Roster.new(user: current_user, participation: @participation)).create? %>
-    <%= link_to game_rosters_path(game: @game, roster: {participation_id: @participation.id }), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
-      <%= t(".add_roster") %>
+    <% roster = Roster.new %>
+    <%= simple_form_for roster, url: game_rosters_path, data: { turbo: false } do |f| %>
+      <%= f.input :participation_id, as: :hidden, input_html: { value: @participation.id }  %>
+      <%= f.submit t(".add_roster"), class: 'btn btn-success' %>
     <% end %>
   <% end %>
 </div>
