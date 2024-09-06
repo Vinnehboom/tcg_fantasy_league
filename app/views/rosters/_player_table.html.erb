@@ -1,7 +1,7 @@
 <h2 class="my-2"><%= t("rosters.edit.players") %></h2>
 
 <div class="w-100 d-flex justify-content-end gap-3">
-  <h4>Filters</h4>
+  <h4><%= t('views.tables.filters') %></h4>
   <%= form_with(url: edit_game_roster_path(id: @roster.id, game: @game, page: params[:page]), method: :get, data: {turbo_stream: true, controller: "table-filters", 'table-filters-target': "form" }, class: 'd-flex gap-3 align-items-center') do |f| %>
     <%= f.label :country, t('activerecord.attributes.player.country') %>
     <%= f.select :country, options_for_select(@countries, @filters[:country]), {}, { class: 'form-select w-25', onchange: "this.form.requestSubmit()" } %>

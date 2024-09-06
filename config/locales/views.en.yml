@@ -9,6 +9,7 @@ en:
       actions: Actions
       show: Show
       edit: Edit
+      filters: Filters
   salary_drafts:
     index:
       add: New draft
