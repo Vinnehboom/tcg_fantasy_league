@@ -13,7 +13,8 @@ module ExternalData
       let(:attributes) do
         {
           name: 'New player',
-          country: 'BE'
+          country: 'BE',
+          external_points: 20
         }
       end
 

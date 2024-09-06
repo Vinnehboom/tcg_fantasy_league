@@ -26,6 +26,8 @@ module ExternalData
       }
     end
 
+    def save_associations(*); end
+
   end
 
 end

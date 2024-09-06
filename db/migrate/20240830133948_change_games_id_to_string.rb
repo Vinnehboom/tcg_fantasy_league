@@ -81,7 +81,9 @@ class ChangeGamesIdToString < ActiveRecord::Migration[7.1]
     end
 
     remove_foreign_key "external_scores", "players"
+    remove_foreign_key "salary_drafts", "tournaments"
     remove_index "external_scores", "player_id"
+    remove_index "salary_drafts", "tournament_id"
     drop_table :tournaments
     drop_table :players
     drop_table :games
@@ -90,7 +92,9 @@ class ChangeGamesIdToString < ActiveRecord::Migration[7.1]
     rename_table 'new_players', 'players'
     rename_table 'new_tournaments', 'tournaments'
     add_foreign_key "external_scores", "players"
+    add_foreign_key "salary_drafts", "tournaments"
     add_index :external_scores, :player_id
+    add_index :salary_drafts, :tournament_id
 
   end
 

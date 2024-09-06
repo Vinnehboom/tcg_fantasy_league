@@ -17,21 +17,14 @@ module ExternalData
     end
 
     def instance_attributes
-      attributes = {
+      {
         name:,
         country:
       }
-      return attributes if @external_points.blank?
-
-      attributes.merge(external_scores_attributes:)
     end
 
-    def external_scores_attributes
-      [
-        {
-          score: external_points
-        }
-      ]
+    def save_associations(record:)
+      record.external_scores.create!(score: external_points)
     end
 
   end
