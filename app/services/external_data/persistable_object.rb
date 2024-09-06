@@ -14,6 +14,7 @@ module ExternalData
       db_record = db_class.find_or_initialize_by(external_id:, game_id:)
       db_record.assign_attributes(instance_attributes)
       db_record.save!
+      save_associations(record: db_record)
     end
 
     private
@@ -24,6 +25,10 @@ module ExternalData
 
     def post_initialize(*)
       raise '#post_initialize not implemented'
+    end
+
+    def save_associations(*)
+      raise '#save_associations not implemented'
     end
 
   end
