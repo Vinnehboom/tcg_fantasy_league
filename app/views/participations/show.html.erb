@@ -41,7 +41,9 @@
   <% end %>
 </div>
 <% if @rosters %>
-  <% @rosters.each do |roster| %>
-    <%= render partial: "participations/roster", locals: { roster: } %>
-  <% end %>
+  <div class="w-50">
+    <% @rosters.each do |roster| %>
+      <%= render partial: "participations/roster", locals: { roster: } %>
+    <% end %>
+  </div>
 <% end %>
