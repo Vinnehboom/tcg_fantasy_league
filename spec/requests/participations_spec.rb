@@ -52,6 +52,34 @@ RSpec.describe 'Participations' do
     end
   end
 
+  describe '#update' do
+    let(:participation) { create(:participation, user:) }
+
+    before do
+      sign_in user
+    end
+
+    describe 'when submitting the participation' do
+      let(:params) do
+        {
+          participation: {
+            status: 'submitted'
+          }
+        }
+      end
+
+      it 'submites the participation' do
+        patch(game_participation_path(id: participation.id, game:), params:)
+        expect(participation.reload).to be_submitted
+      end
+
+      it 'show the participation' do
+        patch(game_participation_path(id: participation.id, game:), params:)
+        expect(response).to redirect_to(game_participation_path(id: participation.id, game:))
+      end
+    end
+  end
+
   describe '#destroy' do
     before do
       sign_in admin

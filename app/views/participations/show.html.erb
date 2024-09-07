@@ -41,7 +41,6 @@
   <% end %>
 </div>
 <% if @rosters %>
-  <h3><%= t('.rosters') %></h3>
   <% @rosters.each do |roster| %>
     <%= render partial: "participations/roster", locals: { roster: } %>
   <% end %>

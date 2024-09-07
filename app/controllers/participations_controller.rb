@@ -25,6 +25,16 @@ class ParticipationsController < ScopedGameController
     end
   end
 
+  def update
+    @participation = Participation.find(params[:id])
+    authorize @participation
+    if @participation.update(update_params)
+      redirect_to [@game, @participation], notice: t('.success')
+    else
+      redirect_to [@game, @participation], error: t('.failed')
+    end
+  end
+
   def destroy
     @participation = Participation.find(params[:id])
     authorize @participation
@@ -40,6 +50,10 @@ class ParticipationsController < ScopedGameController
 
   def participation_params
     params.require(:participation).permit(:draft_id, :user_id)
+  end
+
+  def update_params
+    params.require(:participation).permit(:status)
   end
 
 end
