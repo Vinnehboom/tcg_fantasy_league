@@ -68,14 +68,36 @@ RSpec.describe 'Participations' do
         }
       end
 
-      it 'submites the participation' do
-        patch(game_participation_path(id: participation.id, game:), params:)
-        expect(participation.reload).to be_submitted
+      context 'when the participation has completed rosters' do
+        before do
+          create(:roster, :with_players, participation:)
+        end
+
+        it 'submits the participation' do
+          patch(game_participation_path(id: participation.id, game:), params:)
+          expect(participation.reload).to be_submitted
+        end
+
+        it 'show the participation' do
+          patch(game_participation_path(id: participation.id, game:), params:)
+          expect(response).to redirect_to(game_participation_path(id: participation.id, game:))
+        end
       end
 
-      it 'show the participation' do
-        patch(game_participation_path(id: participation.id, game:), params:)
-        expect(response).to redirect_to(game_participation_path(id: participation.id, game:))
+      context 'when the rosters are empty' do
+        before do
+          participation.rosters.destroy_all
+        end
+
+        it 'does not submit the participation' do
+          patch(game_participation_path(id: participation.id, game:), params:)
+          expect(participation.reload).not_to be_submitted
+        end
+
+        it 'show the participation' do
+          patch(game_participation_path(id: participation.id, game:), params:)
+          expect(response).to redirect_to(game_participation_path(id: participation.id, game:))
+        end
       end
     end
   end

@@ -26,12 +26,13 @@ class ParticipationsController < ScopedGameController
   end
 
   def update
-    @participation = Participation.find(params[:id])
+    @participation = Participation.includes(rosters: :roster_players).find(params[:id])
     authorize @participation
+
     if @participation.update(update_params)
       redirect_to [@game, @participation], notice: t('.success')
     else
-      redirect_to [@game, @participation], error: t('.failed')
+      redirect_to [@game, @participation], alert: t('.failed')
     end
   end
 

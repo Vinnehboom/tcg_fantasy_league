@@ -9,8 +9,8 @@ class Roster < ApplicationRecord
 
   accepts_nested_attributes_for :roster_players, allow_destroy: true
 
-  validate :roster_size
-  validate :roster_cost
+  validate :roster_size, on: :update
+  validate :roster_cost, on: :update
 
   def total_cost
     roster_players.sum { |roster_player| roster_player.player_cost.to_f }.round(2)

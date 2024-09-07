@@ -58,6 +58,10 @@ en:
             players:
               roster_too_big: This roster is full.
               total_cost_exceeded: Price cap exceeded. Please remove players before adding the selected player.
+        participation:
+          attributes:
+            rosters:
+              empty: Add players to your rosters before submitting.
   games:
     not_found: Game not found. Please select a valid game to continue.
   pages:
@@ -94,7 +98,7 @@ en:
       failed: Failed to participate, please try again.
     update:
       success: Participation submitted!
-      failed: Failed to submit participation, please try again.
+      failed: Please add players to your roster before submitting.
     destroy:
       success: Participation successfully cancelled.
       failed: Failed to cancel participation, please try again.

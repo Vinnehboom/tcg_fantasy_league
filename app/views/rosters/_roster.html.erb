@@ -58,7 +58,7 @@
     </table>
 
     <% if policy(roster.participation).update? %>
-      <%= simple_form_for [@game, roster.participation], method: :put do |f| %>
+      <%= simple_form_for [@game, roster.participation], method: :put, data: { turbo: false } do |f| %>
         <%= f.input :status, as: :hidden, input_html: { value: 'submitted' } %>
         <%= f.submit t('rosters.edit.submit_roster'), class: 'btn btn-primary' %>
       <% end %>

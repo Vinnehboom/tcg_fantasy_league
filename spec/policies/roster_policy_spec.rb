@@ -23,6 +23,9 @@ RSpec.describe RosterPolicy, type: :policy do
     end
 
     context 'when the roster participation is submitted or completed' do
+      let(:roster) { create(:roster, :with_players) }
+      let(:user_roster) { create(:roster, :with_players, participation: create(:participation, user:)) }
+
       before do
         roster.participation.submitted!
         user_roster.participation.submitted!
