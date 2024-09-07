@@ -15,11 +15,11 @@ class RosterPolicy < ApplicationPolicy
   end
 
   def edit?
-    admin? || @roster.user == @user
+    @roster.participation.status == 'created' && (admin? || @roster.user == @user)
   end
 
   def update?
-    admin? || @roster.user == @user
+    @roster.participation.status == 'created' && (admin? || @roster.user == @user)
   end
 
   def create?
@@ -27,7 +27,7 @@ class RosterPolicy < ApplicationPolicy
   end
 
   def destroy?
-    admin? || @roster.user == @user
+    @roster.participation.status == 'created' && (admin? || @roster.user == @user)
   end
 
 end

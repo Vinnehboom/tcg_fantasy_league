@@ -92,6 +92,9 @@ en:
     create:
       success: Thank you for participating in this draft!
       failed: Failed to participate, please try again.
+    update:
+      success: Participation submitted!
+      failed: Failed to submit participation, please try again.
     destroy:
       success: Participation successfully cancelled.
       failed: Failed to cancel participation, please try again.

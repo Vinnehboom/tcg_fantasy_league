@@ -44,5 +44,7 @@ en:
       players: Players
       add_player: Add player
       remove_player: Remove
+      submit_roster: Submit roster
+      confirm_submit_roster: Are you sure you want to submit this roster? You will be unable to change the roster after submission.
   application:
     unauthorized: You are not permitted to visit this page.

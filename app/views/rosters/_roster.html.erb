@@ -1,6 +1,7 @@
 <% roster ||= @roster %>
+<% edit ||= false %>
 
-<div class="w-50 mx-auto p-2 my-3 bg-light text-dark">
+<div class="mx-auto p-2 my-3 bg-light text-dark">
   <h3><%= t('rosters.edit.roster_title') %></h3>
   <table class="table table-striped table-light">
     <thead>
@@ -27,14 +28,16 @@
         <td>
           <%= roster_player.decorated_player_cost %>
         </td>
-        <td>
-          <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], **@filters, roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
-        </td>
+        <% if edit %>
+          <td>
+            <%= link_to t("rosters.edit.remove_player"), game_roster_path(id: roster.id, game: @game, page: params["page"], **@filters, roster: { roster_players_attributes: [{id: roster_player.id, _destroy: "1" }] } ), data: { 'turbo-method': :patch }, class: 'text-danger' %>
+          </td>
+        <% end %>
       </tr>
 
   <% end %>
   </table>
-  <div class="d-flex justify-content-end">
+  <div class="d-flex flex-column align-items-end">
     <table class="w-50 table table-striped">
       <tr>
         <td>
@@ -54,13 +57,20 @@
       </tr>
     </table>
 
+    <% if policy(roster.participation).update? %>
+      <%= simple_form_for [@game, roster.participation], method: :put do |f| %>
+        <%= f.input :status, as: :hidden, input_html: { value: 'submitted' } %>
+        <%= f.submit t('rosters.edit.submit_roster'), class: 'btn btn-primary' %>
+      <% end %>
+    <% end %>
   </div>
 
-  <% if @roster.errors %>
+  <% if roster.errors %>
     <div class="text-danger">
-      <% @roster.errors.each do |error| %>
+      <% roster.errors.each do |error| %>
         <p><%= error.message %></p>
       <% end %>
     </div>
 <% end %>
+
 </div>

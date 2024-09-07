@@ -28,4 +28,18 @@ RSpec.describe ParticipationPolicy, type: :policy do
     it { is_expected.not_to permit(user, user_participation) }
     it { is_expected.not_to permit(admin, admin_participation) }
   end
+
+  permissions :update? do
+    context 'when the participation is not submitted or completed' do
+      let(:user_participation) { create(:participation, user:, status: 'created') }
+
+      it { is_expected.to permit(user, user_participation) }
+    end
+
+    context 'when the participation is submitted' do
+      let(:user_participation) { create(:participation, user:, status: %w[submitted completed].sample) }
+
+      it { is_expected.not_to permit(user, user_participation) }
+    end
+  end
 end

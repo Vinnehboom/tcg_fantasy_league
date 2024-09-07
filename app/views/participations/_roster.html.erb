@@ -1,13 +1,8 @@
+
+
 <div class="border p-2 bg-light justify-content-between">
-  <table class="table table-striped table-light">
-      <% roster.players.each do |player| %>
-      <tr>
+  <%= render partial: "rosters/roster", locals: {roster: } %>
 
-      <td><%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %></td>
-      </tr>
-
-  <% end %>
-  </table>
   <div class="d-flex justify-content-end gap-2">
   <% if policy(roster).edit? %>
       <%= link_to edit_game_roster_path(roster, game: @game), class: 'btn btn-success' do %>
@@ -20,5 +15,4 @@
       <% end %>
   <% end %>
   </div>
-
 </div>
