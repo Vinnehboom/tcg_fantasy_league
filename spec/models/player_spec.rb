@@ -29,4 +29,24 @@ RSpec.describe Player do
       expect(player.latest_score_before(date:)).to eq(latest_score.score)
     end
   end
+
+  describe '#score_difference' do
+    let(:player) { create(:player) }
+
+    it 'shows the difference in scores before the given dates' do
+      create(:external_score, player:, score: 20).score
+      travel 5.days
+      create(:external_score, player:, score: 40).score
+      player.reload
+      expect(player.score_difference(date: 1.day.from_now, other_date: 1.day.ago)).to eq(20)
+    end
+
+    it 'works with dates where the player did not have a score' do
+      player.external_scores.destroy_all
+      travel 5.days
+      create(:external_score, player:, score: 40).score
+      player.reload
+      expect(player.score_difference(date: 1.day.from_now, other_date: 1.day.ago)).to eq(40)
+    end
+  end
 end
