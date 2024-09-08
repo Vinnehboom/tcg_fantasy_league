@@ -43,7 +43,7 @@
 <% if @rosters %>
   <div class="w-50">
     <% @rosters.each do |roster| %>
-      <%= render partial: "participations/roster", locals: { roster: } %>
+      <%= render partial: "participations/roster", locals: { roster:, edit: false } %>
     <% end %>
   </div>
 <% end %>
