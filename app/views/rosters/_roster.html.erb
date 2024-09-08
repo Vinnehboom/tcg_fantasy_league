@@ -1,5 +1,5 @@
 <% roster ||= @roster %>
-<% edit ||= false %>
+<% defined?(edit) ? edit : edit = true %>
 
 <div class="mx-auto p-2 my-3 bg-light text-dark">
   <h3><%= t('rosters.edit.roster_title') %></h3>

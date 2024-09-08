@@ -1,6 +1,6 @@
 
 <div class="border p-2 bg-light justify-content-between">
-  <%= render partial: "rosters/roster", locals: {roster: } %>
+  <%= render partial: "rosters/roster", locals: {roster:, edit: } %>
 
   <div class="d-flex justify-content-end gap-2">
   <% if policy(roster).edit? %>
