@@ -40,6 +40,9 @@ en:
     edit:
       roster_title: Current roster
       roster_size: Player count
+      price_rules: Cost definition
+      score: score
+      cost: cost
       total_cost: Total cost
       players: Players
       players_description: You can find all available players below. Players are grouped by tournament region and sorted by score. You can apply more filters and search for players as well.

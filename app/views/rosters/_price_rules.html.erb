@@ -1,0 +1,20 @@
+
+<div class="grid d-flex justify-content-md-end me-2 pe-1">
+
+  <div class="row ms-2 col-md-4 col-8">
+    <h4 class="ps-0"><%= t('rosters.edit.price_rules') %></h4>
+    <div class="bg-dark">
+      <% @price_rules.scales.each do |scale| %>
+        <div class="row border-bottom py-1 border-1 border-secondary">
+          <div class="col-12 col-md-5 text-md-end">
+            <%= scale[:minimum_cost] %> ... <%= scale[:maximum_cost] %> <%= t('rosters.edit.cost') %>
+          </div>
+          <div class="col-12 col-md-7 fw-bold">
+            <%= bootstrap_icon("arrow-right") %><%= scale[:point_coefficient] %> <%= t('rosters.edit.score') %> / 1.00 <%= t('rosters.edit.cost') %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+

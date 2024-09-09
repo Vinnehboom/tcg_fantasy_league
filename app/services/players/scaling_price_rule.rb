@@ -54,7 +54,7 @@ module Players
        {
          minimum_cost: 40,
          maximum_cost: 50,
-         point_coefficient: 30.99
+         point_coefficient: 30.00
        },
        {
          minimum_cost: 50,
