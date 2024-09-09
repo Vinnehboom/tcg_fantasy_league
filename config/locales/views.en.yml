@@ -42,6 +42,7 @@ en:
       roster_size: Player count
       total_cost: Total cost
       players: Players
+      players_description: You can find all available players below. Players are grouped by tournament region and sorted by score. You can apply more filters and search for players as well.
       add_player: Add player
       remove_player: Remove
       submit_roster: Submit roster

@@ -1,0 +1,10 @@
+<div class="w-100 d-flex justify-content-end align-items-center gap-3 my-3 px-2 px-md-0">
+  <h4 class="d-none d-md-block"><%= t('views.tables.filters') %></h4>
+  <%= form_with(url:, method: :get, data: {turbo_stream: true, controller: "table-filters", 'table-filters-target': "form" }, class: 'd-flex gap-3 align-items-center') do |f| %>
+    <%= f.label :country, t('activerecord.attributes.player.country') %>
+    <%= f.select :country, options_for_select(@countries, @filters[:country]), {}, { class: 'form-select w-25', onchange: "this.form.requestSubmit()" } %>
+    <%= f.label :name, t('activerecord.attributes.player.name') %>
+    <%= f.text_field :name, value: @filters[:name], class: 'form-control w-100', data: { 'table-filters-target': "input" }   %>
+    <%= f.submit class: 'btn btn-secondary d-none' %>
+  <% end %>
+</div>

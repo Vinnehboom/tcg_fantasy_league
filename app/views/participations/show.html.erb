@@ -41,9 +41,12 @@
   <% end %>
 </div>
 <% if @rosters %>
-  <div class="w-50">
-    <% @rosters.each do |roster| %>
-      <%= render partial: "participations/roster", locals: { roster:, edit: false } %>
-    <% end %>
+  <div class="grid">
+    <div class="col-12 col-md-6">
+      <% @rosters.each do |roster| %>
+        <%= render partial: "participations/roster", locals: { roster:, edit: false } %>
+      <% end %>
+    </div>
   </div>
+
 <% end %>
