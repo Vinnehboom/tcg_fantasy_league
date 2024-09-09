@@ -12,6 +12,9 @@
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.tournament.other'), path: game_tournaments_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.salary_drafts.other'), path: game_salary_drafts_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.participations.other'), path: game_participations_path(game: @game) } %>
+        <% if current_user && current_user.admin? %>
+          <%= render partial: 'layouts/navlink', locals: { title: t('admin.root'), path: admin_root_path } %>
+        <% end %>
       </ul>
       <div id="user-block" class="text-end d-flex pe-3 me-4">
         <% if current_user %>

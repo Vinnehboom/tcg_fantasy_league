@@ -1,0 +1,24 @@
+<nav class="navbar navbar-dark bg-black navbar-expand-lg p-2 bg-dark">
+  <div class="container-fluid">
+    <%= link_to root_path, class: 'navbar-brand d-flex justify-content-center me-3' do %>
+      <%= t("views.layout.header.navlink") %>
+    <% end %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 fs-6">
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.user.other'), path: admin_users_path } %>
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.participations.other'), path: admin_participations_path } %>
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.salary_drafts.other'), path: admin_salary_drafts_path } %>
+      </ul>
+      <div id="user-block" class="text-end d-flex pe-3 me-4">
+        <% if current_user %>
+          <%= link_to t('views.layout.header.logout'), destroy_user_session_path, data: { "turbo-method": :delete }, class: "text-danger" %>
+        <% else %>
+          <%= link_to t('views.layout.header.login'), new_user_session_path, class: "text-white" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

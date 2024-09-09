@@ -35,6 +35,7 @@ en:
         format: Format
         game_id: Game
       salary_draft:
+        game: Game
         tournament: Tournament
         tournament_id: Tournament
         price_cap: Maximum roster price
@@ -45,6 +46,8 @@ en:
         user: User
         user_id: User
         tournament: Tournament
+        status: Status
+        rosters: Roster
       roster:
         participation: Participation
         participation_id: Participation
@@ -62,26 +65,19 @@ en:
           attributes:
             rosters:
               empty: Add players to your rosters before submitting.
+  admin:
+    salary_drafts:
+      create:
+        success: Salary draft successfully created.
+        failed: Salary draft failed to save.
+      update:
+        success: Salary draft successfully updated.
+        failed: Salary draft failed to update.
+      destroy:
+        success: Salary draft successfully deleted.
+        failed: Salary draft failed to delete.
   games:
     not_found: Game not found. Please select a valid game to continue.
-  pages:
-    landing:
-      title: TCG Fantasy League
-  users:
-    show:
-      title: Profile
-      username: Username
-      email: Email
-  salary_drafts:
-    create:
-      success: Salary draft successfully created.
-      failed: Salary draft failed to save.
-    update:
-      success: Salary draft successfully updated.
-      failed: Salary draft failed to update.
-    destroy:
-      success: Salary draft successfully deleted.
-      failed: Salary draft failed to delete.
   rosters:
     create:
       success: Roster successfully created. Please continue by adding players!

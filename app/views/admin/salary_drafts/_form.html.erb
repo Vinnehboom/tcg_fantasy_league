@@ -1,6 +1,6 @@
 <div class="border-3 border border-light rounded-2 shadow p-3">
-  <%= simple_form_for [@game, salary_draft] do |f| %>
-    <%= f.input :tournament_id, collection: @tournaments %>
+  <%= simple_form_for [:admin, @salary_draft] do |f| %>
+    <%= f.input :tournament_id, collection: @tournaments, label_method: ->(tournament) { "#{tournament.game.id} - #{tournament.name}"}%>
     <%= f.input :roster_size %>
     <%= f.input :price_cap  %>
 

@@ -1,0 +1,40 @@
+<table class="table table-dark table-striped rounded-2 overflow-hidden">
+  <thead>
+    <tr>
+      <% unless @game %>
+        <th><%= t("activerecord.attributes.tournament.game_id") %></th>
+      <% end %>
+      <th><%= t("activerecord.attributes.participation.user") %></th>
+      <th><%= t("activerecord.attributes.participation.tournament") %></th>
+      <th><%= t("activerecord.attributes.tournament.starting_date") %></th>
+      <th><%= t("views.tables.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% participations.each do |participation| %>
+    <tr>
+      <% unless @game %>
+        <td>
+          <%= participation.game.name %>
+        </td>
+      <% end %>
+      <td>
+        <%= link_to participation.user.username, admin_user_path(participation.user)  %>
+      </td>
+      <td>
+        <%= participation.tournament.name %>
+      </td>
+      <td>
+        <%= l(participation.tournament.starting_date) %>
+      </td>
+      <td>
+        <%= link_to([:admin, participation], class: 'text-opacity-75') do %>
+        <%= bootstrap_icon("eye") %>
+        <% end %>
+      </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= paginate participations %>

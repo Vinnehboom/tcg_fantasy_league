@@ -7,6 +7,13 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   root "pages#landing"
 
+  namespace :admin do
+    root "users#index"
+    resources :users
+    resources :participations
+    resources :salary_drafts
+  end
+
   scope ':game', as: 'game' do
     root "pages#home"
     resources :players

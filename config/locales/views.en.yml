@@ -10,13 +10,38 @@ en:
       show: Show
       edit: Edit
       filters: Filters
+  admin:
+    root: Admin
+    users:
+      show:
+        title: User
+        username: Username
+        email: Email
+        participations: Participations
+        status: Status
+        score: Score
+    salary_drafts:
+      index:
+        add: New draft
+      new:
+        title: New draft
+      edit:
+        title: New draft
+      show:
+        edit: Edit
+        destroy: Remove
+        confirm_destroy: Are you sure you want to remove this draft?
+        add_participation: Participate
+        view_participation: View participation
+  pages:
+    landing:
+      title: TCG Fantasy League
+  users:
+    show:
+      title: Profile
+      username: Username
+      email: Email
   salary_drafts:
-    index:
-      add: New draft
-    new:
-      title: New draft
-    edit:
-      title: New draft
     show:
       edit: Edit
       destroy: Remove

@@ -11,13 +11,9 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-<% if header %>
-  <% if @admin %>
-    <%= render partial: 'layouts/admin_header' %>
-  <% else %>
-    <%= render partial: 'layouts/header' %>
-  <% end %>
-<% end %>
+
+<%= render partial: 'layouts/admin_header' %>
+
 <div id="flash" class="flash">
   <%= render "layouts/flash" %>
   <%= turbo_frame_tag "flash" %>
