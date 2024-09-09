@@ -23,12 +23,14 @@
   </table>
 </div>
 
-<div class="w-50 mx-auto">
-  <%= turbo_frame_tag @roster do %>
-    <%= render partial: "roster", locals: { roster: @roster, edit: true } %>
-  <% end %>
-</div>
+<div class="grid mx-auto d-flex justify-content-center">
+  <div class="col-md-6 col-12">
+    <%= turbo_frame_tag @roster do %>
+      <%= render partial: "roster", locals: { roster: @roster, edit: true } %>
+    <% end %>
+  </div>
 
+</div>
 
 <%= turbo_frame_tag 'player_table' do %>
   <%= render partial: "player_table" %>

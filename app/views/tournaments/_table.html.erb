@@ -7,7 +7,6 @@
       <% end %>
       <th><%= t("activerecord.attributes.tournament.name") %></th>
       <th><%= t("activerecord.attributes.tournament.country") %></th>
-      <th><%= t("activerecord.attributes.tournament.format") %></th>
       <th><%= t("activerecord.attributes.tournament.starting_date") %></th>
     </tr>
   </thead>
@@ -29,9 +28,6 @@
         </td>
       <td>
         <%= tournament.country %>
-      </td>
-      <td>
-        <%= tournament.format %>
       </td>
       <td>
         <%= l(tournament.starting_date) %>
