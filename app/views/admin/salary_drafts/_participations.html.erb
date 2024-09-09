@@ -1,0 +1,33 @@
+<table class="table table-dark table-striped rounded-2 overflow-hidden">
+  <thead>
+  <tr>
+    <th><%= t("activerecord.attributes.participation.user") %></th>
+    <th><%= t("activerecord.attributes.participation.status") %></th>
+    <th><%= t("activerecord.attributes.participation.rosters") %></th>
+    <th><%= t("views.tables.actions") %></th>
+  </tr>
+  </thead>
+  <tbody>
+
+  <% @participations.each do |participation| %>
+    <tr>
+      <td>
+        <%= link_to participation.user.username, admin_user_path(participation.user)  %>
+      </td>
+      <td>
+        <%= participation.status %>
+      </td>
+      <td>
+        <%= participation.rosters.first.players.map(&:name) %>
+      </td>
+      <td>
+        <%= link_to([:admin, participation], class: 'text-opacity-75') do %>
+          <%= bootstrap_icon("eye") %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<%= paginate @participations %>

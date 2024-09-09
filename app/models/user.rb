@@ -12,4 +12,8 @@ class User < ApplicationRecord
   has_many :participations, dependent: :destroy
   has_many :rosters, through: :participations
 
+  def admin?
+    has_role?(:admin)
+  end
+
 end

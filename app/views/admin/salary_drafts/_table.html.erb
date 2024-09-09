@@ -1,0 +1,44 @@
+<table class="table table-dark table-striped rounded-2 overflow-hidden">
+  <thead>
+    <tr>
+      <% unless @game %>
+        <th><%= t("activerecord.attributes.tournament.game_id") %></th>
+      <% end %>
+      <th><%= t("activerecord.attributes.salary_draft.tournament") %></th>
+      <th><%= t("activerecord.attributes.tournament.starting_date") %></th>
+      <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.salary_draft.roster_size") %></th>
+      <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.salary_draft.price_cap") %></th>
+      <th><%= t("views.tables.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @salary_drafts.each do |salary_draft| %>
+    <tr>
+      <% unless @game %>
+        <td>
+          <%= salary_draft.game.name %>
+        </td>
+      <% end %>
+      <td>
+        <%= salary_draft.tournament.name %>
+      </td>
+      <td>
+        <%= l(salary_draft.tournament.starting_date) %>
+      </td>
+      <td class="d-none d-md-table-cell">
+        <%= salary_draft.roster_size %>
+      </td>
+      <td class="d-none d-md-table-cell">
+        <%= salary_draft.price_cap %>
+      </td>
+      <td>
+        <%= link_to(admin_salary_draft_path(salary_draft), class: 'text-light text-opacity-75') do %>
+        <%= bootstrap_icon("eye") %>
+        <% end %>
+      </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= paginate salary_drafts %>
