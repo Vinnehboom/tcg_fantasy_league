@@ -101,6 +101,41 @@ module Admin
         end
       end
     end
+
+    describe '#complete' do
+      let(:tournament) { create(:tournament, starting_date: 3.days.ago) }
+      let(:salary_draft) { create(:salary_draft, tournament:) }
+      let(:player) { create(:player) }
+      let(:participation) { create(:participation, draft: salary_draft, status: 'submitted') }
+      let(:roster) { create(:roster, participation:) }
+      let!(:roster_player) { create(:roster_player, roster:, player:) }
+
+      it 'scores all participations' do
+        create(:external_score, player:, score: 20, created_at: 4.days.ago)
+        create(:external_score, player:, score: 40)
+        expect(participation.score).to eq(0.0)
+        post complete_admin_salary_draft_path(salary_draft)
+        expect(roster_player.reload.score).to eq(20.0)
+        expect(participation.reload.score).to eq(20)
+      end
+
+      it 'sets the participations as completed' do
+        expect(participation).to be_submitted
+        post complete_admin_salary_draft_path(salary_draft)
+        expect(participation.reload).to be_completed
+      end
+
+      it 'does not update the scores when run at a later date' do
+        create(:external_score, player:, score: 20, created_at: 4.days.ago)
+        create(:external_score, player:, score: 40)
+        post complete_admin_salary_draft_path(salary_draft)
+        expect(participation.reload.score).to eq(20)
+        travel_to 4.days.from_now
+        create(:external_score, player:, score: 60)
+        post complete_admin_salary_draft_path(salary_draft)
+        expect(participation.reload.score).to eq(20)
+      end
+    end
   end
 
 end

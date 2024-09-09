@@ -44,8 +44,10 @@ RSpec.describe RostersController do
       it 'does not show players the user cannot afford anymore' do
         participation.draft.update(price_cap:)
         azul = create(:player, game:, country: 'US')
+        azul.external_scores.destroy_all
         create(:external_score, player: azul, score: score1)
         tord = create(:player, game:, country: 'NO')
+        tord.external_scores.destroy_all
         create(:external_score, player: tord, score: score2)
         roster.players << azul
         roster.reload
