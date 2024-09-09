@@ -79,6 +79,7 @@ class RostersController < ScopedGameController
     @countries = @players.pluck(:country).uniq.sort
     filter_players
     @filters = filter_params
+    @price_rules = Players::ScalingPriceRule.new
   end
 
   def filter_players
