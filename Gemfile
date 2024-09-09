@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 ruby '3.2.4'
 
+gem 'countries', require: 'countries/global'
 gem 'cssbundling-rails'
 gem 'devise', '~> 4.9'
 gem 'devise-i18n'

@@ -12,6 +12,30 @@ RSpec.describe RostersController do
       sign_in user
     end
 
+    it 'shows players for the tournament region first' do
+      participation.draft.tournament.update(country: 'DE')
+      player1 = create(:player, game:, country: 'US')
+      player2 = create(:player, game:, country: 'AU')
+      player3 = create(:player, game:, country: 'CZ')
+      player4 = create(:player, game:, country: 'ES')
+      get :edit, params: { id: roster.id, game: game.id }
+      expect(assigns(:players).first(2)).to include(player3, player4)
+      expect(assigns(:players).last(2)).to include(player1, player2)
+    end
+
+    it 'sorts the player by highest score within their region' do
+      participation.draft.tournament.update(country: 'DE')
+      create(:player, game:, country: 'US')
+      player3 = create(:player, game:, country: 'CZ')
+      player4 = create(:player, game:, country: 'ES')
+      player3.external_scores.destroy_all
+      player4.external_scores.destroy_all
+      create(:external_score, player: player4, score: 1000)
+      create(:external_score, player: player3, score: 200)
+      get :edit, params: { id: roster.id, game: game.id }
+      expect(assigns(:players).first(2)).to eq([player4, player3])
+    end
+
     it 'applies the cost to all available players' do
       player1, player2 = create_list(:player, 2, :without_scores, game:)
       player1.external_scores.create(score: 50)
