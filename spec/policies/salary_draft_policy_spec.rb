@@ -12,8 +12,7 @@ RSpec.describe SalaryDraftPolicy, type: :policy do
     it { is_expected.to permit(admin, salary_draft) }
   end
 
-  permissions :complete?  do
-
+  permissions :complete? do
     context "when the draft's tournament has commenced" do
       before do
         salary_draft.tournament.update(starting_date: 2.days.ago)
@@ -21,7 +20,6 @@ RSpec.describe SalaryDraftPolicy, type: :policy do
 
       it { is_expected.not_to permit(user, salary_draft) }
       it { is_expected.to permit(admin, salary_draft) }
-
     end
 
     context "when the draft's tournament has not commenced" do
@@ -31,9 +29,6 @@ RSpec.describe SalaryDraftPolicy, type: :policy do
 
       it { is_expected.not_to permit(user, salary_draft) }
       it { is_expected.not_to permit(admin, salary_draft) }
-
     end
-
-
   end
 end
