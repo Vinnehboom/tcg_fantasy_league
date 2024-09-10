@@ -10,4 +10,8 @@ class SalaryDraft < ApplicationRecord
     Players::CostCalculator.new(pricing_rules: [Players::ScalingPriceRule.new]).calculate_cost(player:, tournament:)
   end
 
+  def score_for(cost:)
+    Players::ScoreCalculator.new(pricing_rules: [Players::ScalingPriceRule.new]).calculate_score(cost:)
+  end
+
 end

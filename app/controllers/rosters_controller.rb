@@ -29,8 +29,9 @@ class RostersController < ScopedGameController
   def update
     @roster = Roster.find(params[:id])
     authorize @roster
+    saved = @roster.update(roster_params)
     set_page_variables
-    if @roster.update(roster_params)
+    if saved
       respond_to do |format|
         format.html { redirect_to [@game, @roster], notice: t('.success') }
         format.turbo_stream
@@ -83,8 +84,7 @@ class RostersController < ScopedGameController
   end
 
   def filter_players
-    tournament_region = Country[@roster.tournament.country].region
-    region_countries = Country.collect_countries_with(tournament_region, :region).map(&:alpha2).reject { |c| c == 'IS' }
+    max_score = @roster.reload.draft.score_for(cost: @roster.remaining_cost)
     latest_scores = ExternalScore
                     .select('external_scores.player_id, external_scores.score, external_scores.created_at')
                     .from('external_scores, (SELECT player_id, ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY created_at DESC) AS rn FROM external_scores) ranked_scores') # rubocop:disable Layout/LineLength
@@ -93,11 +93,23 @@ class RostersController < ScopedGameController
     @players = Player
                .left_joins(:external_scores)
                .joins("LEFT JOIN (#{latest_scores.to_sql}) latest_scores ON latest_scores.player_id = players.id")
-               .order(Arel.sql("players.country = ANY(ARRAY['#{region_countries.join("', '")}']::text[]) DESC"))
-               .order('latest_scores.created_at ASC')
+               .where.not(id: @roster.player_ids)
+    unless @roster.remaining_cost == @roster.draft.price_cap
+      @players = @players.where(latest_scores: { score: ...max_score.round })
+
+    end
+
+    @players = group_players_by_region(players: @players)
     @players = apply_filters(players: @players)
     @players = @players.page(params[:page]).per(25)
     @players.each { |player| player.cost = @roster.draft.cost_for(player:) }
+  end
+
+  def group_players_by_region(players:)
+    tournament_region = Country[@roster.tournament.country].region
+    region_countries = Country.collect_countries_with(tournament_region, :region).map(&:alpha2).reject { |c| c == 'IS' }
+    players.order(Arel.sql("players.country = ANY(ARRAY['#{region_countries.join("', '")}']::text[]) DESC"))
+           .order('latest_scores.created_at ASC')
   end
 
 end
