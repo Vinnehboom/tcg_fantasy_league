@@ -15,4 +15,12 @@ RSpec.describe SalaryDraft do
       expect(draft.cost_for(player:)).to eq(40.0)
     end
   end
+
+  describe '#score_for' do
+    let(:draft) { create(:salary_draft) }
+
+    it 'reflects the score for the given cost' do
+      expect(draft.score_for(cost: 10)).to eq(50.0)
+    end
+  end
 end

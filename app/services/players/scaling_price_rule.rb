@@ -35,6 +35,15 @@ module Players
       scales.filter { |scale| scale[:maximum_cost].blank? || scale[:maximum_cost] >= current_cost }
     end
 
+    def unapply(cost:, score:)
+      scales.reverse.filter { |scale| scale[:minimum_cost] <= cost }.each do |scale|
+        cost_rest = cost - scale[:minimum_cost]
+        score += cost_rest * scale[:point_coefficient]
+        cost = scale[:minimum_cost]
+      end
+      score.abs
+    end
+
     def default_scales # rubocop:disable Metrics/MethodLength
       [{
         minimum_cost: 0,

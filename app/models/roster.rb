@@ -16,6 +16,10 @@ class Roster < ApplicationRecord
     roster_players.sum { |roster_player| roster_player.player_cost.to_f }.round(2)
   end
 
+  def remaining_cost
+    draft.price_cap - total_cost
+  end
+
   private
 
   def roster_size

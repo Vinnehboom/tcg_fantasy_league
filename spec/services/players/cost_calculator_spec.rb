@@ -15,6 +15,7 @@ module Players
         [
           [[], 0.0],
           [[ScalingPriceRule.new], 10.0],
+          [[ScalingPriceRule.new], 10.0],
           [[ScalingPriceRule.new(scales: [
                                    {
                                      minimum_cost: 0,

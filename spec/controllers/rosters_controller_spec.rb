@@ -23,6 +23,37 @@ RSpec.describe RostersController do
       expect(assigns(:players).last(2)).to include(player1, player2)
     end
 
+    it 'does not show players the user has already drafted' do
+      azul = create(:player, game:, country: 'US')
+      create(:player, game:, country: 'NO')
+      roster.players << azul
+      roster.reload
+      get :edit, params: { id: roster.id, game: game.id }
+      expect(assigns(:players)).not_to include(azul)
+    end
+
+    where(:price_cap, :score1, :score2) do
+      [
+        [60, 1000, 1000],
+        [40, 900, 500],
+        [20, 250, 300]
+      ]
+    end
+
+    with_them do
+      it 'does not show players the user cannot afford anymore' do
+        participation.draft.update(price_cap:)
+        azul = create(:player, game:, country: 'US')
+        create(:external_score, player: azul, score: score1)
+        tord = create(:player, game:, country: 'NO')
+        create(:external_score, player: tord, score: score2)
+        roster.players << azul
+        roster.reload
+        get :edit, params: { id: roster.id, game: game.id }
+        expect(assigns(:players)).not_to include(tord)
+      end
+    end
+
     it 'sorts the player by highest score within their region' do
       participation.draft.tournament.update(country: 'DE')
       create(:player, game:, country: 'US')
