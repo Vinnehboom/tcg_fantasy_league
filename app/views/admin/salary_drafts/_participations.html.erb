@@ -18,7 +18,8 @@
         <%= participation.status %>
       </td>
       <td>
-        <%= participation.rosters.first.players.map(&:name) %>
+        <% roster = participation.rosters&.first %>
+        <%= roster && roster.players&.map(&:name) %>
       </td>
       <td>
         <%= link_to([:admin, participation], class: 'text-opacity-75') do %>

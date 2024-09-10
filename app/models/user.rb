@@ -16,4 +16,8 @@ class User < ApplicationRecord
     has_role?(:admin)
   end
 
+  def highscore
+    participations.sum(&:score)
+  end
+
 end

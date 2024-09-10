@@ -5,6 +5,7 @@ en:
         navlink: TCG Fantasy Draft
         logout: Log out
         login: Log in
+        user_score: "Score: %{score}"
     tables:
       actions: Actions
       show: Show
@@ -41,8 +42,9 @@ en:
   users:
     show:
       title: Profile
-      username: Username
       email: Email
+      username: Username
+      highscore: Lifetime highscore
   salary_drafts:
     show:
       edit: Edit
