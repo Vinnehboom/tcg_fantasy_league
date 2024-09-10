@@ -11,7 +11,9 @@ Rails.application.routes.draw do
     root "users#index"
     resources :users
     resources :participations
-    resources :salary_drafts
+    resources :salary_drafts do
+      post :complete, on: :member
+    end
   end
 
   scope ':game', as: 'game' do
