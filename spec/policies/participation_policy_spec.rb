@@ -23,10 +23,23 @@ RSpec.describe ParticipationPolicy, type: :policy do
       admin_participation
     end
 
-    it { is_expected.to permit(user, build(:participation, user:)) }
-    it { is_expected.to permit(admin, build(:participation, user: admin)) }
-    it { is_expected.not_to permit(user, user_participation) }
-    it { is_expected.not_to permit(admin, admin_participation) }
+    context 'when the draft tournament has not started yet' do
+      let(:draft) { create(:salary_draft, tournament: create(:tournament, starting_date: 2.days.from_now)) }
+
+      it { is_expected.to permit(user, build(:participation, user:, draft:)) }
+      it { is_expected.to permit(admin, build(:participation, user: admin, draft:)) }
+      it { is_expected.not_to permit(user, user_participation) }
+      it { is_expected.not_to permit(admin, admin_participation) }
+    end
+
+    context 'when the draft tournament has started' do
+      let(:draft) { create(:salary_draft, tournament: create(:tournament, starting_date: 2.days.ago)) }
+
+      it { is_expected.not_to permit(user, build(:participation, user:, draft:)) }
+      it { is_expected.not_to permit(admin, build(:participation, user: admin, draft:)) }
+      it { is_expected.not_to permit(user, user_participation) }
+      it { is_expected.not_to permit(admin, admin_participation) }
+    end
   end
 
   permissions :update? do

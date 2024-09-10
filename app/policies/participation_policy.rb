@@ -11,7 +11,11 @@ class ParticipationPolicy < ApplicationPolicy
   end
 
   def create?
-    @participation.user == @user && @user.participations.where(draft: @participation.draft).blank?
+    tournament = Tournament.find_by(id: @participation.draft.tournament_id)
+    @participation.user == @user &&
+      @user.participations.where(draft: @participation.draft).blank? &&
+      tournament &&
+      tournament.starting_date > Date.current
   end
 
   def update?
