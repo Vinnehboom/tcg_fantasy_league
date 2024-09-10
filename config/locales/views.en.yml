@@ -31,6 +31,8 @@ en:
         edit: Edit
         destroy: Remove
         confirm_destroy: Are you sure you want to remove this draft?
+        complete: Finish
+        confirm_complete: Are you sure you want to finish this draft? Make sure all results and players have been updated before doing so.
         add_participation: Participate
         view_participation: View participation
   pages:

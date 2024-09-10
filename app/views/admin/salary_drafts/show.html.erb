@@ -10,6 +10,11 @@
         <%= t(".destroy") %>
       <% end %>
     <% end %>
+    <% if policy(@salary_draft).complete? %>
+      <%= link_to complete_admin_salary_draft_path(@salary_draft), data: { 'turbo-method': :post, 'turbo-confirm': t('.confirm_complete') }, class: 'btn btn-secondary' do %>
+        <%= t(".complete") %>
+      <% end %>
+    <% end %>
   </div>
 <% end %>
 

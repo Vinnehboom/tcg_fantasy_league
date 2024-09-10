@@ -1,5 +1,7 @@
 class Participation < ApplicationRecord
 
+  scope :submitted, -> { where(status: 'submitted') }
+  scope :completed, -> { where(status: 'completed') }
   belongs_to :draft, class_name: 'SalaryDraft'
   belongs_to :user
   validates :user, uniqueness: { scope: :draft }

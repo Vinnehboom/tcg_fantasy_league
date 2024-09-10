@@ -32,7 +32,10 @@ RSpec/NestedGroups:
   Enabled: false
 RSpec/ImplicitSubject:
   Enabled: false
-
+Metrics/ModuleLength:
+  Max: 100
+  Exclude:
+    - 'spec/**/*_spec.rb'
 Metrics/ClassLength:
   Max: 100
 RSpec/ExampleLength:

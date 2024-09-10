@@ -22,6 +22,10 @@ class SalaryDraftPolicy < ApplicationPolicy
     admin?
   end
 
+  def complete?
+    admin? && Date.current > @salary_draft.tournament.starting_date
+  end
+
   def destroy?
     admin?
   end
