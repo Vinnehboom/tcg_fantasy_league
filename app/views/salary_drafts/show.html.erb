@@ -39,7 +39,10 @@
     <%= link_to game_participations_path(game: @game, participation: {draft_id: @salary_draft.id, user_id: current_user.id}), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
       <%= t(".add_participation") %>
     <% end %>
-  <% end %>
+  <% else %>
+      <%= link_to new_user_session_path, class: 'btn btn-success' do %>
+        <%= t(".log_in_to_participate") %>
+      <% end %>  <% end %>
   <% if @participation %>
     <%= link_to [@game, @participation], class: 'btn btn-success' do %>
       <%= t(".view_participation") %>

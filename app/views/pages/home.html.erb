@@ -1,1 +1,15 @@
-<div>TCG Fantasy League</div>
+<h1><%= t('.title') %></h1>
+
+<div class="grid row">
+  <div class="col-md-6 col-12">
+    <h3><%= t('.upcoming_drafts') %></h3>
+
+    <%= render partial: "salary_drafts/table", locals: { salary_drafts: @upcoming_drafts, page: 'drafts' } %>
+  </div>
+  <div class="col-md-6 col-12">
+    <h3><%= t('.top_players') %></h3>
+
+    <%= render partial: "user_table", locals: { users: @top_users, page: 'users'  } %>
+  </div>
+</div>
+

@@ -22,7 +22,12 @@ class ApplicationController < ActionController::Base
   end
 
   def unauthorized
-    redirect_to game_root_path(@game), alert: t('application.unauthorized')
+    game = Game.find_by(id: params[:game])
+    if game
+      redirect_to game_root_path(game: params[:game]), alert: t('application.unauthorized')
+    else
+      redirect_to root_path, alert: t('application.unauthorized')
+    end
   end
 
 end

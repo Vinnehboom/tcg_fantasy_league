@@ -1,11 +1,7 @@
 class SalaryDraftsController < ScopedGameController
 
   def index
-    @salary_drafts = SalaryDraft
-                     .includes(:tournament)
-                     .where(tournament: { game: @game })
-                     .where('tournament.starting_date > ?', DateTime.current)
-                     .all.page(params[:page])
+    @salary_drafts = @game.upcoming_drafts.page(params[:page])
   end
 
   def show

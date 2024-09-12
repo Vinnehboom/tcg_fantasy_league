@@ -11,6 +11,8 @@ en:
       show: Show
       edit: Edit
       filters: Filters
+      participations:
+        participate: Participate
   admin:
     root: Admin
     users:
@@ -39,6 +41,10 @@ en:
   pages:
     landing:
       title: TCG Fantasy League
+    home:
+      title: TCG Fantasy League
+      upcoming_drafts: Upcoming drafts
+      top_players: Top scoring users
   users:
     show:
       title: Profile
@@ -51,6 +57,7 @@ en:
       destroy: Remove
       confirm_destroy: Are you sure you want to remove this draft?
       add_participation: Participate
+      log_in_to_participate: Sign in to participate
       view_participation: View participation
   participations:
     show:

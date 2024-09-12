@@ -7,7 +7,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def show?
-    @user == @other_user
+    @user == @other_user || admin?
   end
 
 end
