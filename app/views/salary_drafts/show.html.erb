@@ -35,14 +35,17 @@
     </tr>
   </table>
   <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
-  <% if current_user && policy(Participation.new(user: current_user, draft: @salary_draft)).create? %>
-    <%= link_to game_participations_path(game: @game, participation: {draft_id: @salary_draft.id, user_id: current_user.id}), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
-      <%= t(".add_participation") %>
+  <% if current_user %>
+    <% if policy(Participation.new(user: current_user, draft: @salary_draft)).create? %>
+      <%= link_to game_participations_path(game: @game, participation: {draft_id: @salary_draft.id, user_id: current_user.id}), data: {  'turbo-method': :post }, class: 'btn btn-success' do %>
+        <%= t(".add_participation") %>
+      <% end %>
     <% end %>
   <% else %>
       <%= link_to new_user_session_path, class: 'btn btn-success' do %>
         <%= t(".log_in_to_participate") %>
-      <% end %>  <% end %>
+      <% end %>
+    <% end %>
   <% if @participation %>
     <%= link_to [@game, @participation], class: 'btn btn-success' do %>
       <%= t(".view_participation") %>
