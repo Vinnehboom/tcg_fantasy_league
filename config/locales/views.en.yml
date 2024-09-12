@@ -6,7 +6,7 @@ en:
         logout: Log out
         login: Log in
         user_score: "Score: %{score}"
-        dashboard: Dashboard
+        dashboard: Home
     tables:
       actions: Actions
       show: Show

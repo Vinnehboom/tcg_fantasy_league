@@ -15,3 +15,28 @@ html, body, .table-dark {
 .landing-card {
   box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
 }
+
+.spinner-border {
+  display: none;
+  height: 5rem;
+  width: 5rem;
+  &.small {
+    height: 2rem;
+    width: 2rem;
+  }
+  align-self: center;
+}
+
+body {
+  turbo-frame[aria-busy="true"]  {
+    html { display: block };
+    & * { display: none;
+      * .spinner-border {
+        display: block !important;
+      }};
+  }
+  [aria-busy="true"] .spinner-border {
+    display: block;
+  }
+}
+

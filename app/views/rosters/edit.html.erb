@@ -27,13 +27,31 @@
 
 <div class="grid mx-auto d-flex justify-content-center">
   <div class="col-md-6 col-12">
-    <%= turbo_frame_tag @roster do %>
+
+    <div class="mx-auto p-2 my-3 d-block bg-light text-dark w-100">
+      <h3><%= t('rosters.edit.roster_title') %></h3>
+      <%= turbo_frame_tag @roster do %>
       <%= render partial: "roster", locals: { roster: @roster, edit: true } %>
     <% end %>
+    </div>
   </div>
 
 </div>
 
+<h2 class="my-2"><%= t("rosters.edit.players") %></h2>
+<div><p class="fs-6 fs-md-5"><%= t('rosters.edit.players_description') %></p></div>
+
+<div class="w-100 d-flex justify-content-end align-items-center gap-3 my-3 px-2 px-md-0">
+  <h4 class="d-none d-md-block"><%= t('views.tables.filters') %></h4>
+  <%= form_with(url: edit_game_roster_path(id: @roster.id, game: @game, page: params[:page]), method: :get, data: {turbo_stream: true, controller: "table-filters", 'table-filters-target': "form" }, class: 'd-flex gap-3 align-items-center') do |f| %>
+    <%= f.label :country, t('activerecord.attributes.player.country') %>
+    <%= f.select :country, options_for_select(@countries, @filters[:country]), {}, { class: 'form-select w-25', onchange: "this.form.requestSubmit()" } %>
+    <%= f.label :name, t('activerecord.attributes.player.name') %>
+    <%= f.text_field :name, value: @filters[:name], class: 'form-control w-100', data: { 'table-filters-target': "input" }   %>
+    <%= f.submit class: 'btn btn-secondary d-none' %>
+  <% end %>
+</div>
+
 <%= turbo_frame_tag 'player_table' do %>
-  <%= render partial: "player_table" %>
+    <%= render partial: "player_table" %>
 <% end %>

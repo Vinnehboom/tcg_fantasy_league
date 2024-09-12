@@ -1,49 +1,37 @@
-<h2 class="my-2"><%= t("rosters.edit.players") %></h2>
-<div><p class="fs-6 fs-md-5"><%= t('rosters.edit.players_description') %></p></div>
-
-<div class="w-100 d-flex justify-content-end align-items-center gap-3 my-3 px-2 px-md-0">
-  <h4 class="d-none d-md-block"><%= t('views.tables.filters') %></h4>
-  <%= form_with(url: edit_game_roster_path(id: @roster.id, game: @game, page: params[:page]), method: :get, data: {turbo_stream: true, controller: "table-filters", 'table-filters-target': "form" }, class: 'd-flex gap-3 align-items-center') do |f| %>
-    <%= f.label :country, t('activerecord.attributes.player.country') %>
-    <%= f.select :country, options_for_select(@countries, @filters[:country]), {}, { class: 'form-select w-25', onchange: "this.form.requestSubmit()" } %>
-    <%= f.label :name, t('activerecord.attributes.player.name') %>
-    <%= f.text_field :name, value: @filters[:name], class: 'form-control w-100', data: { 'table-filters-target': "input" }   %>
-    <%= f.submit class: 'btn btn-secondary d-none' %>
-  <% end %>
+<div class="w-100 d-flex flex-column align-items-center">
+  <%= render partial: 'shared/spinner' %>
+  <table class="table-dark  table table-striped rounded-2 py-2 overflow-hidden">
+    <thead>
+    <tr>
+      <th><%= t("activerecord.attributes.player.name") %></th>
+      <th><%= t("activerecord.attributes.player.country") %></th>
+      <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.player.external_points") %></th>
+      <th><%= t("activerecord.attributes.player.cost") %></th>
+      <th><%= t("views.tables.actions") %></th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @players.each do |player| %>
+      <tr>
+        <td>
+          <%= link_to(player.name, player.external_url ,target: "_blank") %>
+        </td>
+        <td>
+          <%= player.country %>
+        </td>
+        <td class="d-none d-md-table-cell">
+          <%= player.current_score %>
+        </td>
+        <td>
+          <%= player.decorated_cost %>
+        </td>
+        <td>
+          <%= link_to t("rosters.edit.add_player"), game_roster_path(id: @roster.id, game: @game, page: params[:page], **@filters, roster: {  roster_players_attributes: [{player_id: player.id}] } ), data: { 'turbo-method': :patch } %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+  <%= paginate @players, params: { controller: "rosters", action: "edit", id: @roster.id, page: params[:page ]} %>
 </div>
 
-
-<table class="table-dark  table table-striped rounded-2 py-2 overflow-hidden">
-  <thead>
-  <tr>
-    <th><%= t("activerecord.attributes.player.name") %></th>
-    <th><%= t("activerecord.attributes.player.country") %></th>
-    <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.player.external_points") %></th>
-    <th><%= t("activerecord.attributes.player.cost") %></th>
-    <th><%= t("views.tables.actions") %></th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @players.each do |player| %>
-    <tr>
-      <td>
-        <%= link_to(player.name, player.external_url ,target: "_blank") %>
-      </td>
-      <td>
-        <%= player.country %>
-      </td>
-      <td class="d-none d-md-table-cell">
-        <%= player.current_score %>
-      </td>
-      <td>
-        <%= player.decorated_cost %>
-      </td>
-      <td>
-        <%= link_to t("rosters.edit.add_player"), game_roster_path(id: @roster.id, game: @game, page: params[:page], **@filters, roster: {  roster_players_attributes: [{player_id: player.id}] } ), data: { 'turbo-method': :patch } %>
-      </td>
-    </tr>
-  <% end %>
-  </tbody>
-</table>
-
-<%= paginate @players, params: { controller: "rosters", action: "edit", id: @roster.id, page: params[:page ]} %>
