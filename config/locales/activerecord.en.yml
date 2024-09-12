@@ -49,12 +49,19 @@ en:
         tournament: Tournament
         status: Status
         rosters: Roster
+        score: Score
       roster:
         participation: Participation
         participation_id: Participation
         user: User
         tournament: Tournament
         players: Players
+      roster_player:
+        score: Score
+        player: Player
+        player_id: Player
+        roster: Roster
+        roster_id: Roster
     errors:
       models:
         roster:

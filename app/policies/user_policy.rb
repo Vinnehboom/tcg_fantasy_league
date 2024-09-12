@@ -7,6 +7,10 @@ class UserPolicy < ApplicationPolicy
   end
 
   def show?
+    true
+  end
+
+  def can_see_email?
     @user == @other_user || admin?
   end
 
