@@ -1,6 +1,6 @@
 <nav class="navbar navbar-dark bg-black navbar-expand-lg p-2 bg-dark">
   <div class="container-fluid">
-    <%= link_to game_root_path(game: @game), class: 'navbar-brand d-flex justify-content-center me-3' do %>
+    <%= link_to root_path, class: 'navbar-brand d-flex justify-content-center me-3' do %>
       <%= t("views.layout.header.navlink") %> <%= @game && ":: #{@game.name}"  %>
     <% end %>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -8,6 +8,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 fs-6">
+        <%= render partial: 'layouts/navlink', locals: { title: t('views.layout.header.dashboard'), path: game_root_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.player.other'), path: game_players_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.tournament.other'), path: game_tournaments_path(game: @game) } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.salary_drafts.other'), path: game_salary_drafts_path(game: @game) } %>
