@@ -47,7 +47,9 @@ en:
       top_players: Top scoring users
   users:
     show:
-      title: Profile
+      title: My profile
+      other_title: User profile
+      past_rosters: Past rosters
       email: Email
       username: Username
       highscore: Lifetime highscore

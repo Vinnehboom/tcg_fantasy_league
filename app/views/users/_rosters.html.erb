@@ -1,0 +1,61 @@
+<table class="table table-dark table-striped rounded-2 overflow-hidden">
+  <thead>
+  <tr>
+    <th><%= t("activerecord.attributes.tournament.game_id") %></th>
+    <th><%= t("activerecord.attributes.roster.tournament") %></th>
+    <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.salary_draft.roster_size") %></th>
+    <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.salary_draft.price_cap") %></th>
+    <th><%= t("activerecord.attributes.roster.players") %></th>
+    <th class="d-none d-md-table-cell text-center"><%= t("activerecord.attributes.participation.score") %></th>
+  </tr>
+  </thead>
+  <tbody class="align-middle">
+  <% rosters.each do |roster| %>
+    <tr>
+      <td>
+        <%= roster.tournament.game.name %>
+      </td>
+      <td>
+        <%= link_to roster.tournament.name, roster.tournament.external_url ,target: "_blank", class: 'text-opacity-75' %>
+      </td>
+      <td class="d-none d-md-table-cell">
+        <%= roster.draft.roster_size %>
+      </td>
+      <td class="d-none d-md-table-cell">
+        <%= roster.draft.price_cap %>
+      </td>
+      <td class="p-0 m-0">
+        <table class="table table-dark m-0 p-0">
+          <thead>
+          <tr>
+            <th>
+              <%= t('activerecord.attributes.roster_player.player') %>
+            </th>
+            <th>
+              <%= t('activerecord.attributes.roster_player.score') %>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+            <% roster.roster_players.each do |roster_player| %>
+              <tr>
+                <td>
+                  <%= link_to roster_player.player.name, roster_player.player.external_url ,target: "_blank", class: 'text-opacity-75' %>
+                </td>
+                <td>
+                  <%= roster_player.score %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </td>
+      <td class="text-center">
+        <%= roster.participation.score %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<%= paginate rosters %>

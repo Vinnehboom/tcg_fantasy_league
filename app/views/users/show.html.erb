@@ -1,10 +1,12 @@
-<h2 class="mb-3"><%= t('.title') %></h2>
+<h2 class="mb-3"><%= @user == current_user ? t('.title') : t('.other_title') %></h2>
 
 <table class="table table-primary w-50">
-  <tr>
-    <td class="fw-bold"><%= t('.email') %></td>
-    <td><%= @user.email %></td>
-  </tr>
+  <% if policy(@user).can_see_email? %>
+    <tr>
+      <td class="fw-bold"><%= t('.email') %></td>
+      <td><%= @user.email %></td>
+    </tr>
+    <% end %>
   <tr>
     <td class="fw-bold"><%= t('.username') %></td>
     <td><%= @user.username %></td>
@@ -14,3 +16,7 @@
     <td><%= @user.highscore %></td>
   </tr>
 </table>
+
+<h3 class="my-2"><%= t('.past_rosters') %></h3>
+
+<%= render partial: 'rosters', locals: { rosters: @rosters } %>

@@ -4,7 +4,7 @@ class UsersController < ScopedGameController
 
   def show
     @user = User.find(params[:id])
-    authorize @user
+    @rosters = Roster.where(participation_id: @user.participations.completed.ids).page(params[:page])
   end
 
 end
