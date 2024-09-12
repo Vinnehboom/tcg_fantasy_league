@@ -23,4 +23,14 @@ RSpec.describe SalaryDraft do
       expect(draft.score_for(cost: 10)).to eq(50.0)
     end
   end
+
+  describe '.upcoming' do
+    subject { described_class.upcoming }
+
+    let(:passed_draft) { create(:salary_draft, tournament: create(:tournament, starting_date: 1.day.ago)) }
+    let(:upcoming_draft) { create(:salary_draft, tournament: create(:tournament, starting_date: 1.day.from_now)) }
+
+    it { is_expected.to include(upcoming_draft) }
+    it { is_expected.not_to include(passed_draft) }
+  end
 end

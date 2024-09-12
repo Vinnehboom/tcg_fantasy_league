@@ -20,4 +20,13 @@ class User < ApplicationRecord
     participations.sum(&:score)
   end
 
+  def self.highscorers(game:)
+    joins(rosters: [roster_players: :player])
+      .group('users.id')
+      .where('player.game_id': game.id)
+      .where.not('roster_players.score': nil)
+      .select('users.*, SUM(roster_players.score) AS total')
+      .order('total DESC')
+  end
+
 end

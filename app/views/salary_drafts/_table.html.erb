@@ -1,3 +1,4 @@
+<% page ||= 'page' %>
 <table class="table table-dark table-striped rounded-2 overflow-hidden">
   <thead>
     <tr>
@@ -11,8 +12,8 @@
       <th><%= t("views.tables.actions") %></th>
     </tr>
   </thead>
-  <tbody>
-    <% @salary_drafts.each do |salary_draft| %>
+  <tbody class="align-middle">
+    <% salary_drafts.each do |salary_draft| %>
     <tr>
       <% unless @game %>
         <td>
@@ -32,13 +33,24 @@
         <%= salary_draft.price_cap %>
       </td>
       <td>
-        <%= link_to([@game, salary_draft], class: 'text-light text-opacity-75') do %>
-        <%= bootstrap_icon("eye") %>
-        <% end %>
+        <div class="grid row w-100">
+          <div class="col-md-4 col-12">
+            <%= link_to([@game, salary_draft], class: 'text-light text-opacity-75 d-inline-block w-50') do %>
+              <%= bootstrap_icon("eye") %>
+            <% end %>
+          </div>
+          <div class="col-md-8 col-12">
+            <% if current_user && policy(Participation.new(user: current_user, draft: salary_draft)).create? %>
+              <%= link_to game_participations_path(game: @game, participation: {draft_id: salary_draft.id, user_id: current_user.id}), data: {  'turbo-method': :post }, class: 'd-inline-block w-50' do %>
+                <%= t("views.tables.participations.participate") %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= paginate @salary_drafts %>
+<%= paginate salary_drafts, param_name: page %>

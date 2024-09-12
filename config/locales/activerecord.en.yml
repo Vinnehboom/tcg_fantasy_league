@@ -20,6 +20,7 @@ en:
       user:
         email: Email
         username: Username
+        highscore: Highscore
       player:
         name: Name
         country: Country

@@ -9,12 +9,11 @@
                 input_html: { autocomplete: "email" } %>
 
     <%= f.input :username %>
-    <%= f.input :password, input_html: { autocomplete: "password" } %>
+    <%= f.input :password, as: :password, input_html: { autocomplete: "new-password" } %>
     <% if @minimum_password_length %>
       <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
     <% end %>
     <br />
-    <%= f.input :password, as: :password, input_html: { autocomplete: "new-password" } %>
     <%= f.input :password_confirmation, as: :password, input_html: { autocomplete: "new-password" }  %>
 
     <div class="d-flex align-items-end flex-column">
