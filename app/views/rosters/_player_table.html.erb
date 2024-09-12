@@ -12,38 +12,41 @@
   <% end %>
 </div>
 
-
-<table class="table-dark  table table-striped rounded-2 py-2 overflow-hidden">
-  <thead>
-  <tr>
-    <th><%= t("activerecord.attributes.player.name") %></th>
-    <th><%= t("activerecord.attributes.player.country") %></th>
-    <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.player.external_points") %></th>
-    <th><%= t("activerecord.attributes.player.cost") %></th>
-    <th><%= t("views.tables.actions") %></th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @players.each do |player| %>
+<div class="w-100 d-flex flex-column align-items-center">
+  <%= render partial: 'shared/spinner' %>
+  <table class="table-dark  table table-striped rounded-2 py-2 overflow-hidden">
+    <thead>
     <tr>
-      <td>
-        <%= link_to(player.name, player.external_url ,target: "_blank") %>
-      </td>
-      <td>
-        <%= player.country %>
-      </td>
-      <td class="d-none d-md-table-cell">
-        <%= player.current_score %>
-      </td>
-      <td>
-        <%= player.decorated_cost %>
-      </td>
-      <td>
-        <%= link_to t("rosters.edit.add_player"), game_roster_path(id: @roster.id, game: @game, page: params[:page], **@filters, roster: {  roster_players_attributes: [{player_id: player.id}] } ), data: { 'turbo-method': :patch } %>
-      </td>
+      <th><%= t("activerecord.attributes.player.name") %></th>
+      <th><%= t("activerecord.attributes.player.country") %></th>
+      <th class="d-none d-md-table-cell"><%= t("activerecord.attributes.player.external_points") %></th>
+      <th><%= t("activerecord.attributes.player.cost") %></th>
+      <th><%= t("views.tables.actions") %></th>
     </tr>
-  <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+    <% @players.each do |player| %>
+      <tr>
+        <td>
+          <%= link_to(player.name, player.external_url ,target: "_blank") %>
+        </td>
+        <td>
+          <%= player.country %>
+        </td>
+        <td class="d-none d-md-table-cell">
+          <%= player.current_score %>
+        </td>
+        <td>
+          <%= player.decorated_cost %>
+        </td>
+        <td>
+          <%= link_to t("rosters.edit.add_player"), game_roster_path(id: @roster.id, game: @game, page: params[:page], **@filters, roster: {  roster_players_attributes: [{player_id: player.id}] } ), data: { 'turbo-method': :patch } %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
 
-<%= paginate @players, params: { controller: "rosters", action: "edit", id: @roster.id, page: params[:page ]} %>
+  <%= paginate @players, params: { controller: "rosters", action: "edit", id: @roster.id, page: params[:page ]} %>
+</div>
+

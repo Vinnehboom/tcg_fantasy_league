@@ -1,9 +1,8 @@
 <% roster ||= @roster %>
 <% defined?(edit) ? edit : edit = true %>
 
-<div class="mx-auto p-2 my-3 bg-light text-dark">
-  <h3><%= t('rosters.edit.roster_title') %></h3>
-  <table class="table table-striped table-light">
+  <%= render partial: 'shared/spinner', locals: { small: 'small' } %>
+ <table class="table table-striped table-light">
     <thead>
     <tr>
       <th>
@@ -60,7 +59,7 @@
     <% if policy(roster.participation).update? %>
       <%= simple_form_for [@game, roster.participation], method: :put, data: { turbo: false } do |f| %>
         <%= f.input :status, as: :hidden, input_html: { value: 'submitted' } %>
-        <%= f.submit t('rosters.edit.submit_roster'), class: 'btn btn-primary' %>
+        <%= f.submit t('rosters.edit.submit_roster'), class: 'btn btn-primary my-2' %>
       <% end %>
     <% end %>
   </div>
@@ -72,5 +71,3 @@
       <% end %>
     </div>
 <% end %>
-
-</div>

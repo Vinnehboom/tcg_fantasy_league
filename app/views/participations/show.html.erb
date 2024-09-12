@@ -41,10 +41,13 @@
   <% end %>
 </div>
 <% if @rosters %>
+  <h3><%= t('.rosters') %></h3>
   <div class="grid">
     <div class="col-12 col-md-6">
       <% @rosters.each do |roster| %>
+        <div class="mx-auto p-2 my-3 d-block bg-light text-dark">
         <%= render partial: "participations/roster", locals: { roster:, edit: false } %>
+        </div>
       <% end %>
     </div>
   </div>
