@@ -33,6 +33,9 @@ jobs:
     executor: test-container
     steps:
       - checkout
+      - run:
+          name: Fix stale Google Chrome apt key
+          command: sudo wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
       - run: sudo apt update && sudo apt install zlib1g-dev
       - ruby/install-deps
       - run:
