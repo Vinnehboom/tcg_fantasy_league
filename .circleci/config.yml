@@ -12,11 +12,11 @@ executors:
   lite-ruby-container:
     resource_class: small
     docker:
-      - image: cimg/ruby:3.2.4
+      - image: cimg/ruby:3.3.6
   test-container:
     resource_class: medium
     docker:
-      - image: cimg/ruby:3.2.4-browsers
+      - image: cimg/ruby:3.3.6-browsers
       - image: cimg/postgres:14.0
         environment:
           POSTGRES_USER: tcg_fantasy_draft
