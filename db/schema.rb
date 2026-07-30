@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_09_193139) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_30_122646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -50,6 +50,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_09_193139) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["game_id"], name: "index_players_on_game_id"
+  end
+
+  create_table "results", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "tournament_id", null: false
+    t.integer "placement"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id", "tournament_id"], name: "index_results_on_player_id_and_tournament_id", unique: true
+    t.index ["player_id"], name: "index_results_on_player_id"
+    t.index ["tournament_id"], name: "index_results_on_tournament_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -126,6 +137,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_09_193139) do
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
   add_foreign_key "players", "games"
+  add_foreign_key "results", "players"
+  add_foreign_key "results", "tournaments"
   add_foreign_key "roster_players", "players"
   add_foreign_key "roster_players", "rosters"
   add_foreign_key "rosters", "participations"
