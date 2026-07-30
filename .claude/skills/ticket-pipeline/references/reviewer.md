@@ -21,3 +21,6 @@ Ranked list, most serious first, each with file:line and a concrete failing scen
 
 ## The loop
 Findings go back to the developer, who fixes and returns; re-review. Up to 3 rounds. If blocking issues survive three rounds, hand to the human with your reasoning.
+
+## What you hand back
+An APPROVE or a findings list — nothing else. Do not push the branch or open the PR; that's the orchestrator's job once you approve (see the skill's "Opening the PR" section).
