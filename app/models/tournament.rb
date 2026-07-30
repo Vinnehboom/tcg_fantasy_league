@@ -6,6 +6,7 @@ class Tournament < ApplicationRecord
   validates :external_id, presence: true
   validates :starting_date, presence: true
   has_many :salary_drafts, dependent: :destroy
+  has_many :results, dependent: :destroy
 
   enum format: { standard: 0, expanded: 1 }
 
