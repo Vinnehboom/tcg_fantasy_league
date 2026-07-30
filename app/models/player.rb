@@ -6,6 +6,7 @@ class Player < ApplicationRecord
   validates :external_id, presence: true
   belongs_to :game
   has_many :external_scores, dependent: :destroy
+  has_many :results, dependent: :destroy
   accepts_nested_attributes_for :external_scores
 
   def current_score
