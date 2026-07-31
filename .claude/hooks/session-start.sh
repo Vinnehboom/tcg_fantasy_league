@@ -84,4 +84,19 @@ if command -v bundle >/dev/null 2>&1; then
   RAILS_ENV=test bundle exec rails db:prepare >/dev/null 2>&1 || true
 fi
 
+# 7. Coding Style Guide reminder. This hook can't fetch Notion content itself
+# (no API credentials available to the shell — Notion access only exists
+# inside the agent's own tool calls), so instead it surfaces the canonical
+# page reference from .claude/coding-style.json as context, telling the
+# agent to pull it in as one of its first actions. Printed on stdout so
+# Claude Code injects it into the session's context.
+if [ -f .claude/coding-style.json ]; then
+  STYLE_GUIDE_URL=$(grep -o '"notion_page_url"[[:space:]]*:[[:space:]]*"[^"]*"' .claude/coding-style.json | sed -E 's/.*"([^"]+)"$/\1/')
+  if [ -n "$STYLE_GUIDE_URL" ]; then
+    cat <<EOF
+Before making code changes in this repo, fetch the Coding Style Guide from Notion ($STYLE_GUIDE_URL) via the notion-fetch tool and treat its Style Rules as binding project style guidance alongside repo conventions — it's the shared source of truth the ticket-pipeline skill also reads before implementing tickets. Skip this fetch only if Notion tools are unavailable this session.
+EOF
+  fi
+fi
+
 exit 0
