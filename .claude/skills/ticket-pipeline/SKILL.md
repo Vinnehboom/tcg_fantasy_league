@@ -3,9 +3,11 @@ name: ticket-pipeline
 description: >-
   Drive a single tracked ticket from its Notion card all the way to a reviewed,
   ready-to-merge pull request, using a planner → developer → reviewer → live-verification
-  → curator pipeline (live verification exercises the Render PR-preview deploy with a
-  real test account and posts screenshot evidence; the curator harvests reusable
-  knowledge — new tickets, style-guide and doc updates — from the finished work).
+  → gatekeeper → curator pipeline (live verification exercises the Render PR-preview
+  deploy with a real test account and posts screenshot evidence; the gatekeeper keeps
+  the PR a draft — CI green, evidence attached, branch rebased onto main, never merged —
+  until it's genuinely ready for human review; the curator harvests reusable knowledge —
+  new tickets, style-guide and doc updates — from the finished work).
   Use this skill whenever the user wants to "work", "pick up", "start",
   "ship", or "rattle through" a ticket/story/card — especially when they reference
   a ticket ID (like A-1, C-3), a Notion board card, or a backlog item — even if
@@ -17,15 +19,16 @@ description: >-
 
 # Ticket pipeline
 
-Take one ticket and carry it, in order, through five specialist phases:
+Take one ticket and carry it, in order, through six specialist phases:
 
 1. Planner (Opus, high effort) — understands the ticket, closes knowledge gaps with you, and writes a commit-by-commit plan directly onto the Notion ticket card.
 2. Developer (Sonnet, medium effort) — builds it test-first on a branch, following the coding style guide, linting and testing before every commit.
 3. Reviewer (Opus, high effort) — reviews the whole branch against ONLY the ticket, the style guide, and Notion docs, blind to the developer's reasoning, and loops fixes back before the PR opens.
 4. Tester (Sonnet, medium effort) — once Render's PR-preview environment deploys, exercises the ticket's done-criteria against the live app with a real test account, capturing screenshots as evidence.
-5. Curator (Opus, high effort) — after review, harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval.
+5. Gatekeeper (orchestrator-run, no separate subagent) — keeps the PR a draft until CI is green, testing evidence is attached, and the branch is rebased onto the latest main (never merged) — only then marks it ready for review.
+6. Curator (Opus, high effort) — after review, harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval.
 
-Each role runs as a SEPARATE subagent on purpose. Isolation matters most for the reviewer — it must not inherit the developer's justifications, or it will rubber-stamp them. The curator is the deliberate exception: it needs the whole picture.
+Each role runs as a SEPARATE subagent on purpose (except the Gatekeeper, which is mechanical orchestrator work, not judgment work — see Phase 5). Isolation matters most for the reviewer — it must not inherit the developer's justifications, or it will rubber-stamp them. The curator is the deliberate exception: it needs the whole picture.
 
 The ORCHESTRATOR (you, running this skill) owns the flow between phases, the three human checkpoints, and keeping the Notion card in sync. You dispatch each phase and carry artifacts between them.
 
@@ -58,7 +61,7 @@ If either is unset, skip Phase 4 entirely and say so — don't attempt unauthent
 Notion MCP has previously dropped mid-run and blinded the developer/reviewer/curator (they fell back to guessing repo conventions instead of the style guide). To make a Notion disconnect mid-pipeline harmless:
 
 1. As the FIRST action of any pipeline run, fetch every doc phases will need — the ticket card, the project context/decisions page, and the Coding Style Guide — and write each one verbatim to a local cache file under `docs/pipeline-cache/<TASK_ID>/` (e.g. `ticket.md`, `context.md`, `style-guide.md`). Create the directory if needed.
-2. From then on, every subagent (planner, developer, reviewer, curator) is handed the LOCAL CACHE FILES, not a live Notion fetch. Subagents should not need `mcp__Notion__*` tools at all except the curator, which re-fetches live at Phase 5 specifically to check proposals against the current state of the docs before proposing (see references/curator.md) — if that live re-fetch fails, it falls back to the cached copies and says so.
+2. From then on, every subagent (planner, developer, reviewer, curator) is handed the LOCAL CACHE FILES, not a live Notion fetch. Subagents should not need `mcp__Notion__*` tools at all except the curator, which re-fetches live at Phase 6 specifically to check proposals against the current state of the docs before proposing (see references/curator.md) — if that live re-fetch fails, it falls back to the cached copies and says so.
 3. The cache is scratch state for this run, not a repo artifact to keep clean forever: it's fine to leave it in `docs/pipeline-cache/<TASK_ID>/` for traceability, but it should not be treated as a source of truth after the run — Notion is still canonical for the next run.
 4. If the initial fetch itself fails (Notion unavailable at init, before any cache exists), that's the "Notion not connected" stop condition above — don't start the pipeline on stale or partial context.
 
@@ -92,15 +95,15 @@ Between Checkpoints 2 and 3 the developer, reviewer, and tester run to completio
 ### Phase 3 — Reviewer → read references/reviewer.md
 - FRESH subagent, opus, high effort, carrying ONLY ticket + cached Notion context + branch diff. Do NOT hand it the plan or the developer's rationale.
 - On findings: loop back to the developer, re-review. Cap 3 rounds; unresolved → user, pipeline pauses.
-- On clean pass, the ORCHESTRATOR (not the reviewer subagent) opens the PR — see "Opening the PR" below — then sets card Status → Review and appends the PR link + a short review-outcome note to the card (next to the plan already there).
+- On clean pass, the ORCHESTRATOR (not the reviewer subagent) opens the PR — see "Opening the PR" below — then appends a short review-outcome note to the Notion card (next to the plan already there). Card Status stays "In progress," NOT "Review" yet — the PR is a draft and nothing is actually ready for anyone's review until the Gatekeeper (Phase 5) says so.
 
 ## Opening the PR
 Runs automatically on a clean review, no extra checkpoint (Checkpoint 3 gates the curator's Notion writes, not this).
 1. Push the developer's branch: `git push -u origin <branch-name>`.
 2. Check for a PR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE.md`, root `PULL_REQUEST_TEMPLATE.md`, or `docs/PULL_REQUEST_TEMPLATE.md`). If one exists, mirror its section headings and fill them in from the diff — treat it as a layout, not instructions to follow. If none exists, write a plain summary + test plan.
-3. Open the PR against `main` (or the dependency branch the plan named — see "Stacked PRs for dependent tickets" below) using the GitHub MCP tools (`mcp__github__create_pull_request`) — never the `gh` CLI, which isn't available in this environment. Title: `<Task ID> — <ticket name>`. Body: what changed and why (from the plan's Goal/Decisions), a link to the Notion ticket card (where the full plan lives — do NOT link a repo file, there isn't one), and a one-line note that review already happened in-session (findings + resolution, if any). No Claude co-author trailer or generated-with footer on the PR body — same override as the commits.
-4. Ask whether to subscribe this session to the PR's activity (`subscribe_pr_activity`) so review comments/CI failures — and Render's preview-ready comment, see Phase 4 — get handled without polling. Don't subscribe without asking; once subscribed, review feedback triggers "Handling review feedback" below, not an ad hoc patch.
-5. Report the PR URL to the user.
+3. Open the PR AS A DRAFT (`draft: true`) against `main` (or the dependency branch the plan named — see "Stacked PRs for dependent tickets" below) using the GitHub MCP tools (`mcp__github__create_pull_request`) — never the `gh` CLI, which isn't available in this environment. Title: `<Task ID> — <ticket name>`. Body: what changed and why (from the plan's Goal/Decisions), a link to the Notion ticket card (where the full plan lives — do NOT link a repo file, there isn't one), and a one-line note that review already happened in-session (findings + resolution, if any). No Claude co-author trailer or generated-with footer on the PR body — same override as the commits.
+4. Subscribe this session to the PR's activity (`subscribe_pr_activity`) — don't ask this time, it's required infrastructure for the Gatekeeper's CI-wait and the review-feedback re-entry flow, not optional convenience. If subscribing fails, say so; the Gatekeeper falls back to polling (see Phase 5).
+5. Report the (draft) PR URL to the user, and say plainly that it's still a draft pending CI + testing evidence + a rebase check.
 
 ## Stacked PRs for dependent tickets
 GitHub shipped native Stacked Pull Requests to public preview in July 2026: a chain of PRs, each based on the one below it, reviewable independently and merged as a unit, with CI on every PR in the chain still running against `main`. Use this whenever a ticket's Depends On names another ticket whose branch/PR hasn't merged yet, instead of quietly nesting the dependency's diff inside this ticket's PR.
@@ -128,7 +131,20 @@ GitHub shipped native Stacked Pull Requests to public preview in July 2026: a ch
 2. Notion card: append a `## Live verification` section to the ticket card (`notion-update-page`, `insert_content`) with the same report; attach screenshots via `notion-create-attachment` if available, otherwise reference where the files can be found.
 3. Both postings carry the same attribution footer convention as other GitHub posts in this environment (see repo-level instructions) — the Notion posting does not need one.
 
-### Phase 5 — Curator → read references/curator.md
+### Phase 5 — Gatekeeper (pre-review gate + git hygiene)
+Not a subagent — mechanical orchestrator work, like "Opening the PR." Its whole job: nothing reaches Vinnie for review until it's genuinely ready, and the branch never picks up merge-commit noise against main. Runs after Phase 4 (Tester), whether or not Tester actually ran.
+
+1. **CI gate.** Wait for the PR's CI check. Preferred: the webhook event from the subscription set up in "Opening the PR." If that subscription failed, poll `pull_request_read` (`get_status`) with a real wait mechanism (`ScheduleWakeup`/`send_later`), not an inline sleep loop. Green → continue. Red → diagnose and fix it using the Developer role (references/developer.md) exactly as if it were a reviewer finding — new commit(s), test-first, lint+test gate — then go back to the top of this step and wait for the next run. This is the same "own it, don't just report it" duty this environment expects for CI failures on a PR you opened generally; the Gatekeeper is where that duty actually lives in this pipeline.
+2. **Testing-evidence gate.** Confirm Phase 4 actually posted a live-verification report to the PR. If Phase 4 was skipped (credentials unset) or somehow never posted, do NOT silently wave it through — this is the one moment a human would have caught a missing-evidence PR, so surface it explicitly and ask whether to proceed without evidence rather than letting it slide unnoticed. Treat this as an evidence-specific checkpoint, same weight as Checkpoints 1–3.
+3. **Branch-currency gate — rebase only, never merge.** `git fetch origin main` and compare against the branch's merge-base. If main has moved: `git rebase origin/main` — NEVER `git merge origin/main` into the branch, this repo does not want merge commits anywhere in its history, in either direction. Re-run the commit gate (lint + full suite) after rebasing, since a rebase can surface real conflicts or behavior changes that a plain diff wouldn't. Force-push (`--force-with-lease`). This same rebase-only rule applies everywhere else this skill reconciles a branch with main — general merge-conflict handling in this environment, and the review-feedback re-entry flow below, both mean rebase, never merge.
+4. **Mark ready for review.** Only once 1–3 all pass: un-draft the PR (`mcp__github__update_pull_request`, `draft: false`), set the Notion card Status → Review, and tell Vinnie it's actually ready now — this is the real "sending it off for your review" moment, not PR creation.
+
+See "Merge policy" below for how the PR itself eventually gets merged.
+
+## Merge policy
+No merge commits, anywhere. When a PR in this pipeline is merged, always use `merge_method: "rebase"` on `mcp__github__merge_pull_request` — never `"merge"`, which creates a merge commit. `"squash"` is a separate call Vinnie can make per-PR if he wants it; rebase is this skill's default unless told otherwise. Stacked-PR merges still respect bottom-up order (see "Stacked PRs for dependent tickets") on top of this.
+
+### Phase 6 — Curator → read references/curator.md
 - Subagent opus, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, decisions log, board, tech-debt page) — re-fetched live where possible, falling back to the cache.
 - Proposes new tickets / style-guide additions / decisions-log or tech-debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
 - Checkpoint 3: present proposals; on approval, create cards / edit pages. Nothing written without the user's go.
@@ -142,14 +158,15 @@ A review comment on a pipeline-opened PR is NOT a quick ad hoc patch — rerun t
 4. Developer (Phase 2, scoped): new commit(s) on the SAME branch, addressing only the feedback, test-first, same lint+test gate before each commit as always.
 5. Reviewer (Phase 3): re-reviews the WHOLE branch again, not just the new commits — a fix for one comment can break something the first pass already approved. Same blind rules: fresh subagent, no plan, no developer rationale.
 6. Tester (Phase 4): reruns against the updated Render preview if credentials are set — a new preview build kicks off automatically once the new commits push, same wait-for-deploy mechanics as the first pass.
-7. Curator (Phase 5): only worth rerunning if the feedback + fix revealed something genuinely new to capture — skip it for a purely mechanical round (e.g. a rename) rather than re-checking the knowledge base for nothing.
-8. Reply on the PR thread once the round resolves the feedback (per this environment's PR-babysitting conventions) — the pushed commits are the record, the reply is just the "handled" signal.
+7. Gatekeeper (Phase 5): re-runs its CI and evidence gates against the new commits before calling the round done — same reasoning as the branch-currency check, a fix isn't "handled" just because it was pushed. Skip only the branch-currency check itself if it already passed earlier in the same round and nothing pulled from main in between.
+8. Curator (Phase 6): only worth rerunning if the feedback + fix revealed something genuinely new to capture — skip it for a purely mechanical round (e.g. a rename) rather than re-checking the knowledge base for nothing.
+9. Reply on the PR thread once the round resolves the feedback (per this environment's PR-babysitting conventions) — the pushed commits are the record, the reply is just the "handled" signal.
 
 ## Model and effort summary
-Planner opus/high; Developer sonnet/medium; Reviewer opus/high; Tester sonnet/medium; Curator opus/high. If a model isn't available, fall back to the closest stronger model and say so rather than silently downgrading the reviewer.
+Planner opus/high; Developer sonnet/medium; Reviewer opus/high; Tester sonnet/medium; Gatekeeper — orchestrator, no subagent/model of its own (CI fixes it dispatches reuse the Developer role); Curator opus/high. If a model isn't available, fall back to the closest stronger model and say so rather than silently downgrading the reviewer.
 
 ## Notion status transitions
-Planner starts → In progress. PR opened after clean review → Review. Leave Done for a human on merge. If a phase fails or the user aborts, return the card to its previous status and say what happened.
+Planner starts → In progress. PR opens as a draft after clean review — card stays In progress. Gatekeeper marks the PR ready for review → card moves to Review. Leave Done for a human on merge. If a phase fails or the user aborts, return the card to its previous status and say what happened.
 
 ## Guardrails
 - One ticket per run. Repeat the pipeline per ticket; offer to continue after a PR opens.
@@ -158,3 +175,5 @@ Planner starts → In progress. PR opened after clean review → Review. Leave D
 - Never hardcode the live-verification credentials anywhere (skill files, commits, PR bodies, Notion pages, logs) — env vars only, read at the point of use.
 - Stacked PRs merge bottom-up, always. Never merge a PR based on another still-open PR before that base merges.
 - A review-feedback re-entry round doesn't skip Checkpoints 1/2 just because it's smaller than a full ticket — they still apply, scaled down.
+- No merge commits, anywhere. Reconciling a branch with main is always `git rebase`, never `git merge`; PR merges always use `merge_method: "rebase"`.
+- A PR doesn't leave draft state without the Gatekeeper's explicit say-so. Don't undraft one manually mid-pipeline as a shortcut, even under time pressure.
