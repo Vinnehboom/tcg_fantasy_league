@@ -21,6 +21,25 @@ if [ -n "${TCG_FANTASY_LEAGUE_TEST_KEY:-}" ] && [ ! -f config/credentials/test.k
   chmod 600 config/credentials/test.key
 fi
 
+# 1b. Git commit signing (SSH), from the TCG_FANTASY_LEAGUE_GIT_SIGNING_KEY
+# secret. Writes the private key to a session-local file and configures
+# repo-local SSH commit signing so pushed commits show as "Verified" on
+# GitHub. Skipped (not a failure) if the secret isn't set — commits just
+# stay unsigned, same as before this was added.
+if [ -n "${TCG_FANTASY_LEAGUE_GIT_SIGNING_KEY:-}" ]; then
+  if ! command -v ssh-keygen >/dev/null 2>&1; then
+    sudo apt-get update -qq || true
+    sudo apt-get install -y -qq openssh-client || true
+  fi
+  SIGNING_KEY_PATH="$HOME/.ssh/tcg_fantasy_league_signing"
+  mkdir -p "$HOME/.ssh"
+  printf '%s\n' "$TCG_FANTASY_LEAGUE_GIT_SIGNING_KEY" > "$SIGNING_KEY_PATH"
+  chmod 600 "$SIGNING_KEY_PATH"
+  git config gpg.format ssh
+  git config user.signingkey "$SIGNING_KEY_PATH"
+  git config commit.gpgsign true
+fi
+
 # 2. Postgres: install if missing, relax local auth to trust (throwaway
 # container, local-socket-only, fine for a test DB), start the service.
 export DEBIAN_FRONTEND=noninteractive
