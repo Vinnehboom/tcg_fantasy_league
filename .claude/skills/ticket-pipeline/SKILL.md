@@ -42,7 +42,9 @@ Every commit the developer makes must be authored as the repo owner's identity, 
 git config user.name "Vinnehboom"
 git config user.email "vinnie.schelfhaut.95@hotmail.com"
 ```
-Set this repo-locally (not `--global`) at the start of Phase 2, before the first commit. Note: this is a real personal email, not a GitHub noreply address — it's visible in plain git history (`git log`, the GitHub API), not just masked in the UI. That's a deliberate choice made explicitly by the user, overriding the noreply-address default this skill used earlier. It does NOT get commits a "Verified" badge on GitHub — that requires actual commit signing (GPG/SSH), which this skill doesn't set up. See references/developer.md.
+Set this repo-locally (not `--global`) at the start of Phase 2, before the first commit. Note: this is a real personal email, not a GitHub noreply address — it's visible in plain git history (`git log`, the GitHub API), not just masked in the UI. That's a deliberate choice made explicitly by the user, overriding the noreply-address default this skill used earlier. See references/developer.md.
+
+**Commit signing:** the `.claude/hooks/session-start.sh` SessionStart hook configures repo-local SSH commit signing (`gpg.format ssh`, `user.signingkey`, `commit.gpgsign true`) automatically when the `TCG_FANTASY_LEAGUE_GIT_SIGNING_KEY` secret is set — that's what actually gets commits a "Verified" badge on GitHub, not the identity email above. This skill doesn't need to do anything extra for it; it's inherited from repo-local git config the hook already set up before Phase 2 runs. If that secret isn't set, commits are just unsigned — not an error, don't try to work around it mid-pipeline.
 
 ## Live-verification credentials
 The tester (Phase 4) logs into the Render PR-preview app as a real user. Credentials come from environment secrets, never hardcoded in the skill or the repo:
