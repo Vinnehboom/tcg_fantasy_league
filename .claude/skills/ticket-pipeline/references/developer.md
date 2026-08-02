@@ -13,7 +13,7 @@ New branch off latest main (git fetch origin main && git checkout -B <branch> or
 Before the first commit, set the commit identity repo-locally (see the skill's "Commit identity" section):
 ```
 git config user.name "Vinnehboom"
-git config user.email "64021036+Vinnehboom@users.noreply.github.com"
+git config user.email "vinnie.schelfhaut.95@hotmail.com"
 ```
 
 ## Step 2 — Adopt the conventions
