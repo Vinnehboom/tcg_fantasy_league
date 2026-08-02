@@ -38,6 +38,12 @@ if [ -n "${TCG_FANTASY_LEAGUE_GIT_SIGNING_KEY:-}" ]; then
   git config gpg.format ssh
   git config user.signingkey "$SIGNING_KEY_PATH"
   git config commit.gpgsign true
+  # This environment's own global gitconfig points gpg.ssh.program at a
+  # platform-managed signer (/tmp/code-sign, tied to Claude's own identity)
+  # that silently ignores a custom user.signingkey — it neither errors nor
+  # produces a valid signature for it. Override it repo-locally to plain
+  # ssh-keygen so the key above actually gets used.
+  git config gpg.ssh.program "$(command -v ssh-keygen)"
 fi
 
 # 2. Postgres: install if missing, relax local auth to trust (throwaway
