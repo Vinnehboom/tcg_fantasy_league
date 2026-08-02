@@ -1,0 +1,7 @@
+{
+  "_comment": "Config for the kanban-cycle skill, read at the start of every cycle. To reuse this automation on another project: copy the .claude/skills/kanban-cycle folder there and write a new file like this one pointing at that project's repo/board.",
+  "repo": "Vinnehboom/tcg_fantasy_league",
+  "notion_board_url": "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0?pvs=25",
+  "max_open_prs": 3,
+  "max_stacked_prs": 2
+}
