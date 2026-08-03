@@ -5,6 +5,7 @@ RSpec.describe Player do
   it { is_expected.to validate_presence_of(:external_id) }
   it { is_expected.to have_many(:external_scores) }
   it { is_expected.to have_many(:results) }
+  it { is_expected.to have_many(:external_requests).dependent(:nullify) }
 
   it { is_expected.to belong_to(:game) }
 

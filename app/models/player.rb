@@ -7,6 +7,7 @@ class Player < ApplicationRecord
   belongs_to :game
   has_many :external_scores, dependent: :destroy
   has_many :results, dependent: :destroy
+  has_many :external_requests, as: :requestable, dependent: :nullify
   accepts_nested_attributes_for :external_scores
 
   def current_score

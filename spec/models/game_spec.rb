@@ -6,6 +6,28 @@ RSpec.describe Game do
 
   it { is_expected.to have_many(:players) }
   it { is_expected.to have_many(:tournaments) }
+  it { is_expected.to have_many(:external_requests).dependent(:restrict_with_error) }
+
+  describe '#destroy' do
+    subject(:destroy) { game.destroy }
+
+    let(:game) { create(:game) }
+    let(:request) { create(:external_request, game:) }
+
+    before { request }
+
+    it 'refuses to destroy a game with external requests' do
+      destroy
+
+      expect(game).to be_persisted
+    end
+
+    it 'leaves the external request audit trail intact' do
+      destroy
+
+      expect(ExternalRequest.exists?(request.id)).to be(true)
+    end
+  end
 
   describe '.upcoming_drafts' do
     subject { game.upcoming_drafts }

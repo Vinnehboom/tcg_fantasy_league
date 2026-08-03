@@ -16,6 +16,9 @@ en:
       participations:
         one: Participation
         other: Participations
+      external_request:
+        one: External request
+        other: External requests
     attributes:
       user:
         email: Email
@@ -62,6 +65,17 @@ en:
         player_id: Player
         roster: Roster
         roster_id: Roster
+      external_request:
+        game: Game
+        kind: Kind
+        status: Status
+        records_processed: Records processed
+        started_at: Started at
+        finished_at: Finished at
+        error: Error
+        response_body: Response body
+        source_url: Source URL
+        requestable: Requestable
     errors:
       models:
         roster:
