@@ -70,7 +70,7 @@ module Admin
     def complete_participations(participations:, draft:)
       ActiveRecord::Base.transaction do
         participations.each do |participation|
-          SalaryDrafts::Scorer.new.score(participation:, draft:)
+          SalaryDrafts::Scorer.call(participation:, draft:)
           participation.completed!
         end
       end
