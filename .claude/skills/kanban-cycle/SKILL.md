@@ -9,9 +9,14 @@ description: >-
   portable to any project with a Notion kanban board: copy this skill folder
   and write a new config file pointing at that project's repo/board. Designed
   to be fired by a recurring Routine bound to a persistent session (not a
-  fresh session per firing) so state — a plan still awaiting approval, a
-  ticket already picked up today — carries across firings instead of getting
-  duplicated. Every cycle ends with a PushNotification summarizing status,
+  fresh session per firing) — this session is the standing orchestrator,
+  doing triage and picking what's next; it does NOT run ticket-pipeline
+  inline. Picked-up ticket work is dispatched to its own fresh session (own
+  container, own git checkout, own test DB) so a scheduled cycle can never
+  collide with in-progress ticket work, here or elsewhere. In-flight
+  detection reads real state (open PRs, Notion card status), not
+  conversation memory, so it's correct regardless of which session last
+  touched a ticket. Every cycle ends with a PushNotification summarizing status,
   approvals needed, or questions. Use when the user says "run the board
   cycle," "/kanban-cycle," or asks to check the kanban board and PR status on
   a schedule. Do not use for a one-off "work this ticket" request — that's
@@ -30,19 +35,27 @@ Read `.claude/kanban-cycle.json` (repo `owner/name`, `notion_board_url`,
 `max_open_prs`, `max_stacked_prs`). If it's missing, say so and stop —
 don't guess a repo or board.
 
-## 1. Check for in-flight work from an earlier cycle today
+## 1. Check for in-flight work — from real state, not memory
 
-Since this skill runs in a persistent session across firings, the
-conversation itself is the source of truth for anything already started
-today. Before touching the board:
+Ticket work now runs in its own dispatched session (see step 6), not this
+one, so this session's conversation is NOT a reliable record of what's
+already running — a ticket could be mid-pipeline in a session this
+orchestrator has never seen a message from. Check real state instead:
 
-- Is there a ticket whose plan (Checkpoint 1/2 of `/ticket-pipeline`) is
-  still awaiting the user's answer or go-ahead from a previous cycle? If so,
-  **don't start a new ticket this cycle** — only one ticket may be sitting in
-  the pre-approval state at a time. Note it in this cycle's summary as
-  "still waiting on your OK for `<ticket>`" and move on to PR triage.
-- Is there a ticket mid-pipeline (developer/reviewer/tester running)? Same
-  rule — let it finish or hit its own checkpoint before picking up another.
+- Query the Notion board for any card with Status "In progress" or
+  "Review". For each, check (step 2's PR inventory) whether an open PR
+  already links it.
+  - Status "In progress" with **no** linked open PR yet → still at or before
+    Checkpoint 2 (planning, or a plan awaiting the user's go-ahead) in
+    whatever session it's running in. Treat as in-flight.
+  - Status "In progress" or "Review" **with** a linked open PR → it has its
+    own lifecycle now; step 3's PR triage covers it, not this step.
+- If any card is in-flight per the first bullet, **don't dispatch a new
+  ticket this cycle** — only one ticket may be sitting in the
+  pre-Checkpoint-2 state at a time. Note it in this cycle's summary as
+  "still waiting on your OK for `<ticket>`" (you won't know which session
+  to point the user at — that's fine, the ticket's own session already
+  notified them when it reached that checkpoint) and move on to PR triage.
 
 If nothing is in flight, proceed normally.
 
@@ -113,15 +126,45 @@ If no candidate clears it (board empty of ready work, or every ready
 ticket is blocked by the PR/stacking caps), that's a valid outcome — say so
 in the summary, don't force one through.
 
-## 6. Hand off to /ticket-pipeline
+## 6. Dispatch the ticket to a fresh session
 
-Invoke the `ticket-pipeline` skill for the chosen ticket. It owns its own
-Checkpoint 1 (planner questions) and Checkpoint 2 (plan approval) — let it
-run up to whichever checkpoint it naturally reaches, then stop; this cycle
-does not auto-approve anything on the user's behalf. Do not start a second
-ticket in the same cycle even if step 4 would technically allow it — one
-new ticket picked up per cycle, so the user's phone doesn't get a wall of
-approvals at once.
+Do NOT invoke the `ticket-pipeline` skill inline in this session — that's
+what causes the collision this design exists to avoid (a scheduled cycle
+landing mid-branch-checkout of whatever this session is doing elsewhere).
+Instead, hand the ticket to its own dispatched session via
+`mcp__Claude_Code_Remote__create_trigger`:
+
+- `create_new_session_on_fire: true` (a genuinely fresh session — its own
+  container, git checkout, and test DB, not this one)
+- `run_once_at`: ~1 minute from now (there's no direct "start a session
+  now" tool; a near-immediate one-shot trigger is the closest equivalent)
+- `notifications: {"push": true, "email": true}` — belt-and-suspenders in
+  case the dispatched session errors out before it gets a chance to notify
+  on its own
+- `prompt`: a fully self-contained instruction — the dispatched session has
+  NO memory of this conversation. Include: the repo (`owner/name`), the
+  ticket's Task ID, an instruction to run `/ticket-pipeline <Task ID>`
+  exactly as documented including its human checkpoints, and — critically —
+  an explicit instruction that since nobody is watching that session
+  interactively, it MUST call `PushNotification` at every point that would
+  normally just wait for the next chat turn (Checkpoint 1 questions,
+  Checkpoint 2 plan approval, Checkpoint 3 curator proposals, PR opened,
+  any blocker) rather than sitting idle with no signal sent.
+
+This orchestrator session does not track the dispatched session's ID or
+poll it directly — step 1's next firing checks real state (the Notion card,
+open PRs) to see how it's progressing, which works whether the dispatched
+session is still running, finished, or was closed. If tighter coupling is
+ever wanted (e.g. routing that ticket's checkpoints back into this
+session), the dispatched session can reach this one directly with its own
+`create_trigger` call using `persistent_session_id` set to this session's
+ID — async, lands as a new turn here, not a live channel — but that's not
+the default; the default is that ticket's own dispatched session handles
+its own checkpoints and notifications end-to-end.
+
+Do not dispatch a second ticket in the same cycle even if step 4 would
+technically allow it — one new ticket picked up per cycle, so the user
+doesn't get a wall of approvals across several sessions at once.
 
 ## 7. End-of-cycle notification (always)
 
@@ -144,6 +187,10 @@ with what needs a reply if anything does:
   PR on one the user hasn't reviewed at least once yet — these are hard
   caps, not targets to approach.
 - Only one ticket in the pre-Checkpoint-2 state at a time (step 1).
+- Never run `/ticket-pipeline` inline in this session — always dispatch to
+  a fresh session (step 6). This session's git checkout and test DB are
+  shared with whatever else it's doing; a scheduled cycle must never touch
+  them for ticket work.
 - No merge commits, ever — rebase only, same as `/ticket-pipeline`.
 - Don't touch a PR that doesn't link a Notion ticket card — it isn't this
   automation's to drive.
