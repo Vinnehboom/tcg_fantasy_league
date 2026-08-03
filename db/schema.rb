@@ -14,6 +14,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_30_122646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "external_requests", force: :cascade do |t|
+    t.string "game_id", null: false
+    t.integer "kind", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "records_processed", default: 0, null: false
+    t.datetime "started_at", null: false
+    t.datetime "finished_at"
+    t.text "error"
+    t.jsonb "response_body"
+    t.string "source_url"
+    t.string "requestable_type"
+    t.bigint "requestable_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_external_requests_on_game_id"
+    t.index ["requestable_type", "requestable_id"], name: "index_external_requests_on_requestable"
+  end
+
   create_table "external_scores", force: :cascade do |t|
     t.bigint "player_id", null: false
     t.integer "score"
@@ -133,6 +151,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_30_122646) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
+  add_foreign_key "external_requests", "games"
   add_foreign_key "external_scores", "players"
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
