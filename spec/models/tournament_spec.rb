@@ -6,6 +6,7 @@ RSpec.describe Tournament do
   it { is_expected.to validate_presence_of(:starting_date) }
   it { is_expected.to have_many(:salary_drafts) }
   it { is_expected.to have_many(:results) }
+  it { is_expected.to have_many(:external_requests).dependent(:nullify) }
 
   it { is_expected.to belong_to(:game) }
 end
