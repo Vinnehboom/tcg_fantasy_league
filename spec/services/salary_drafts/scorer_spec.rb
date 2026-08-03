@@ -22,7 +22,7 @@ module SalaryDrafts
       travel_to 7.days.from_now
       create(:external_score, player: player1, score: 40)
       create(:external_score, player: player2, score: 50)
-      described_class.new.score(participation:, draft:)
+      described_class.call(participation:, draft:)
       expect(participation.reload.score).to eq(40)
     end
   end

@@ -2,12 +2,23 @@ module SalaryDrafts
 
   class Scorer
 
-    def score(participation:, draft:)
+    def self.call(...)
+      new(...).call
+    end
+
+    def initialize(participation:, draft:)
+      @participation = participation
+      @draft = draft
+    end
+
+    def call
       calculate_score(rosters: participation.rosters, draft:)
       participation.save!
     end
 
     private
+
+    attr_reader :participation, :draft
 
     def calculate_score(rosters:, draft:)
       tournament_date = draft.tournament.starting_date
