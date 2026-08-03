@@ -20,7 +20,7 @@ This blindness is deliberate. Judge whether the code makes sense on its own term
 Ranked list, most serious first, each with file:line and a concrete failing scenario or the criterion it violates. Separate BLOCKING (ticket not met, incorrect, contradicts a decision, vacuous tests on core behavior) from NON-BLOCKING nits. If the branch is genuinely good, say so and approve — don't invent findings.
 
 ## The loop
-Findings go back to the developer, who fixes and returns; re-review. Up to 3 rounds. If blocking issues survive three rounds, hand to the human with your reasoning.
+Findings go back to the developer, who fixes and returns; re-review. Up to 2 rounds. If blocking issues survive 2 rounds, don't ask for a 3rd and don't pause the pipeline on the human — the orchestrator opens the PR anyway and posts your last round's findings (with your BLOCKING/NON-BLOCKING split intact) as PR review comments, so the human resolves them directly on the PR instead of waiting on chat.
 
 ## What you hand back
 An APPROVE or a findings list — nothing else. Do not push the branch or open the PR; that's the orchestrator's job once you approve (see the skill's "Opening the PR" section).
