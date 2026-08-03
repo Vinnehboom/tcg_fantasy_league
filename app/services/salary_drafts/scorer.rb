@@ -1,12 +1,9 @@
 module SalaryDrafts
 
-  class Scorer
-
-    def self.call(...)
-      new(...).call
-    end
+  class Scorer < ApplicationService
 
     def initialize(participation:, draft:)
+      super()
       @participation = participation
       @draft = draft
     end
