@@ -60,7 +60,27 @@ module ExternalData
         end
       end
 
-      context 'when retry_after is non-numeric' do
+      context 'when retry_after is numeric and negative' do
+        it 'floors the delay at zero' do
+          expect(policy.delay_before_retry(attempt: 1, retry_after: -5)).to eq(0)
+        end
+      end
+
+      context 'when retry_after is a parseable numeric string' do
+        it 'parses and uses the retry_after value, same as a real HTTP header would arrive' do
+          expect(policy.delay_before_retry(attempt: 1, retry_after: '12')).to eq(12)
+        end
+      end
+
+      context 'when retry_after is an HTTP-date, the delta-seconds alternative RFC 9110 allows' do
+        it 'falls back to the backoff schedule for that attempt instead of raising' do
+          expect(
+            policy.delay_before_retry(attempt: 1, retry_after: 'Wed, 21 Oct 2015 07:28:00 GMT')
+          ).to eq(0.5)
+        end
+      end
+
+      context 'when retry_after cannot be parsed as an integer at all' do
         it 'falls back to the backoff schedule for that attempt' do
           expect(policy.delay_before_retry(attempt: 1, retry_after: 'later')).to eq(0.5)
         end

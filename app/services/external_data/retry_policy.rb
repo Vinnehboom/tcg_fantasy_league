@@ -27,9 +27,10 @@ module ExternalData
     attr_reader :retry_delays, :max_retry_after
 
     def capped_retry_after(retry_after)
-      return nil unless retry_after.is_a?(Numeric)
+      parsed = Integer(retry_after, exception: false)
+      return nil unless parsed
 
-      [retry_after, max_retry_after].min
+      parsed.clamp(0, max_retry_after)
     end
 
     def default_timeout
