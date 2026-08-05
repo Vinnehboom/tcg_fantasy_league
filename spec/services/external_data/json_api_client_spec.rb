@@ -115,7 +115,7 @@ module ExternalData
           attempts = 0
           allow(HTTParty).to receive(:get) do
             attempts += 1
-            raise Timeout::Error if attempts == 1
+            raise Net::OpenTimeout if attempts == 1
 
             stub_response(body: '{"name":"Ash"}')
           end
@@ -127,7 +127,7 @@ module ExternalData
       context 'when every attempt times out' do
         let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
 
-        before { allow(HTTParty).to receive(:get).and_raise(Timeout::Error) }
+        before { allow(HTTParty).to receive(:get).and_raise(Net::OpenTimeout) }
 
         it 'raises a TimeoutError once retries are exhausted' do
           expect { client.get_json(path: '/players/1') }.to raise_error(described_class::TimeoutError)
@@ -148,7 +148,7 @@ module ExternalData
       context 'when wiring the retry policy for timeouts' do
         let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
 
-        before { allow(HTTParty).to receive(:get).and_raise(Timeout::Error) }
+        before { allow(HTTParty).to receive(:get).and_raise(Net::OpenTimeout) }
 
         it 'consults the retry_policy for how many attempts to make' do
           suppress(described_class::TimeoutError) { client.get_json(path: '/players/1') }
