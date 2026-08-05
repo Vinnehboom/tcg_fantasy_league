@@ -96,6 +96,44 @@ module ExternalData
           expect(urls).to eq(%w[https://example.com/players/1 https://example.com/players/2])
         end
       end
+
+      context 'when a request times out once and then succeeds' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
+
+        it 'returns the parsed JSON payload from the retried attempt' do
+          attempts = 0
+          allow(HTTParty).to receive(:get) do
+            attempts += 1
+            raise Net::OpenTimeout if attempts == 1
+
+            stub_response(body: '{"name":"Ash"}')
+          end
+
+          expect(client.get_json(path: '/players/1')).to eq('name' => 'Ash')
+        end
+      end
+
+      context 'when every attempt times out' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
+
+        before { allow(HTTParty).to receive(:get).and_raise(Net::OpenTimeout) }
+
+        it 'raises a TimeoutError once retries are exhausted' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::TimeoutError)
+        end
+      end
+
+      context 'when wiring the retry policy for timeouts' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
+
+        before { allow(HTTParty).to receive(:get).and_raise(Net::OpenTimeout) }
+
+        it 'consults the retry_policy for how many attempts to make' do
+          suppress(described_class::TimeoutError) { client.get_json(path: '/players/1') }
+
+          expect(HTTParty).to have_received(:get).exactly(retry_policy.max_attempts).times
+        end
+      end
     end
   end
 
