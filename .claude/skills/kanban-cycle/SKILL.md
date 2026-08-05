@@ -11,12 +11,14 @@ description: >-
   to be fired by a recurring Routine bound to a persistent session (not a
   fresh session per firing) — this session is the standing orchestrator,
   doing triage and picking what's next; it does NOT run ticket-pipeline
-  inline. Picked-up ticket work is dispatched to its own fresh session (own
-  container, own git checkout, own test DB) so a scheduled cycle can never
-  collide with in-progress ticket work, here or elsewhere. In-flight
-  detection reads real state (open PRs, Notion card status), not
-  conversation memory, so it's correct regardless of which session last
-  touched a ticket. Every cycle ends with a PushNotification summarizing status,
+  inline in its own working directory. Picked-up ticket work is dispatched
+  as a background Agent-tool subagent on an isolated git worktree (own
+  checkout, own branch — not a separate container or session) so a
+  scheduled cycle can never collide with in-progress ticket work on the
+  orchestrator's own checkout. In-flight detection reads real state (open
+  PRs, Notion card status), not conversation memory, so it's correct
+  regardless of which session or dispatch last touched a ticket. Every
+  cycle ends with a PushNotification summarizing status,
   approvals needed, or questions. Use when the user says "run the board
   cycle," "/kanban-cycle," or asks to check the kanban board and PR status on
   a schedule. Do not use for a one-off "work this ticket" request — that's
@@ -126,45 +128,68 @@ If no candidate clears it (board empty of ready work, or every ready
 ticket is blocked by the PR/stacking caps), that's a valid outcome — say so
 in the summary, don't force one through.
 
-## 6. Dispatch the ticket to a fresh session
+## 6. Dispatch the ticket to a worktree-isolated background agent
 
-Do NOT invoke the `ticket-pipeline` skill inline in this session — that's
-what causes the collision this design exists to avoid (a scheduled cycle
-landing mid-branch-checkout of whatever this session is doing elsewhere).
-Instead, hand the ticket to its own dispatched session via
-`mcp__Claude_Code_Remote__create_trigger`:
+**Do not use `mcp__Claude_Code_Remote__create_trigger` with
+`create_new_session_on_fire: true` for this.** That was the original
+design and it is broken for this org: a freshly-spawned CCR session gets
+none of this session's MCP connectors — confirmed via `list_triggers`
+(such triggers show no `mcp_connections` at all, unlike self-bound ones,
+which inherit the calling session's) and via `create_trigger` itself
+rejecting an explicit `connectors` param ("not available for this
+organization"). Two real dispatch attempts on ticket A-1 both confirmed
+`run_once_fired` server-side and then did precisely nothing — no session,
+no branch, no PR, not even a startup `PushNotification` — because the
+spawned session had no GitHub or Notion tools to do anything with, and
+apparently not enough life left to report that before giving up.
 
-- `create_new_session_on_fire: true` (a genuinely fresh session — its own
-  container, git checkout, and test DB, not this one)
-- `run_once_at`: ~1 minute from now (there's no direct "start a session
-  now" tool; a near-immediate one-shot trigger is the closest equivalent)
-- `notifications: {"push": true, "email": true}` — belt-and-suspenders in
-  case the dispatched session errors out before it gets a chance to notify
-  on its own
-- `prompt`: a fully self-contained instruction — the dispatched session has
-  NO memory of this conversation. Include: the repo (`owner/name`), the
-  ticket's Task ID, an instruction to run `/ticket-pipeline <Task ID>`
-  exactly as documented including its human checkpoints, and — critically —
-  an explicit instruction that since nobody is watching that session
-  interactively, it MUST call `PushNotification` at every point that would
-  normally just wait for the next chat turn (Checkpoint 1 questions,
-  Checkpoint 2 plan approval, Checkpoint 3 curator proposals, PR opened,
-  any blocker) rather than sitting idle with no signal sent.
+Instead, dispatch `/ticket-pipeline <Task ID>` as a background `Agent`
+subagent of THIS session, with `isolation: "worktree"`:
 
-This orchestrator session does not track the dispatched session's ID or
-poll it directly — step 1's next firing checks real state (the Notion card,
-open PRs) to see how it's progressing, which works whether the dispatched
-session is still running, finished, or was closed. If tighter coupling is
-ever wanted (e.g. routing that ticket's checkpoints back into this
-session), the dispatched session can reach this one directly with its own
-`create_trigger` call using `persistent_session_id` set to this session's
-ID — async, lands as a new turn here, not a live channel — but that's not
-the default; the default is that ticket's own dispatched session handles
-its own checkpoints and notifications end-to-end.
+- `run_in_background: true` — a background Agent-tool call, not a new CCR
+  session. Subagents inherit this session's tool access (GitHub, Notion —
+  confirmed working: a Curator subagent dispatched this way successfully
+  used live `mcp__Notion__*` calls with no special wiring) instead of
+  starting cold with nothing, which is what actually made the checkpoint
+  loop and every phase's Notion/GitHub work possible on A-1.
+- `isolation: "worktree"` — gives the ticket its own git checkout and
+  branch, isolated from whatever this orchestrator's own working directory
+  is doing, without needing a wholly separate session/container to get
+  that isolation. This is the actual property the old design was reaching
+  for; it just reached for the wrong tool to get it.
+- `subagent_type: "general-purpose"`, prompt: instruct it to run
+  `/ticket-pipeline <Task ID>` exactly as documented, including all three
+  human checkpoints. Since it's a subagent of this session (not a
+  disconnected CCR session), route checkpoints through the normal
+  subagent flow: it stops and its `<task-notification>` arrives back into
+  THIS session when it needs an answer or reaches a checkpoint; relay to
+  the user directly in this conversation, then `SendMessage` the answer
+  back to resume it. This is materially faster than the old design's
+  loop (dispatched session pushes a `PushNotification`, user has to find
+  and reply in that session's own separate chat) — checkpoints land and
+  get answered in the same place this cycle is already running. Still
+  tell the dispatched agent explicitly not to assume anyone is watching
+  live between its own tool calls — this session may itself be dormant
+  between cron firings, so it should still be able to sit blocked on its
+  own `<task-notification>` without doing anything destructive in the
+  meantime.
+
+**Residual risk this trade accepts:** worktree isolation is git-level
+only — every worktree of this repo still shares one Postgres test
+database. The old fully-separate-session design also gave a separate test
+DB, which is what the "cross-branch test-DB pollution" bug this design
+was originally built to prevent actually needed. The practical exposure
+now is narrow (this skill dispatches at most one ticket per cycle, and
+the orchestrator itself rarely runs `bundle exec rspec` directly outside
+of skill-file verification work) but not zero: avoid running the test
+suite in the orchestrator's own checkout while a dispatched ticket agent
+is still active, and if collision symptoms ever show up (a stray
+table/migration bleeding across branches, as seen before), that's the
+first thing to suspect.
 
 Do not dispatch a second ticket in the same cycle even if step 4 would
 technically allow it — one new ticket picked up per cycle, so the user
-doesn't get a wall of approvals across several sessions at once.
+doesn't get a wall of approvals at once.
 
 ## 7. End-of-cycle notification (always)
 
@@ -187,10 +212,13 @@ with what needs a reply if anything does:
   PR on one the user hasn't reviewed at least once yet — these are hard
   caps, not targets to approach.
 - Only one ticket in the pre-Checkpoint-2 state at a time (step 1).
-- Never run `/ticket-pipeline` inline in this session — always dispatch to
-  a fresh session (step 6). This session's git checkout and test DB are
-  shared with whatever else it's doing; a scheduled cycle must never touch
-  them for ticket work.
+- Never run `/ticket-pipeline` inline in this session's own working
+  directory — always dispatch it as a worktree-isolated background `Agent`
+  subagent (step 6), so ticket work gets its own checkout and branch
+  instead of touching whatever this orchestrator's own git state is doing.
+  Worktree isolation is git-level only, not a separate test DB — see step
+  6's residual-risk note before ever running specs directly in this
+  session while a dispatch is active.
 - No merge commits, ever — rebase only, same as `/ticket-pipeline`.
 - Don't touch a PR that doesn't link a Notion ticket card — it isn't this
   automation's to drive.
