@@ -162,7 +162,7 @@ module ExternalData
 
         it 'returns the parsed JSON payload from the retried attempt' do
           allow(HTTParty).to receive(:get).and_return(
-            stub_response(code: 429, headers: { 'Retry-After' => 0 }),
+            stub_response(code: 429, headers: { 'Retry-After' => '0' }),
             stub_response(body: '{"name":"Ash"}')
           )
 
@@ -175,7 +175,7 @@ module ExternalData
 
         before do
           allow(HTTParty).to receive(:get).and_return(
-            stub_response(code: 429, headers: { 'Retry-After' => 12 }),
+            stub_response(code: 429, headers: { 'Retry-After' => '12' }),
             stub_response(body: '{"name":"Ash"}')
           )
           allow(client).to receive(:sleep)
@@ -192,7 +192,7 @@ module ExternalData
         let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
 
         before do
-          allow(HTTParty).to receive(:get).and_return(stub_response(code: 429, headers: { 'Retry-After' => 0 }))
+          allow(HTTParty).to receive(:get).and_return(stub_response(code: 429, headers: { 'Retry-After' => '0' }))
         end
 
         it 'raises a RateLimitError once retries are exhausted' do
