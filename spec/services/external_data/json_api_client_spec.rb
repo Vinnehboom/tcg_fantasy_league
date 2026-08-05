@@ -82,6 +82,17 @@ module ExternalData
         end
       end
 
+      context 'when no retry_policy is given' do
+        it 'falls back to a default RetryPolicy' do
+          allow(HTTParty).to receive(:get).and_return(stub_response)
+          default_client = described_class.new(base_uri: 'https://example.com')
+
+          default_client.get_json(path: '/players/1')
+
+          expect(HTTParty).to have_received(:get).with(anything, hash_including(timeout: RetryPolicy.new.timeout))
+        end
+      end
+
       context 'when the same client is reused for a second call' do
         it 'issues each call against its own path on the shared host' do
           urls = []
@@ -120,6 +131,17 @@ module ExternalData
 
         it 'raises a TimeoutError once retries are exhausted' do
           expect { client.get_json(path: '/players/1') }.to raise_error(described_class::TimeoutError)
+        end
+
+        it 'carries the request URL on the raised TimeoutError' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::TimeoutError => e
+            error = e
+          end
+
+          expect(error).to have_attributes(url: 'https://example.com/players/1')
         end
       end
 
@@ -175,6 +197,17 @@ module ExternalData
 
         it 'raises a RateLimitError once retries are exhausted' do
           expect { client.get_json(path: '/players/1') }.to raise_error(described_class::RateLimitError)
+        end
+
+        it 'carries the response status and the request URL on the raised RateLimitError' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::RateLimitError => e
+            error = e
+          end
+
+          expect(error).to have_attributes(status: 429, url: 'https://example.com/players/1')
         end
       end
     end
