@@ -14,6 +14,10 @@ module ExternalData
 
     end
 
+    class RateLimitError < HttpError
+
+    end
+
     class TimeoutError < ExternalData::Exception
 
       attr_reader :url
@@ -43,6 +47,7 @@ module ExternalData
     def fetch(url:, query:, attempt: 1)
       response = perform_request(url:, query:)
       return response if response.code == 200
+      return retry_after_rate_limit(response, url:, query:, attempt:) if response.code == 429
 
       raise HttpError.new(status: response.code, url:)
     rescue Timeout::Error
@@ -53,6 +58,14 @@ module ExternalData
       raise TimeoutError.new(url:) if attempt >= retry_policy.max_attempts
 
       sleep(retry_policy.delay_before_retry(attempt:))
+      fetch(url:, query:, attempt: attempt + 1)
+    end
+
+    def retry_after_rate_limit(response, url:, query:, attempt:)
+      raise RateLimitError.new(status: response.code, url:) if attempt >= retry_policy.max_attempts
+
+      delay = retry_policy.delay_before_retry(attempt:, retry_after: response.headers['Retry-After'])
+      sleep(delay)
       fetch(url:, query:, attempt: attempt + 1)
     end
 
