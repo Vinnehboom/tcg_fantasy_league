@@ -134,6 +134,49 @@ module ExternalData
           expect(HTTParty).to have_received(:get).exactly(retry_policy.max_attempts).times
         end
       end
+
+      context 'when the response is rate-limited once and then succeeds' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
+
+        it 'returns the parsed JSON payload from the retried attempt' do
+          allow(HTTParty).to receive(:get).and_return(
+            stub_response(code: 429, headers: { 'Retry-After' => '0' }),
+            stub_response(body: '{"name":"Ash"}')
+          )
+
+          expect(client.get_json(path: '/players/1')).to eq('name' => 'Ash')
+        end
+      end
+
+      context 'when wiring the retry policy for rate limits' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0]) }
+
+        before do
+          allow(HTTParty).to receive(:get).and_return(
+            stub_response(code: 429, headers: { 'Retry-After' => '12' }),
+            stub_response(body: '{"name":"Ash"}')
+          )
+          allow(client).to receive(:sleep)
+        end
+
+        it 'passes the response Retry-After through to the retry_policy' do
+          client.get_json(path: '/players/1')
+
+          expect(client).to have_received(:sleep).with(12)
+        end
+      end
+
+      context 'when the rate limit outlasts every attempt' do
+        let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
+
+        before do
+          allow(HTTParty).to receive(:get).and_return(stub_response(code: 429, headers: { 'Retry-After' => '0' }))
+        end
+
+        it 'raises a RateLimitError once retries are exhausted' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::RateLimitError)
+        end
+      end
     end
   end
 
