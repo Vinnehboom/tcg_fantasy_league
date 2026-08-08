@@ -2,7 +2,10 @@ require 'rails_helper'
 
 RSpec.describe ExternalData::Interface do
   let(:game) { create(:game) }
-  let(:interface) { described_class.new(game:) }
+
+  def fake_adapter(players: nil, upcoming_tournaments: nil)
+    Struct.new(:players, :upcoming_tournaments, keyword_init: true).new(players:, upcoming_tournaments:)
+  end
 
   describe 'players' do
     let(:players) do
@@ -15,10 +18,8 @@ RSpec.describe ExternalData::Interface do
     end
 
     describe '#players' do
-      describe 'when a game with a corresponding adapter is given' do
-        before do
-          allow(ExternalData::OfflineAdapter).to receive(:players).and_return(players)
-        end
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(players:)) }
 
         it 'retrieves all the players for the game' do
           expect(interface.players.map(&:instance_values)).to include(players.sample.instance_values)
@@ -29,7 +30,9 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
-      describe 'when a game without a corresponding adapter is given' do
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
         it 'raises an exception' do
           expect { interface.players }.to raise_error(ExternalData::Exception)
         end
@@ -37,10 +40,8 @@ RSpec.describe ExternalData::Interface do
     end
 
     describe '#update_players' do
-      describe 'when a game with a corresponding adapter is given' do
-        before do
-          allow(ExternalData::OfflineAdapter).to receive(:players).and_return(players)
-        end
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(players:)) }
 
         describe 'when the player data exists' do
           let(:player) { players.sample }
@@ -52,16 +53,18 @@ RSpec.describe ExternalData::Interface do
           end
 
           describe 'when the external score has been updated' do
+            let(:interface) { described_class.new(game:, adapter: fake_adapter(players: [player])) }
+
             it 'creates a new score' do
-              allow(ExternalData::OfflineAdapter).to receive(:players).and_return([player])
               expect { interface.update_players }.to change(ExternalScore, :count).by(1)
             end
           end
 
           describe 'when the external score has not changed' do
+            let(:interface) { described_class.new(game:, adapter: fake_adapter(players: [player])) }
+
             it 'creates a new score' do
               create(:external_score, player: db_player, score: player.external_points)
-              allow(ExternalData::OfflineAdapter).to receive(:players).and_return([player])
               expect { interface.update_players }.not_to change(ExternalScore, :count)
             end
           end
@@ -74,7 +77,9 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
-      describe 'when a game without a corresponding adapter is given' do
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
         it 'raises an exception' do
           expect { interface.update_players }.to raise_error(ExternalData::Exception)
         end
@@ -92,10 +97,8 @@ RSpec.describe ExternalData::Interface do
     end
 
     describe '#upcoming_tournaments' do
-      describe 'when a game with a corresponding adapter is given' do
-        before do
-          allow(ExternalData::OfflineAdapter).to receive(:upcoming_tournaments).and_return(tournaments)
-        end
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(upcoming_tournaments: tournaments)) }
 
         it 'retrieves all upcoming tournaments for the game' do
           expect(interface.upcoming_tournaments.map(&:instance_values)).to include(tournaments.sample.instance_values)
@@ -106,7 +109,9 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
-      describe 'when a game without a corresponding adapter is given' do
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
         it 'raises an exception' do
           expect { interface.upcoming_tournaments }.to raise_error(ExternalData::Exception)
         end
@@ -114,10 +119,8 @@ RSpec.describe ExternalData::Interface do
     end
 
     describe '#update_upcoming_tournaments' do
-      describe 'when a game with a corresponding adapter is given' do
-        before do
-          allow(ExternalData::OfflineAdapter).to receive(:upcoming_tournaments).and_return(tournaments)
-        end
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(upcoming_tournaments: tournaments)) }
 
         describe 'when the tournament has been saved previously' do
           let(:tournament) { tournaments.sample }
@@ -139,7 +142,9 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
-      describe 'when a game without a corresponding adapter is given' do
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
         it 'raises an exception' do
           expect { interface.update_upcoming_tournaments }.to raise_error(ExternalData::Exception)
         end
