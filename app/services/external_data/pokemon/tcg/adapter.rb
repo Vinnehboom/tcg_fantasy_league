@@ -6,11 +6,11 @@ module ExternalData
 
       class Adapter
 
-        def self.players
+        def players
           ExternalData::Pokemon::Tcg::Players.all
         end
 
-        def self.upcoming_tournaments
+        def upcoming_tournaments
           ExternalData::Pokemon::Tcg::Tournaments.upcoming_tournaments
         end
 

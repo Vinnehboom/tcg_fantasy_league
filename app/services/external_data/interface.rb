@@ -2,15 +2,14 @@ module ExternalData
 
   class Interface
 
-    def initialize(game:)
+    def initialize(game:, adapter: OfflineAdapter.new)
       @game = game
-      @adapter = select_adapter
-      super()
+      @adapter = adapter
     end
 
     def players
-      players = @adapter.players
-      players.each { |player| player.game_id = @game.id }
+      players = adapter.players
+      players.each { |player| player.game_id = game.id }
       players
     end
 
@@ -19,8 +18,8 @@ module ExternalData
     end
 
     def upcoming_tournaments
-      tournaments = @adapter.upcoming_tournaments
-      tournaments.each { |tournament| tournament.game_id = @game.id }
+      tournaments = adapter.upcoming_tournaments
+      tournaments.each { |tournament| tournament.game_id = game.id }
       tournaments
     end
 
@@ -29,6 +28,8 @@ module ExternalData
     end
 
     private
+
+    attr_reader :game, :adapter
 
     def save_objects(objects:)
       @errors = []
@@ -41,15 +42,6 @@ module ExternalData
       end
       Rails.logger.debug { "invalid objects: #{@errors} \n" }
       Rails.logger.debug { "#{@processed} out of #{count} processed" }
-    end
-
-    def select_adapter
-      case @game.id
-      when 'PTCG'
-        Pokemon::Tcg::Adapter
-      else
-        OfflineAdapter
-      end
     end
 
   end
