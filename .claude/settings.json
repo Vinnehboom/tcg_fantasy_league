@@ -1,4 +1,16 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__github__pull_request_read",
+      "Bash(bundle exec rspec *)",
+      "mcp__Notion__notion-fetch",
+      "Bash(git fetch *)",
+      "mcp__Notion__notion-query-data-sources",
+      "mcp__Claude_Code_Remote__list_triggers",
+      "mcp__github__list_pull_requests",
+      "mcp__Notion__notion-search"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
