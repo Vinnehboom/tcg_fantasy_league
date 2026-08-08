@@ -1,7 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
-  let(:adapter) { described_class.new }
+  subject(:adapter) { described_class.new }
+
+  it_behaves_like 'an external data adapter'
 
   describe '#players' do
     it 'delegates to Pokemon::Tcg::Players' do
