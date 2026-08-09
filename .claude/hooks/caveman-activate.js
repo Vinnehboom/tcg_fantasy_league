@@ -2,9 +2,8 @@
 // caveman — Claude Code SessionStart activation hook
 //
 // Runs on every session start:
-//   1. Writes flag file at $CLAUDE_CONFIG_DIR/.caveman-active (statusline reads this)
+//   1. Writes flag file at $CLAUDE_CONFIG_DIR/.caveman-active
 //   2. Emits caveman ruleset as hidden SessionStart context
-//   3. Detects missing statusline config and emits setup nudge
 
 const fs = require('fs');
 const path = require('path');
@@ -13,14 +12,6 @@ const { getDefaultMode, safeWriteFlag, recordModeChange, readFlag, VALID_MODES }
 
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const flagPath = path.join(claudeDir, '.caveman-active');
-const settingsPath = path.join(claudeDir, 'settings.json');
-
-// Apply per-agent model overrides from env vars before emitting rules.
-// Best-effort: any error is swallowed so SessionStart is never blocked.
-try {
-  const { applyOverrides, resolvePluginRoot } = require('./cavecrew-model-overrides');
-  applyOverrides(resolvePluginRoot(__dirname));
-} catch (e) {}
 
 // SessionStart re-fires mid-conversation (resume, /clear, context compaction),
 // not just at true session start. Re-firing must not clobber a mode the user
@@ -162,38 +153,8 @@ if (skillContent) {
     'Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persist until changed or session end.';
 }
 
-// 3. Detect missing statusline config — nudge Claude to help set it up.
-// One-shot (#661): the nudge costs ~90 tokens per session, so a marker file
-// gates it to the first session only. Users who declined stop paying for it.
-const nudgeMarkerPath = path.join(claudeDir, '.caveman-nudge-shown');
-try {
-  let hasStatusline = false;
-  if (fs.existsSync(settingsPath)) {
-    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    if (settings.statusLine) {
-      hasStatusline = true;
-    }
-  }
-
-  if (!hasStatusline && !fs.existsSync(nudgeMarkerPath)) {
-    safeWriteFlag(nudgeMarkerPath, '1');
-    const isWindows = process.platform === 'win32';
-    const scriptName = isWindows ? 'caveman-statusline.ps1' : 'caveman-statusline.sh';
-    const scriptPath = path.join(__dirname, scriptName);
-    const command = isWindows
-      ? `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`
-      : `bash "${scriptPath}"`;
-    const statusLineSnippet =
-      '"statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }';
-    output += "\n\n" +
-      "STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge showing active mode " +
-      "(e.g. [CAVEMAN], [CAVEMAN:ULTRA]). It is not configured yet. " +
-      "To enable, add this to " + path.join(claudeDir, 'settings.json') + ": " +
-      statusLineSnippet + " " +
-      "Proactively offer to set this up for the user on first interaction.";
-  }
-} catch (e) {
-  // Silent fail — don't block session start over statusline detection
-}
+// 3. Statusline badge nudge omitted — caveman-statusline.sh/.ps1 aren't
+// vendored in this repo (cosmetic only, no CLI status bar in remote
+// sessions), so recommending them here would point at a missing file.
 
 process.stdout.write(output);
