@@ -70,6 +70,23 @@ module Admin
         end
       end
     end
+
+    describe '#show' do
+      it 'renders the show template' do
+        get admin_external_request_path(create(:external_request, :failure, game: game_a))
+
+        expect(response).to render_template('admin/external_requests/show')
+      end
+
+      it 'shows the full, untruncated error even when longer than the index truncation length' do
+        long_error = "boom #{'x' * 100}"
+        external_request = create(:external_request, :failure, game: game_a, error: long_error)
+
+        get admin_external_request_path(external_request)
+
+        expect(response.body).to include(long_error)
+      end
+    end
   end
 
 end

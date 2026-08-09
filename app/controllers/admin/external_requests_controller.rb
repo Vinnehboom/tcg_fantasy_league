@@ -12,6 +12,10 @@ module Admin
       @external_requests = requests_for(@game).page(params[:page])
     end
 
+    def show
+      @external_request = ExternalRequest.find(params[:id])
+    end
+
     private
 
     def error_preview_length
