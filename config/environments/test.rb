@@ -61,4 +61,9 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Keep ActiveJob's queue in-memory and inert during specs -- without this, a job whose
+  # retry_on re-enqueues itself would fall through to the global :async default and actually
+  # run on a background thread pool mid-test.
+  config.active_job.queue_adapter = :test
 end

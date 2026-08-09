@@ -67,8 +67,10 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
-  # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter = :resque
+  # In-process queue adapter, deliberate: transient-failure resilience comes from each
+  # ActiveJob's own retry_on (see ExternalData::ImportJob), not from a Redis-backed broker.
+  # Revisit if/when persistent-queue infra (Sidekiq/GoodJob/etc.) is available.
+  config.active_job.queue_adapter = :async
   # config.active_job.queue_name_prefix = "tcg_fantasy_draft_production"
 
   config.action_mailer.perform_caching = false
