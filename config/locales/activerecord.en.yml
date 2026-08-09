@@ -76,6 +76,15 @@ en:
         response_body: Response body
         source_url: Source URL
         requestable: Requestable
+    enums:
+      external_request:
+        kind:
+          players: Players
+          tournaments: Tournaments
+        status:
+          running: Running
+          success: Success
+          failure: Failure
     errors:
       models:
         roster:
