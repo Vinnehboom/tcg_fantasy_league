@@ -74,6 +74,10 @@ RSpec.describe ExternalData::Interface do
           it 'saves the players information' do
             expect { interface.update_players }.to change(Player, :count).by(players.length)
           end
+
+          it 'returns how many players were processed' do
+            expect(interface.update_players).to eq(players.length)
+          end
         end
       end
 
@@ -138,6 +142,10 @@ RSpec.describe ExternalData::Interface do
         describe 'when the tournament data does not exist yet' do
           it 'saves the tournament information' do
             expect { interface.update_upcoming_tournaments }.to change(Tournament, :count).by(tournaments.length)
+          end
+
+          it 'returns how many tournaments were processed' do
+            expect(interface.update_upcoming_tournaments).to eq(tournaments.length)
           end
         end
       end

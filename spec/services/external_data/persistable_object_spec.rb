@@ -38,6 +38,25 @@ module ExternalData
           expect(example_class.find_by(external_id:, game:).name).to eq('New player')
         end
       end
+
+      describe 'when #save_associations returns a falsy value' do
+        let(:silent_associations_class) do
+          Class.new(described_class) do
+            def db_class = ::Player
+
+            def post_initialize(*); end
+
+            def instance_attributes = { name: 'Quiet player', country: 'BE' }
+
+            def save_associations(*) = nil
+          end
+        end
+        let(:instance) { silent_associations_class.new(attributes: { game_id: game.id, external_id: }) }
+
+        it 'still returns a truthy value on a successful save' do
+          expect(instance.save!).to be true
+        end
+      end
     end
   end
 

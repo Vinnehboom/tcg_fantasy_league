@@ -15,6 +15,7 @@ module ExternalData
       db_record.assign_attributes(instance_attributes)
       db_record.save!
       save_associations(record: db_record)
+      true
     end
 
     private
