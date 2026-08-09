@@ -1,0 +1,38 @@
+<% if game.nil? %>
+  <p><%= t("admin.external_requests.index.no_games") %></p>
+<% else %>
+  <table class="table table-dark table-striped rounded-2 overflow-hidden">
+    <thead>
+      <tr>
+        <th><%= t("activerecord.attributes.external_request.kind") %></th>
+        <th><%= t("activerecord.attributes.external_request.status") %></th>
+        <th><%= t("activerecord.attributes.external_request.records_processed") %></th>
+        <th><%= t("activerecord.attributes.external_request.started_at") %></th>
+        <th><%= t("activerecord.attributes.external_request.finished_at") %></th>
+        <th><%= t("admin.external_requests.index.duration") %></th>
+        <th><%= t("activerecord.attributes.external_request.error") %></th>
+        <th><%= t("views.tables.actions") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% external_requests.each do |external_request| %>
+        <tr>
+          <td><%= external_request.kind_label %></td>
+          <td><%= external_request.status_label %></td>
+          <td><%= external_request.records_processed %></td>
+          <td><%= l(external_request.started_at) %></td>
+          <td><%= external_request.finished_at ? l(external_request.finished_at) : "—" %></td>
+          <td><%= external_request.duration_seconds ? "#{number_with_precision(external_request.duration_seconds, precision: 1)}s" : "—" %></td>
+          <td><%= truncate(external_request.error, length: error_preview_length) if external_request.error %></td>
+          <td>
+            <%= link_to([:admin, external_request], class: 'text-opacity-75') do %>
+              <%= bootstrap_icon("eye") %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate external_requests %>
+<% end %>

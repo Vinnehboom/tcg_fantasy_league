@@ -24,6 +24,10 @@ en:
         participations: Participations
         status: Status
         score: Score
+    external_requests:
+      index:
+        no_games: No games found yet.
+        duration: Duration
     salary_drafts:
       index:
         add: New draft

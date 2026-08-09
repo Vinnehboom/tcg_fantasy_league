@@ -1,0 +1,9 @@
+<% if games.any? %>
+  <ul class="nav nav-tabs mb-3">
+    <% games.each do |tab_game| %>
+      <li class="nav-item">
+        <%= link_to tab_game.name, admin_external_requests_path(game: tab_game.id), class: "nav-link #{'active' if tab_game == game}" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

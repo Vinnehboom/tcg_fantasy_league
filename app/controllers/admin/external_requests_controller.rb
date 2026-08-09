@@ -1,0 +1,29 @@
+module Admin
+
+  class ExternalRequestsController < ApplicationController
+
+    ERROR_PREVIEW_LENGTH = 50
+
+    helper_method :error_preview_length
+
+    def index
+      @games = Game.order(:name)
+      @game = @games.find_by(id: params[:game]) || @games.first
+      @external_requests = requests_for(@game).page(params[:page])
+    end
+
+    private
+
+    def error_preview_length
+      ERROR_PREVIEW_LENGTH
+    end
+
+    def requests_for(game)
+      return ExternalRequest.none unless game
+
+      game.external_requests.order(started_at: :desc)
+    end
+
+  end
+
+end
