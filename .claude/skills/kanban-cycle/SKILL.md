@@ -231,16 +231,21 @@ set of active dispatched agents (this cycle's new dispatches plus any
 still running from earlier cycles), and give one bullet per agent:
 
 ```
-- <label>: <one-line status>
+- [<Task ID>](<Notion card URL>) · [PR #<n>](<PR URL>): <one-line status>
 ```
 
-`<label>` identifies the PR or ticket (e.g. `PR #32 (A-2)`, `C-4
-planner`). `<status>` is a short, concrete state, e.g. `blocked on CI,
-pushed a fix` / `planner waiting on your decisions` / `review round 2 in
-progress` / `ready for review`. Include a line for every open PR too, even
-ones with nothing new to say (`nothing to do, waiting on your review`),
-so the rundown is a complete picture, not just the deltas. If nothing is
-active at all, say so in one line (`no open PRs, no ready tickets`).
+Link whatever exists: a ticket with no PR yet is just `[<Task ID>](<Notion
+card URL>): <status>`; a hand-opened PR with no linked ticket is just `[PR
+#<n>](<PR URL>): <status>`. Use the card's own Notion page URL (from step
+1/5's board query), not the shared `notion_board_url` — the point is a
+one-click link straight to that ticket, not the whole board. Use the PR's
+`html_url` from step 2's inventory. `<status>` is a short, concrete state,
+e.g. `blocked on CI, pushed a fix` / `planner waiting on your decisions` /
+`review round 2 in progress` / `ready for review`. Include a line for
+every open PR too, even ones with nothing new to say (`nothing to do,
+waiting on your review`), so the rundown is a complete picture, not just
+the deltas. If nothing is active at all, say so in one line (`no open PRs,
+no ready tickets`).
 
 Then send exactly one `PushNotification` for the whole cycle — never more,
 regardless of how many checkpoints were hit or agents dispatched during
