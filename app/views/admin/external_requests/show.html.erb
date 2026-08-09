@@ -1,0 +1,40 @@
+<div class="bg-primary">
+  <table class="table table-dark table-bordered">
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.game") %></td>
+      <td><%= @external_request.game.name %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.kind") %></td>
+      <td><%= @external_request.kind_label %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.status") %></td>
+      <td><%= @external_request.status_label %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.records_processed") %></td>
+      <td><%= @external_request.records_processed %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.started_at") %></td>
+      <td><%= l(@external_request.started_at) %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.finished_at") %></td>
+      <td><%= @external_request.finished_at ? l(@external_request.finished_at) : "—" %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.source_url") %></td>
+      <td><%= @external_request.source_url %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.error") %></td>
+      <td><pre class="text-white mb-0"><%= @external_request.error %></pre></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t("activerecord.attributes.external_request.response_body") %></td>
+      <td><pre class="text-white mb-0"><%= @external_request.response_body %></pre></td>
+    </tr>
+  </table>
+</div>
