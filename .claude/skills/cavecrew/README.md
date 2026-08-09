@@ -34,23 +34,7 @@ Parallel scout: spawn 2-3 `cavecrew-investigator` calls in one message with diff
 
 ## Model overrides
 
-By default, `cavecrew-reviewer` and `cavecrew-investigator` pin `model: haiku` in their frontmatter; `cavecrew-builder` has no `model:` line (uses the API session default). Set env vars in your shell before launching Claude Code to override per-agent:
-
-| Env var | Agent |
-|---|---|
-| `CAVECREW_REVIEWER_MODEL` | `cavecrew-reviewer` |
-| `CAVECREW_BUILDER_MODEL` | `cavecrew-builder` |
-| `CAVECREW_INVESTIGATOR_MODEL` | `cavecrew-investigator` |
-
-Example — run reviewer on sonnet, keep others on default:
-
-```sh
-export CAVECREW_REVIEWER_MODEL=sonnet
-```
-
-Use the same model name strings you'd use in any Claude Code agent frontmatter (e.g. `haiku`, `sonnet`, `opus`).
-
-Overrides patch only the `model:` line in the installed agent's frontmatter; the prompt body is untouched and keeps receiving upstream updates. Plugin installs only — standalone hook installs have no local agent files to patch. Unset or blank = no change. The patch persists in the installed file until the plugin is updated or reinstalled.
+By default, `cavecrew-reviewer` and `cavecrew-investigator` pin `model: haiku` in their frontmatter; `cavecrew-builder` has no `model:` line (uses the API session default). Upstream caveman supports per-agent overrides via `CAVECREW_*_MODEL` env vars, patched in by `cavecrew-model-overrides.js` on `SessionStart` — that hook isn't vendored in this repo (unused elsewhere), so overrides here mean editing the `model:` line directly in the agent files under `.claude/agents/`.
 
 ## See also
 
@@ -58,4 +42,5 @@ Overrides patch only the `model:` line in the installed agent's frontmatter; the
 - [`agents/cavecrew-investigator.md`](../../agents/cavecrew-investigator.md)
 - [`agents/cavecrew-builder.md`](../../agents/cavecrew-builder.md)
 - [`agents/cavecrew-reviewer.md`](../../agents/cavecrew-reviewer.md)
-- [Caveman README](../../README.md) — repo overview
+- [caveman](https://github.com/JuliusBrussee/caveman) — upstream source
+- License: MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)

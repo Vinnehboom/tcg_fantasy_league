@@ -33,4 +33,5 @@ Est. net: -51,394 (caveman cost more than it saved for this workload — conside
 ## See also
 
 - [`SKILL.md`](./SKILL.md) — hook contract and mechanics
-- [Caveman README](../../README.md) — repo overview
+- [caveman](https://github.com/JuliusBrussee/caveman) — upstream source
+- License: MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)
