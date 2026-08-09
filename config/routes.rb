@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     resources :salary_drafts do
       post :complete, on: :member
     end
+    resources :external_requests, only: %i[index show]
   end
 
   scope ':game', as: 'game' do
