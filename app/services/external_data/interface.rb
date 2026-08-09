@@ -32,16 +32,17 @@ module ExternalData
     attr_reader :game, :adapter
 
     def save_objects(objects:)
-      @errors = []
+      errors = []
       count = objects.count
-      @processed = 0
+      processed = 0
       objects.each do |object|
-        @processed += 1 if object.save!
+        processed += 1 if object.save!
       rescue ActiveRecord::RecordInvalid => e
-        @errors << [object, e.message]
+        errors << [object, e.message]
       end
-      Rails.logger.debug { "invalid objects: #{@errors} \n" }
-      Rails.logger.debug { "#{@processed} out of #{count} processed" }
+      Rails.logger.debug { "invalid objects: #{errors} \n" }
+      Rails.logger.debug { "#{processed} out of #{count} processed" }
+      processed
     end
 
   end
