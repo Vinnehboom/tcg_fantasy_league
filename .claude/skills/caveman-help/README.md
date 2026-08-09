@@ -35,4 +35,5 @@ Deactivate:
 ## See also
 
 - [`SKILL.md`](./SKILL.md) — full reference card
-- [Caveman README](../../README.md) — repo overview
+- [caveman](https://github.com/JuliusBrussee/caveman) — upstream source
+- License: MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)

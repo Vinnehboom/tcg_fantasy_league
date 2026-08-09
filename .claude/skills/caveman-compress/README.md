@@ -161,3 +161,7 @@ This skill is part of the [caveman](https://github.com/JuliusBrussee/caveman) to
 
 - **caveman** — make Claude *speak* like caveman (cuts response tokens ~65%)
 - **caveman-compress** — make Claude *read* less (cuts context tokens ~46%)
+
+## License
+
+MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)

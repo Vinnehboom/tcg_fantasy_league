@@ -41,4 +41,5 @@ before 2026-06-01. Old route returns 410 after that date.
 ## See also
 
 - [`SKILL.md`](./SKILL.md) — full LLM-facing instructions
-- [Caveman README](../../README.md) — repo overview
+- [caveman](https://github.com/JuliusBrussee/caveman) — upstream source
+- License: MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)

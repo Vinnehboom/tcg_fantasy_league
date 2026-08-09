@@ -30,4 +30,5 @@ L107: ❓ q: why drop the cache here? Reads on next request will miss.
 ## See also
 
 - [`SKILL.md`](./SKILL.md) — full LLM-facing instructions
-- [Caveman README](../../README.md) — repo overview
+- [caveman](https://github.com/JuliusBrussee/caveman) — upstream source
+- License: MIT — see [`THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)
