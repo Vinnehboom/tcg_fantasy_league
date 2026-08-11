@@ -1,0 +1,25 @@
+<% if @game %>
+  <div class="p-2 m-2"
+       data-controller="external-import-trigger"
+       data-external-import-trigger-url-value="<%= admin_external_imports_path %>"
+       data-external-import-trigger-game-id-value="<%= @game.id %>"
+       data-external-import-trigger-success-text-value="<%= t('.trigger_success') %>"
+       data-external-import-trigger-failure-text-value="<%= t('.trigger_failure') %>">
+    <h2><%= t('.title') %></h2>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary"
+              data-action="external-import-trigger#trigger"
+              data-external-import-trigger-kind-param="players">
+        <%= t('.trigger_players') %>
+      </button>
+      <button type="button" class="btn btn-primary"
+              data-action="external-import-trigger#trigger"
+              data-external-import-trigger-kind-param="tournaments">
+        <%= t('.trigger_tournaments') %>
+      </button>
+    </div>
+    <p class="mt-2" data-external-import-trigger-target="status"></p>
+  </div>
+<% else %>
+  <p><%= t('.empty_state') %></p>
+<% end %>
