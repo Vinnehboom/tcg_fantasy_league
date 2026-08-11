@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       post :complete, on: :member
     end
     resources :external_requests, only: %i[index show]
+    resources :external_imports, only: %i[index create]
   end
 
   scope ':game', as: 'game' do

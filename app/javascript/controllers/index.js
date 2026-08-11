@@ -12,3 +12,6 @@ application.register("removals", RemovalsController)
 
 import TableFiltersController from "./table_filters_controller"
 application.register("table-filters", TableFiltersController)
+
+import ExternalImportTriggerController from "./external_import_trigger_controller"
+application.register("external-import-trigger", ExternalImportTriggerController)
