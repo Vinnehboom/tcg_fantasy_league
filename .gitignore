@@ -48,3 +48,6 @@
 
 .DS_Store
 /config/credentials/production.key
+
+# Transient git worktrees created by background pipeline agents.
+/.claude/worktrees/
