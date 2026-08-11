@@ -49,7 +49,13 @@ fi
 # 2. Postgres: install if missing, relax local auth to trust (throwaway
 # container, local-socket-only, fine for a test DB), start the service.
 export DEBIAN_FRONTEND=noninteractive
-if ! command -v pg_config >/dev/null 2>&1 || ! command -v psql >/dev/null 2>&1; then
+# Don't gate on `command -v pg_config`: postgresql-common ships a pg_config
+# shim independent of whether libpq-dev's headers are actually installed, so
+# that check can pass while libpq-fe.h is still missing — which breaks the
+# `pg` gem's native build in step 3 silently (masked by `|| true`) and
+# cascades into every later step that assumes bundle install succeeded.
+# Check for the header file itself instead.
+if [ ! -f /usr/include/postgresql/libpq-fe.h ] || ! command -v psql >/dev/null 2>&1; then
   sudo apt-get update -qq || true
   sudo apt-get install -y -qq postgresql libpq-dev || true
 fi
