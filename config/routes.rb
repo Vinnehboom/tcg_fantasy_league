@@ -18,7 +18,10 @@ Rails.application.routes.draw do
     resources :external_imports, only: %i[index create]
   end
 
-  scope ':game', as: 'game' do
+  # Game#id is a free-form string primary key (e.g. seeded/import data may include
+  # punctuation), so the default dynamic-segment matcher -- which stops at "." -- would
+  # 422/404 on any game id containing a period. Explicitly allow anything but "/".
+  scope ':game', as: 'game', constraints: { game: %r{[^/]+} } do
     root "pages#home"
     resources :players
     resources :tournaments

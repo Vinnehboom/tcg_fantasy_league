@@ -19,6 +19,8 @@ export default class extends Controller {
       body: JSON.stringify({ game_id: this.gameIdValue, kind })
     }).then((response) => {
       this.statusTarget.textContent = response.ok ? this.successTextValue : this.failureTextValue
+    }).catch(() => {
+      this.statusTarget.textContent = this.failureTextValue
     })
   }
 }
