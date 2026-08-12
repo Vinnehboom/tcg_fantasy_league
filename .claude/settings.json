@@ -15,7 +15,8 @@
       "mcp__Claude_Code_Remote__list_triggers",
       "mcp__Claude_Code_Remote__list_environments",
       "mcp__6b792a3d-c3ab-4bf3-97ce-c11eb8be9fda__notion-fetch",
-      "Bash(bundle exec rubocop *)"
+      "Bash(bundle exec rubocop *)",
+      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__subscribe_pr_activity"
     ]
   },
   "hooks": {
