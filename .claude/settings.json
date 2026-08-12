@@ -11,7 +11,11 @@
       "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__update_trigger",
       "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__delete_trigger",
       "mcp__github__list_pull_requests",
-      "mcp__Notion__notion-search"
+      "mcp__Notion__notion-search",
+      "mcp__Claude_Code_Remote__list_triggers",
+      "mcp__Claude_Code_Remote__list_environments",
+      "mcp__6b792a3d-c3ab-4bf3-97ce-c11eb8be9fda__notion-fetch",
+      "Bash(bundle exec rubocop *)"
     ]
   },
   "hooks": {
