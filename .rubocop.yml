@@ -32,6 +32,9 @@ RSpec/NestedGroups:
   Enabled: false
 RSpec/ImplicitSubject:
   Enabled: false
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/config/**/*'
 Metrics/ModuleLength:
   Max: 100
   Exclude:
