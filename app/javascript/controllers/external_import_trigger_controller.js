@@ -1,8 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The import-triggers endpoint (Api::ExternalImportsController#create) is headless —
-// no view, no flash, no redirect to land on — so triggering it needs a client-side fetch
-// handler instead of a plain Rails form.
 export default class extends Controller {
   static values = { url: String, gameId: String, successText: String, failureText: String }
   static targets = ["status"]
