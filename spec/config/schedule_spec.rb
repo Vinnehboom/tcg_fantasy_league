@@ -8,9 +8,6 @@ RSpec.describe 'config/schedule.rb' do
     expect { job_list }.not_to raise_error
   end
 
-  # Jobs are paused (commented out in config/schedule.rb) per review feedback on PR #41;
-  # follow-up ticket A-10 tracks re-enabling them. This asserts the pause is actually in
-  # effect, not just that the block reads as commented out.
   it 'does not enqueue the daily PTCG import jobs while paused' do
     expect(job_list.generate_cron_output)
       .not_to include('ExternalData::Ptcg::ImportPlayersJob.perform_later')
