@@ -1,0 +1,34 @@
+<h2 class="mb-3"><%= @game.name %></h2>
+
+<table class="table table-primary w-50">
+  <tr>
+    <td class="fw-bold"><%= t('.id') %></td>
+    <td><%= @game.id %></td>
+  </tr>
+  <tr>
+    <td class="fw-bold"><%= t('.name') %></td>
+    <td><%= @game.name %></td>
+  </tr>
+</table>
+
+<div class="p-2 m-2"
+     data-controller="external-import-trigger"
+     data-external-import-trigger-url-value="<%= api_external_imports_path %>"
+     data-external-import-trigger-game-id-value="<%= @game.id %>"
+     data-external-import-trigger-success-text-value="<%= t('.trigger_success') %>"
+     data-external-import-trigger-failure-text-value="<%= t('.trigger_failure') %>">
+  <h3><%= t('.more_actions') %></h3>
+  <div class="d-flex gap-2">
+    <button type="button" class="btn btn-primary"
+            data-action="external-import-trigger#trigger"
+            data-external-import-trigger-kind-param="players">
+      <%= t('.trigger_players') %>
+    </button>
+    <button type="button" class="btn btn-primary"
+            data-action="external-import-trigger#trigger"
+            data-external-import-trigger-kind-param="tournaments">
+      <%= t('.trigger_tournaments') %>
+    </button>
+  </div>
+  <p class="mt-2" data-external-import-trigger-target="status"></p>
+</div>
