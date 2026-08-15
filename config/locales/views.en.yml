@@ -51,6 +51,15 @@ en:
         trigger_success: Import started.
         trigger_failure: Failed to start import.
         empty_state: No games are set up yet.
+    games:
+      show:
+        id: Id
+        name: Name
+        more_actions: More actions
+        trigger_players: Import players
+        trigger_tournaments: Import tournaments
+        trigger_success: Import started.
+        trigger_failure: Failed to start import.
   pages:
     landing:
       title: TCG Fantasy League
