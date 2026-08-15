@@ -15,7 +15,6 @@ Rails.application.routes.draw do
       post :complete, on: :member
     end
     resources :external_requests, only: %i[index show]
-    resources :external_imports, only: %i[index create]
     # Same free-form-string-id constraint as the ':game' scope below -- the
     # default dynamic segment stops at "." and Game#id may contain one.
     resources :games, only: :show, constraints: { id: %r{[^/]+} }
