@@ -7,8 +7,8 @@ module Admin
     helper_method :error_preview_length
 
     def index
-      @games = Game.order(:name)
-      @game = @games.find_by(id: params[:game]) || @games.first
+      @games = Game.order(:name).to_a
+      @game = @games.find { |game| game.id == params[:game] } || @games.first
       @external_requests = requests_for(@game).page(params[:page])
     end
 
