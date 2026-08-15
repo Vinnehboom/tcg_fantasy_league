@@ -25,12 +25,4 @@ class ExternalRequest < ApplicationRecord
     update!(status: :failure, error:, finished_at:)
   end
 
-  def kind_label
-    I18n.t(kind, scope: %i[activerecord enums external_request kind])
-  end
-
-  def status_label
-    I18n.t(status, scope: %i[activerecord enums external_request status])
-  end
-
 end

@@ -17,8 +17,8 @@
     <tbody>
       <% external_requests.each do |external_request| %>
         <tr>
-          <td><%= external_request.kind_label %></td>
-          <td><%= external_request.status_label %></td>
+          <td><%= kind_label(external_request) %></td>
+          <td><%= status_label(external_request) %></td>
           <td><%= external_request.records_processed %></td>
           <td><%= l(external_request.started_at) %></td>
           <td><%= external_request.finished_at ? l(external_request.finished_at) : "—" %></td>

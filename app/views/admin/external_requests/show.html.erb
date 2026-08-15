@@ -6,11 +6,11 @@
     </tr>
     <tr>
       <td class="fw-bold"><%= t("activerecord.attributes.external_request.kind") %></td>
-      <td><%= @external_request.kind_label %></td>
+      <td><%= kind_label(@external_request) %></td>
     </tr>
     <tr>
       <td class="fw-bold"><%= t("activerecord.attributes.external_request.status") %></td>
-      <td><%= @external_request.status_label %></td>
+      <td><%= status_label(@external_request) %></td>
     </tr>
     <tr>
       <td class="fw-bold"><%= t("activerecord.attributes.external_request.records_processed") %></td>
