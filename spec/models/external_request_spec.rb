@@ -59,44 +59,6 @@ RSpec.describe ExternalRequest do
     end
   end
 
-  describe '#kind_label' do
-    subject { external_request.kind_label }
-
-    context 'when the kind is players' do
-      let(:external_request) { build(:external_request, kind: :players) }
-
-      it { is_expected.to eq('Players') }
-    end
-
-    context 'when the kind is tournaments' do
-      let(:external_request) { build(:external_request, kind: :tournaments) }
-
-      it { is_expected.to eq('Tournaments') }
-    end
-  end
-
-  describe '#status_label' do
-    subject { external_request.status_label }
-
-    context 'when the status is running' do
-      let(:external_request) { build(:external_request, status: :running) }
-
-      it { is_expected.to eq('Running') }
-    end
-
-    context 'when the status is success' do
-      let(:external_request) { build(:external_request, :success) }
-
-      it { is_expected.to eq('Success') }
-    end
-
-    context 'when the status is failure' do
-      let(:external_request) { build(:external_request, :failure) }
-
-      it { is_expected.to eq('Failure') }
-    end
-  end
-
   describe '#mark_failure' do
     let(:external_request) { create(:external_request) }
 
