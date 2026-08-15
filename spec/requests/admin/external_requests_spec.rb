@@ -30,6 +30,26 @@ module Admin
         end
       end
 
+      context 'when loading the per-game tab list' do
+        it 'queries the games table once instead of once per lookup' do
+          # Given
+          game_a
+          game_b
+          games_table_queries = []
+          subscription = ActiveSupport::Notifications.subscribe('sql.active_record') do |*, payload|
+            games_table_queries << payload[:sql] if payload[:sql].match?(/FROM "games"/)
+          end
+
+          # When
+          get admin_external_requests_path
+
+          # Then
+          expect(games_table_queries.size).to eq(1)
+        ensure
+          ActiveSupport::Notifications.unsubscribe(subscription)
+        end
+      end
+
       context 'when a game param is given' do
         it 'shows only that game\'s requests' do
           create(:external_request, :failure, game: game_a, error: 'error-only-in-a')
