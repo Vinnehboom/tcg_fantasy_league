@@ -16,10 +16,10 @@ Rails.application.routes.draw do
     end
     resources :external_requests, only: %i[index show]
     resources :games, only: :show, constraints: { id: %r{[^/]+} }
-  end
 
-  namespace :api do
-    resources :external_imports, only: :create
+    namespace :api do
+      resources :external_imports, only: :create
+    end
   end
 
   scope ':game', as: 'game', constraints: { game: %r{[^/]+} } do
