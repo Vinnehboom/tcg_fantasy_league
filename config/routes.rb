@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   root "pages#landing"
 
   namespace :admin do
-    root "users#index"
+    root "games#index"
     resources :users
     resources :participations
     resources :salary_drafts do
