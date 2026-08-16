@@ -210,6 +210,70 @@ module ExternalData
           expect(error).to have_attributes(status: 429, url: 'https://example.com/players/1')
         end
       end
+
+      context 'when the response body is not valid JSON' do
+        before { allow(HTTParty).to receive(:get).and_return(stub_response(body: '<html>login wall</html>')) }
+
+        it 'raises an InvalidResponseError' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::InvalidResponseError)
+        end
+
+        it 'is caught by a rescue of the shared ExternalData::Exception base class' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(ExternalData::Exception)
+        end
+
+        it 'carries the request URL and the body verbatim when it is under the snippet limit' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::InvalidResponseError => e
+            error = e
+          end
+
+          expect(error).to have_attributes(
+            url: 'https://example.com/players/1',
+            body_snippet: '<html>login wall</html>'
+          )
+        end
+
+        it 'preserves the original JSON::ParserError as the cause' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::InvalidResponseError => e
+            error = e
+          end
+
+          expect(error.cause).to be_a(JSON::ParserError)
+        end
+      end
+
+      context 'when the malformed response body contains invalid byte sequences' do
+        let(:binary_body) { "\xFF\xFEnot json".dup.force_encoding(Encoding::UTF_8) }
+
+        before { allow(HTTParty).to receive(:get).and_return(stub_response(body: binary_body)) }
+
+        it 'builds the body snippet without raising a secondary encoding error' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::InvalidResponseError)
+        end
+      end
+
+      context 'when the malformed response body is longer than the snippet limit' do
+        let(:oversized_body) { 'x' * (described_class::InvalidResponseError::MAX_BODY_SNIPPET_LENGTH + 100) }
+
+        before { allow(HTTParty).to receive(:get).and_return(stub_response(body: oversized_body)) }
+
+        it 'truncates the body snippet to the configured limit' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::InvalidResponseError => e
+            error = e
+          end
+
+          expect(error.body_snippet.length).to eq(described_class::InvalidResponseError::MAX_BODY_SNIPPET_LENGTH)
+        end
+      end
     end
   end
 
