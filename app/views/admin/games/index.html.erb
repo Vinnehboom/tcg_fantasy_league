@@ -1,0 +1,12 @@
+<% if @games.any? %>
+  <ul class="list-group">
+    <% @games.each do |game| %>
+      <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+        <%= game.name %>
+        <%= link_to t('views.tables.show'), admin_game_path(game), class: 'text-opacity-75' %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p><%= t('.no_games') %></p>
+<% end %>

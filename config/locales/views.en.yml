@@ -44,6 +44,8 @@ en:
         add_participation: Participate
         view_participation: View participation
     games:
+      index:
+        no_games: No games found yet.
       show:
         id: Id
         name: Name
