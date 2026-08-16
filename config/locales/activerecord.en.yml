@@ -19,6 +19,9 @@ en:
       external_request:
         one: External request
         other: External requests
+      game:
+        one: Game
+        other: Games
     attributes:
       user:
         email: Email
