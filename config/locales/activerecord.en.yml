@@ -78,6 +78,7 @@ en:
         error: Error
         response_body: Response body
         source_url: Source URL
+        discarded_at: Discarded at
         requestable: Requestable
     enums:
       external_request:
