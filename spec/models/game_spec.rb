@@ -27,6 +27,16 @@ RSpec.describe Game do
 
       expect(ExternalRequest.exists?(request.id)).to be(true)
     end
+
+    context 'when its only external request is discarded' do
+      let(:request) { create(:external_request, :discarded, game:) }
+
+      it 'still refuses to destroy the game' do
+        destroy
+
+        expect(game).to be_persisted
+      end
+    end
   end
 
   describe '.upcoming_drafts' do
