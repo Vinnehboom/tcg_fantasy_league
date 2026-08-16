@@ -62,7 +62,7 @@ Notion MCP has previously dropped mid-run and blinded the developer/reviewer/cur
 
 1. As the FIRST action of any pipeline run, fetch every doc phases will need — the ticket card, the project context/decisions page, and the Coding Style Guide — and write each one verbatim to a local cache file under `docs/pipeline-cache/<TASK_ID>/` (e.g. `ticket.md`, `context.md`, `style-guide.md`). Create the directory if needed.
 2. From then on, every subagent (planner, developer, reviewer, curator) is handed the LOCAL CACHE FILES, not a live Notion fetch. Subagents should not need `mcp__Notion__*` tools at all except the curator, which re-fetches live at Phase 6 specifically to check proposals against the current state of the docs before proposing (see references/curator.md) — if that live re-fetch fails, it falls back to the cached copies and says so.
-3. The cache is scratch state for this run, not a repo artifact to keep clean forever: it's fine to leave it in `docs/pipeline-cache/<TASK_ID>/` for traceability, but it should not be treated as a source of truth after the run — Notion is still canonical for the next run.
+3. The cache is scratch state for this run, not a repo artifact — `docs/pipeline-cache/` is gitignored. Never `git add`/commit it, even with a broad `git add -A`; it should not be treated as a source of truth after the run either — Notion is still canonical for the next run.
 4. If the initial fetch itself fails (Notion unavailable at init, before any cache exists), that's the "Notion not connected" stop condition above — don't start the pipeline on stale or partial context.
 
 ## Locating Notion context
