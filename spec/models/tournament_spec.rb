@@ -9,4 +9,19 @@ RSpec.describe Tournament do
   it { is_expected.to have_many(:external_requests).dependent(:nullify) }
 
   it { is_expected.to belong_to(:game) }
+
+  describe '#destroy' do
+    subject(:destroy) { tournament.destroy }
+
+    let(:tournament) { create(:tournament) }
+    let(:request) { create(:external_request, :discarded, requestable: tournament) }
+
+    before { request }
+
+    it 'nullifies a discarded external request pointing at the tournament' do
+      destroy
+
+      expect(request.reload.requestable_id).to be_nil
+    end
+  end
 end

@@ -9,6 +9,21 @@ RSpec.describe Player do
 
   it { is_expected.to belong_to(:game) }
 
+  describe '#destroy' do
+    subject(:destroy) { player.destroy }
+
+    let(:player) { create(:player) }
+    let(:request) { create(:external_request, :discarded, requestable: player) }
+
+    before { request }
+
+    it 'nullifies a discarded external request pointing at the player' do
+      destroy
+
+      expect(request.reload.requestable_id).to be_nil
+    end
+  end
+
   describe '#current_score' do
     let(:player) { create(:player) }
 
