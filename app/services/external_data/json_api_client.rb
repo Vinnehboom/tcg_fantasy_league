@@ -29,6 +29,20 @@ module ExternalData
 
     end
 
+    class InvalidResponseError < ExternalData::Exception
+
+      MAX_BODY_SNIPPET_LENGTH = 200
+
+      attr_reader :url, :body_snippet
+
+      def initialize(url:, body:)
+        @url = url
+        @body_snippet = body.to_s.scrub.truncate(MAX_BODY_SNIPPET_LENGTH)
+        super('External API response was not valid JSON', "GET #{url} returned a body that failed JSON parsing")
+      end
+
+    end
+
     def initialize(base_uri:, retry_policy: RetryPolicy.new)
       @base_uri = base_uri
       @retry_policy = retry_policy
@@ -37,12 +51,18 @@ module ExternalData
     def get_json(path:, query: {})
       url = url_for(path)
       response = fetch(url:, query:)
-      JSON.parse(response.body)
+      parse_json(response:, url:)
     end
 
     private
 
     attr_reader :base_uri, :retry_policy
+
+    def parse_json(response:, url:)
+      JSON.parse(response.body)
+    rescue JSON::ParserError
+      raise InvalidResponseError.new(url:, body: response.body)
+    end
 
     def fetch(url:, query:, attempt: 1)
       response = perform_request(url:, query:)
