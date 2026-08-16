@@ -72,6 +72,18 @@ module Admin
         end
       end
 
+      context 'when a request has been discarded' do
+        it 'excludes it from the list' do
+          create(:external_request, :failure, :discarded, game: game_a, error: 'error-discarded')
+          create(:external_request, :failure, game: game_a, error: 'error-kept')
+
+          get admin_external_requests_path(game: game_a.id)
+
+          expect(response.body).to include('error-kept')
+          expect(response.body).not_to include('error-discarded')
+        end
+      end
+
       context 'when the game param does not match any game' do
         it 'falls back to the alphabetically-first game' do
           create(:external_request, :failure, game: game_a, error: 'error-only-in-a')
