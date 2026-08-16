@@ -25,7 +25,7 @@ module Admin
     def requests_for(game)
       return ExternalRequest.none unless game
 
-      game.external_requests.kept.order(started_at: :desc)
+      game.external_requests.order(started_at: :desc)
     end
 
   end
