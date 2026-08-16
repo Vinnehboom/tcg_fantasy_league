@@ -6,7 +6,7 @@ class Game < ApplicationRecord
   has_many :players, dependent: :nullify
   has_many :tournaments, dependent: :nullify
   has_many :salary_drafts, through: :tournaments
-  has_many :external_requests, -> { with_discarded }, dependent: :restrict_with_error, inverse_of: :game
+  has_many :external_requests, dependent: :restrict_with_error
 
   def upcoming_drafts
     salary_drafts.upcoming
