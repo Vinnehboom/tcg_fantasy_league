@@ -93,4 +93,64 @@ RSpec.describe ExternalRequest do
       end
     end
   end
+
+  describe 'the default scope' do
+    subject(:all_requests) { described_class.all }
+
+    let(:kept_request) { create(:external_request) }
+    let(:discarded_request) { create(:external_request, :discarded) }
+
+    before do
+      kept_request
+      discarded_request
+    end
+
+    it { is_expected.to contain_exactly(kept_request) }
+  end
+
+  describe '.with_discarded' do
+    subject(:with_discarded) { described_class.with_discarded }
+
+    let(:discarded_request) { create(:external_request, :discarded) }
+
+    before { discarded_request }
+
+    it { is_expected.to include(discarded_request) }
+  end
+
+  describe '#discard' do
+    subject(:discard) { external_request.discard }
+
+    let(:external_request) { create(:external_request) }
+
+    it 'marks the request as discarded' do
+      discard
+
+      expect(external_request).to be_discarded
+    end
+  end
+
+  describe '#undiscard' do
+    subject(:undiscard) { external_request.undiscard }
+
+    let(:external_request) { create(:external_request, :discarded) }
+
+    it 'marks the request as kept again' do
+      undiscard
+
+      expect(external_request).to be_kept
+    end
+  end
+
+  describe '#destroy' do
+    subject(:destroy) { external_request.destroy }
+
+    let(:external_request) { create(:external_request, :discarded) }
+
+    it 'still hard-deletes a discarded request' do
+      destroy
+
+      expect(described_class.with_discarded.exists?(external_request.id)).to be(false)
+    end
+  end
 end

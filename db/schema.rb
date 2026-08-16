@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_30_122646) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_16_091901) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,6 +28,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_30_122646) do
     t.bigint "requestable_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_external_requests_on_discarded_at"
     t.index ["game_id"], name: "index_external_requests_on_game_id"
     t.index ["requestable_type", "requestable_id"], name: "index_external_requests_on_requestable"
   end

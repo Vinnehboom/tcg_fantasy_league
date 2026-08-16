@@ -1,5 +1,9 @@
 class ExternalRequest < ApplicationRecord
 
+  include Discard::Model
+
+  default_scope { kept }
+
   belongs_to :game
   belongs_to :requestable, polymorphic: true, optional: true
 

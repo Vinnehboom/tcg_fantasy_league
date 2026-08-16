@@ -17,5 +17,9 @@ FactoryBot.define do
       error { Faker::Lorem.sentence }
       finished_at { Time.current }
     end
+
+    trait :discarded do
+      discarded_at { Time.current }
+    end
   end
 end
