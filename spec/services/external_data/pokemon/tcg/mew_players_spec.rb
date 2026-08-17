@@ -102,4 +102,20 @@ RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
       end
     end
   end
+
+  describe 'a mapped player, once persisted' do
+    let(:game) { create(:game, base_uri: 'https://limitlesstcg.com') }
+
+    before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
+
+    it 'still resolves the correct external_url' do
+      player = described_class.all(season: 2026).first
+      player.game_id = game.id
+
+      player.save!
+
+      persisted = Player.find_by(external_id: '/players/860', game_id: game.id)
+      expect(persisted.external_url).to eq('https://limitlesstcg.com/players/860')
+    end
+  end
 end
