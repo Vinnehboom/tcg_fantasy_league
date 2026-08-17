@@ -2,47 +2,6 @@ module ExternalData
 
   class JsonApiClient
 
-    class HttpError < ExternalData::Exception
-
-      attr_reader :status, :url
-
-      def initialize(status:, url:)
-        @status = status
-        @url = url
-        super('External API request failed', "GET #{url} returned HTTP #{status}")
-      end
-
-    end
-
-    class RateLimitError < HttpError
-
-    end
-
-    class TimeoutError < ExternalData::Exception
-
-      attr_reader :url
-
-      def initialize(url:)
-        @url = url
-        super('External API request timed out', "GET #{url} timed out")
-      end
-
-    end
-
-    class InvalidResponseError < ExternalData::Exception
-
-      MAX_BODY_SNIPPET_LENGTH = 200
-
-      attr_reader :url, :body_snippet
-
-      def initialize(url:, body:)
-        @url = url
-        @body_snippet = body.to_s.scrub.truncate(MAX_BODY_SNIPPET_LENGTH)
-        super('External API response was not valid JSON', "GET #{url} returned a body that failed JSON parsing")
-      end
-
-    end
-
     def initialize(base_uri:, retry_policy: RetryPolicy.new)
       @base_uri = base_uri
       @retry_policy = retry_policy
