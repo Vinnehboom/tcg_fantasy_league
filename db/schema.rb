@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_16_091901) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_18_074302) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -39,8 +39,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_16_091901) do
     t.integer "score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "season"
     t.index ["player_id"], name: "index_external_scores_on_player_id"
-    t.index ["score", "player_id"], name: "index_external_scores_on_score_and_player_id", unique: true
   end
 
   create_table "games", id: :string, force: :cascade do |t|
