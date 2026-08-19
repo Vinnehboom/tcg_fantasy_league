@@ -20,6 +20,35 @@ RSpec.describe Player do
     end
   end
 
+  describe '#latest_score' do
+    let(:player) { create(:player, :without_scores) }
+
+    context 'when no season is given' do
+      it 'returns the most recent score regardless of season' do
+        create(:external_score, player:, score: 10, season: 'S1', created_at: 2.days.ago)
+        latest = create(:external_score, player:, score: 20, season: 'S2', created_at: 1.day.ago)
+
+        expect(player.reload.latest_score).to eq(latest.score)
+      end
+    end
+
+    context 'when a season is given' do
+      it 'returns the most recent score within that season' do
+        create(:external_score, player:, score: 10, season: 'S1', created_at: 2.days.ago)
+        latest = create(:external_score, player:, score: 20, season: 'S1', created_at: 1.day.ago)
+        create(:external_score, player:, score: 99, season: 'S2', created_at: Time.current)
+
+        expect(player.reload.latest_score(season: 'S1')).to eq(latest.score)
+      end
+
+      it 'returns nil when the player has no score in that season' do
+        create(:external_score, player:, score: 10, season: 'S1')
+
+        expect(player.reload.latest_score(season: 'S2')).to be_nil
+      end
+    end
+  end
+
   describe '#record_score!' do
     let(:player) { create(:player, :without_scores) }
 

@@ -14,6 +14,11 @@ class Player < ApplicationRecord
     external_scores.order('created_at desc').first&.score
   end
 
+  def latest_score(season: nil)
+    scores = season.nil? ? external_scores : external_scores.where(season:)
+    scores.order('created_at desc').first&.score
+  end
+
   def record_score!(score)
     # Base 10 is explicit: without it a leading-zero reading (e.g. "0791") is
     # parsed as octal and silently fails, which would defeat the comparison.
