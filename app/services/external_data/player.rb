@@ -24,7 +24,7 @@ module ExternalData
     end
 
     def save_associations(record:)
-      record.external_scores.create!(score: external_points)
+      record.record_score!(external_points)
     end
 
   end
