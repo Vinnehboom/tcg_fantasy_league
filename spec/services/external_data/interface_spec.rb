@@ -63,11 +63,9 @@ RSpec.describe ExternalData::Interface do
           describe 'when the external score has not changed' do
             let(:interface) { described_class.new(game:, adapter: fake_adapter(players: [player])) }
 
-            # Snapshots are appended unconditionally for now; skipping a re-import when the
-            # value is unchanged is a separate, not-yet-built piece of behavior.
-            it 'still creates a new score' do
+            it 'does not create a new score' do
               create(:external_score, player: db_player, score: player.external_points)
-              expect { interface.update_players }.to change(ExternalScore, :count).by(1)
+              expect { interface.update_players }.not_to change(ExternalScore, :count)
             end
           end
         end

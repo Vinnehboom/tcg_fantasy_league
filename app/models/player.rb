@@ -14,6 +14,15 @@ class Player < ApplicationRecord
     external_scores.order('created_at desc').first&.score
   end
 
+  def record_score!(score)
+    # Base 10 is explicit: without it a leading-zero reading (e.g. "0791") is
+    # parsed as octal and silently fails, which would defeat the comparison.
+    parsed_score = Integer(score.to_s, 10, exception: false)
+    return if parsed_score && parsed_score == current_score
+
+    external_scores.create!(score:)
+  end
+
   def latest_score_before(date:)
     external_scores.order('created_at desc').where(created_at: ..date).first&.score || 0
   end
