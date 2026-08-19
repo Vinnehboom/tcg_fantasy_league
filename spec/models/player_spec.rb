@@ -54,7 +54,7 @@ RSpec.describe Player do
 
     context 'when the player has no score yet' do
       it 'creates a snapshot' do
-        expect { player.record_score!(100) }.to change(player.external_scores, :count).from(0).to(1)
+        expect { player.record_score!(score: 100) }.to change(player.external_scores, :count).from(0).to(1)
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe Player do
       before { create(:external_score, player:, score: 100) }
 
       it 'appends a new snapshot' do
-        expect { player.record_score!(150) }.to change(player.external_scores, :count).from(1).to(2)
+        expect { player.record_score!(score: 150) }.to change(player.external_scores, :count).from(1).to(2)
       end
     end
 
@@ -70,7 +70,7 @@ RSpec.describe Player do
       before { create(:external_score, player:, score: 100) }
 
       it 'does not append a new snapshot' do
-        expect { player.record_score!(100) }.not_to change(player.external_scores, :count)
+        expect { player.record_score!(score: 100) }.not_to change(player.external_scores, :count)
       end
     end
 
@@ -78,7 +78,7 @@ RSpec.describe Player do
       before { create(:external_score, player:, score: 100) }
 
       it 'still recognizes it as unchanged' do
-        expect { player.record_score!('100') }.not_to change(player.external_scores, :count)
+        expect { player.record_score!(score: '100') }.not_to change(player.external_scores, :count)
       end
     end
   end
