@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
+RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
   def stub_response(code: 200, body: '{}')
     Struct.new(:code, :body, :headers, keyword_init: true).new(code:, body:, headers: {})
   end
@@ -11,13 +11,17 @@ RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
 
   def sample_entry(overrides = {})
     {
-      player_id: 860,
-      name: 'Liam Halliburton',
+      player_id: 1,
+      name: 'Test Player One',
       country: 'US',
       points: 1675,
       finishes: '420,350,325,300,280',
       region: 'NA'
     }.merge(overrides)
+  end
+
+  def other_sample_entry(overrides = {})
+    sample_entry({ player_id: 2, name: 'Test Player Two', country: 'CA', points: 1400 }.merge(overrides))
   end
 
   describe '.all' do
@@ -27,7 +31,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
       it 'maps the entry to an ExternalData::Player with the mew external_id format' do
         player = described_class.all(season: 2026).first
 
-        expect(player.external_id).to eq('/players/860')
+        expect(player.external_id).to eq('/players/1')
       end
 
       it 'maps points to external_points' do
@@ -39,7 +43,29 @@ RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
       it 'maps name and country directly' do
         player = described_class.all(season: 2026).first
 
-        expect(player).to have_attributes(name: 'Liam Halliburton', country: 'US')
+        expect(player).to have_attributes(name: 'Test Player One', country: 'US')
+      end
+    end
+
+    context 'when the response has multiple valid entries' do
+      before do
+        body = rankings_body(message: [sample_entry, other_sample_entry])
+        allow(HTTParty).to receive(:get).and_return(stub_response(body:))
+      end
+
+      it 'maps every entry to its own ExternalData::Player' do
+        players = described_class.all(season: 2026)
+
+        expect(players.length).to eq(2)
+      end
+
+      it 'preserves each entry\'s own attributes independently' do
+        players = described_class.all(season: 2026)
+
+        expect(players).to contain_exactly(
+          have_attributes(external_id: '/players/1', name: 'Test Player One', country: 'US', external_points: 1675),
+          have_attributes(external_id: '/players/2', name: 'Test Player Two', country: 'CA', external_points: 1400)
+        )
       end
     end
 
@@ -114,8 +140,8 @@ RSpec.describe ExternalData::Pokemon::Tcg::MewPlayers do
 
       player.save!
 
-      persisted = Player.find_by(external_id: '/players/860', game_id: game.id)
-      expect(persisted.external_url).to eq('https://limitlesstcg.com/players/860')
+      persisted = Player.find_by(external_id: '/players/1', game_id: game.id)
+      expect(persisted.external_url).to eq('https://limitlesstcg.com/players/1')
     end
   end
 end

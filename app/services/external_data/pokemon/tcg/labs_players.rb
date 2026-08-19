@@ -4,7 +4,7 @@ module ExternalData
 
     module Tcg
 
-      class MewPlayers
+      class LabsPlayers
 
         MEW_BASE_URI = 'https://mew.limitlesstcg.com'.freeze
         RANKINGS_PATH = '/labs/data/tcg/rankings'.freeze
