@@ -24,24 +24,24 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
     sample_entry({ player_id: 2, name: 'Test Player Two', country: 'CA', points: 1400 }.merge(overrides))
   end
 
-  describe '.all' do
+  describe '.call' do
     context 'when the response has a valid entry' do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
       it 'maps the entry to an ExternalData::Player with the mew external_id format' do
-        player = described_class.all(season: 2026).first
+        player = described_class.call(season: 2026).first
 
         expect(player.external_id).to eq('/players/1')
       end
 
       it 'maps points to external_points' do
-        player = described_class.all(season: 2026).first
+        player = described_class.call(season: 2026).first
 
         expect(player.external_points).to eq(1675)
       end
 
       it 'maps name and country directly' do
-        player = described_class.all(season: 2026).first
+        player = described_class.call(season: 2026).first
 
         expect(player).to have_attributes(name: 'Test Player One', country: 'US')
       end
@@ -54,13 +54,13 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'maps every entry to its own ExternalData::Player' do
-        players = described_class.all(season: 2026)
+        players = described_class.call(season: 2026)
 
         expect(players.length).to eq(2)
       end
 
       it 'preserves each entry\'s own attributes independently' do
-        players = described_class.all(season: 2026)
+        players = described_class.call(season: 2026)
 
         expect(players).to contain_exactly(
           have_attributes(external_id: '/players/1', name: 'Test Player One', country: 'US', external_points: 1675),
@@ -69,11 +69,24 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
     end
 
+    context 'when a client is injected' do
+      it 'uses the injected client instead of building its own' do
+        client = instance_double(ExternalData::JsonApiClient, get_json: JSON.parse(rankings_body))
+
+        described_class.call(season: 2026, client:)
+
+        expect(client).to have_received(:get_json).with(
+          path: described_class::RANKINGS_PATH,
+          query: { season: 2026, division: described_class::DIVISION }
+        )
+      end
+    end
+
     context 'when composing the request' do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
       it 'requests the mew rankings endpoint with the given season and a fixed division' do
-        described_class.all(season: 2026)
+        described_class.call(season: 2026)
 
         expect(HTTParty).to have_received(:get).with(
           'https://mew.limitlesstcg.com/labs/data/tcg/rankings',
@@ -89,7 +102,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'skips the incomplete entry without raising' do
-        expect(described_class.all(season: 2026).length).to eq(1)
+        expect(described_class.call(season: 2026).length).to eq(1)
       end
     end
 
@@ -100,7 +113,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'skips the incomplete entry without raising' do
-        expect(described_class.all(season: 2026).length).to eq(1)
+        expect(described_class.call(season: 2026).length).to eq(1)
       end
     end
 
@@ -108,7 +121,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
       it 'maps the entry without raising' do
-        expect { described_class.all(season: 2026) }.not_to raise_error
+        expect { described_class.call(season: 2026) }.not_to raise_error
       end
     end
 
@@ -116,7 +129,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body(message: []))) }
 
       it 'returns an empty array' do
-        expect(described_class.all(season: 2026)).to eq([])
+        expect(described_class.call(season: 2026)).to eq([])
       end
     end
 
@@ -124,7 +137,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: { ok: false }.to_json)) }
 
       it 'returns an empty array' do
-        expect(described_class.all(season: 2026)).to eq([])
+        expect(described_class.call(season: 2026)).to eq([])
       end
     end
   end
@@ -135,7 +148,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
     before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
     it 'still resolves the correct external_url' do
-      player = described_class.all(season: 2026).first
+      player = described_class.call(season: 2026).first
       player.game_id = game.id
 
       player.save!
