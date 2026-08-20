@@ -42,4 +42,32 @@ RSpec.describe Game do
     it { is_expected.to include(upcoming_draft) }
     it { is_expected.not_to include(passed_draft) }
   end
+
+  describe '#current_season' do
+    subject(:current) { game.current_season(on: date) }
+
+    let(:game) { create(:game) }
+
+    before { create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: Date.new(2026, 8, 31)) }
+
+    context 'when a season covers the given date' do
+      let(:date) { Date.new(2026, 1, 15) }
+
+      it { is_expected.to have_attributes(label: '2026') }
+    end
+
+    context 'when no season covers the given date' do
+      let(:date) { Date.new(2030, 1, 1) }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when no date is given' do
+      subject(:current) { game.current_season }
+
+      let(:date) { Date.current }
+
+      it { is_expected.to have_attributes(label: '2026') }
+    end
+  end
 end

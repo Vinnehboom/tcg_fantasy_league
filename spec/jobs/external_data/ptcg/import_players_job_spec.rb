@@ -10,19 +10,27 @@ module ExternalData
       describe 'when a PTCG game row exists' do
         let(:player) do
           ExternalData::Player.new(
-            attributes: { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791' }
+            attributes: { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791',
+                          season: '2026' }
           )
         end
 
         before do
-          create(:game, id: 'PTCG')
-          allow(ExternalData::Pokemon::Tcg::Players).to receive(:all).and_return([player])
+          game = create(:game, id: 'PTCG')
+          create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date, label: '2026')
+          allow(ExternalData::Pokemon::Tcg::LabsPlayers).to receive(:call).and_return([player])
         end
 
         it_behaves_like 'an external data import job'
 
-        it 'imports the scraped players' do
+        it 'imports the fetched players' do
           expect { job.perform_now }.to change(::Player, :count).by(1)
+        end
+
+        it 'tags the imported player\'s score with the current season' do
+          job.perform_now
+
+          expect(::Player.last.external_scores.last.season).to eq('2026')
         end
 
         it 'records the fetch against the players kind' do

@@ -45,6 +45,12 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
 
         expect(player).to have_attributes(name: 'Test Player One', country: 'US')
       end
+
+      it 'stamps the entry with the season it was fetched for' do
+        player = described_class.call(season: 2026).first
+
+        expect(player.season).to eq(2026)
+      end
     end
 
     context 'when the response has multiple valid entries' do
@@ -87,6 +93,15 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
 
       it 'requests the mew rankings endpoint with the given season and a fixed division' do
         described_class.call(season: 2026)
+
+        expect(HTTParty).to have_received(:get).with(
+          'https://mew.limitlesstcg.com/labs/data/tcg/rankings',
+          hash_including(query: { season: 2026, division: 'MA' })
+        )
+      end
+
+      it 'coerces a string season to an integer for the query' do
+        described_class.call(season: '2026')
 
         expect(HTTParty).to have_received(:get).with(
           'https://mew.limitlesstcg.com/labs/data/tcg/rankings',

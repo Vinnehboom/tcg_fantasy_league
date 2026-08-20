@@ -20,10 +20,10 @@ class Player < ApplicationRecord
     scores.order('created_at desc').first&.score
   end
 
-  def record_score!(score:)
+  def record_score!(score:, season: nil)
     return if Integer(score) == current_score
 
-    external_scores.create!(score:)
+    external_scores.create!(score:, season:)
   end
 
   def latest_score_before(date:)
