@@ -13,7 +13,7 @@ module ExternalData
       end
 
       def adapter
-        ExternalData::Pokemon::Tcg::Adapter.new
+        ExternalData::Pokemon::Tcg::Adapter.new(game:)
       end
 
       def kind

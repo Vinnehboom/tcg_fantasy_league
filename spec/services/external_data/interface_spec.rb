@@ -45,7 +45,9 @@ RSpec.describe ExternalData::Interface do
 
         describe 'when the player data exists' do
           let(:player) { players.sample }
-          let!(:db_player) { create(:player, **player.instance_values.slice!('external_points'), game_id: game.id) }
+          let!(:db_player) do
+            create(:player, **player.instance_values.slice!('external_points', 'season'), game_id: game.id)
+          end
 
           it 'updates the players information' do
             interface.update_players

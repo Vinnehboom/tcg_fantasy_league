@@ -11,12 +11,15 @@ RSpec.describe 'external_data:ptcg rake tasks', type: :task do
 
   describe 'update_players' do
     describe 'when a PTCG game row exists' do
-      before { create(:game, id: 'PTCG') }
+      before do
+        game = create(:game, id: 'PTCG')
+        create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date)
+      end
 
-      it 'imports the scraped players' do
+      it 'imports the fetched players' do
         player = ExternalData::Player.new(attributes: { name: 'Jodie Predovic', country: 'TF',
                                                         external_id: '/players/5', external_points: '791' })
-        allow(ExternalData::Pokemon::Tcg::Players).to receive(:all).and_return([player])
+        allow(ExternalData::Pokemon::Tcg::LabsPlayers).to receive(:call).and_return([player])
 
         expect { update_players_task.invoke }.to change(Player, :count).by(1)
       end

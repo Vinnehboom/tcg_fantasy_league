@@ -22,6 +22,9 @@ en:
       game:
         one: Game
         other: Games
+      season:
+        one: Season
+        other: Seasons
     attributes:
       user:
         email: Email
@@ -80,6 +83,12 @@ en:
         source_url: Source URL
         discarded_at: Discarded at
         requestable: Requestable
+      season:
+        game: Game
+        game_id: Game
+        label: Label
+        start_date: Start date
+        end_date: End date
     enums:
       external_request:
         kind:
@@ -100,6 +109,12 @@ en:
           attributes:
             rosters:
               empty: Add players to your rosters before submitting.
+        season:
+          attributes:
+            end_date:
+              before_start_date: must be on or after the start date
+            start_date:
+              overlapping_season: overlaps an existing season for this game
   admin:
     salary_drafts:
       create:
