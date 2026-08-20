@@ -83,6 +83,36 @@ RSpec.describe Player do
     end
   end
 
+  describe '#external_url' do
+    let(:game) { create(:game, base_uri: 'https://limitlesstcg.com') }
+    let(:player) { create(:player, :without_scores, game:, external_id: '/players/370') }
+
+    context "when a Season covers the current date for the player's game" do
+      before { create(:season, game:, label: '2026', start_date: 1.month.ago, end_date: 1.month.from_now) }
+
+      it 'resolves a labs.limitlesstcg.com URL carrying the season param' do
+        expect(player.external_url).to eq('https://labs.limitlesstcg.com/players/370?season=2026')
+      end
+    end
+
+    context "when no Season covers the current date for the player's game" do
+      it 'falls back to the plain game base_uri URL' do
+        expect(player.external_url).to eq('https://limitlesstcg.com/players/370')
+      end
+    end
+
+    context 'when a Season covers the current date, but only for a different game' do
+      before do
+        other_game = create(:game)
+        create(:season, game: other_game, label: '2026', start_date: 1.month.ago, end_date: 1.month.from_now)
+      end
+
+      it 'falls back to the plain game base_uri URL' do
+        expect(player.external_url).to eq('https://limitlesstcg.com/players/370')
+      end
+    end
+  end
+
   describe '#latest_score_before' do
     let(:player) { create(:player) }
 
