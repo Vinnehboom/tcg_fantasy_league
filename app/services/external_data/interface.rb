@@ -27,6 +27,18 @@ module ExternalData
       save_objects(objects: upcoming_tournaments)
     end
 
+    def results(tournament:)
+      results = adapter.results(tournament:)
+      results.each { |result| result.tournament = tournament }
+      results
+    end
+
+    def update_results(tournament:)
+      processed = save_objects(objects: results(tournament:))
+      tournament.update!(field_size: processed) if processed.positive?
+      processed
+    end
+
     private
 
     attr_reader :game, :adapter
