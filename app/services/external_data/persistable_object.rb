@@ -11,7 +11,7 @@ module ExternalData
     end
 
     def save!
-      db_record = db_class.find_or_initialize_by(external_id:, game_id:)
+      db_record = db_class.find_or_initialize_by(**lookup_attributes)
       db_record.assign_attributes(instance_attributes)
       db_record.save!
       save_associations(record: db_record)
@@ -19,6 +19,10 @@ module ExternalData
     end
 
     private
+
+    def lookup_attributes
+      { external_id:, game_id: }
+    end
 
     def instance_attributes
       raise '#instance_attributes not implemented'
