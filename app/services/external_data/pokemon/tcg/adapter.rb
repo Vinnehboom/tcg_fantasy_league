@@ -19,6 +19,17 @@ module ExternalData
           ExternalData::Pokemon::Tcg::Tournaments.upcoming_tournaments
         end
 
+        def results(tournament:)
+          ExternalData::Pokemon::Tcg::LabsStandings.call(tournament_id: labs_tournament_id_for(tournament))
+        end
+
+        def field_size(tournament:)
+          tournament_id = labs_tournament_id_for(tournament)
+
+          ExternalData::Pokemon::Tcg::LabsTournament.call(tournament_id:) ||
+            ExternalData::Pokemon::Tcg::LabsStandings.entrant_count(tournament_id:)
+        end
+
         private
 
         attr_reader :game, :season
@@ -26,6 +37,12 @@ module ExternalData
         def current_season
           season || raise("#{self.class.name}: no Season row covers #{Date.current} for game '#{game.id}' — " \
                           'seed a Season before running this job.')
+        end
+
+        def labs_tournament_id_for(tournament)
+          tournament.labs_tournament_id ||
+            raise("#{self.class.name}: no labs_tournament_id set on tournament ##{tournament.id} " \
+                  "('#{tournament.name}') — resolve it (e.g. via admin) before fetching Pokemon results.")
         end
 
       end
