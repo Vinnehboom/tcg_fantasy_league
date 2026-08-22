@@ -42,4 +42,11 @@ class Player < ApplicationRecord
 
   include ExternalResource
 
+  def external_url
+    season = game.current_season
+    return super unless season
+
+    "#{super}?season=#{CGI.escape(season.label)}"
+  end
+
 end
