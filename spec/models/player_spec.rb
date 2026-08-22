@@ -90,8 +90,8 @@ RSpec.describe Player do
     context "when a Season covers the current date for the player's game" do
       before { create(:season, game:, label: '2026', start_date: 1.month.ago, end_date: 1.month.from_now) }
 
-      it 'resolves a labs.limitlesstcg.com URL carrying the season param' do
-        expect(player.external_url).to eq('https://labs.limitlesstcg.com/players/370?season=2026')
+      it "appends the season param to the game's base_uri URL" do
+        expect(player.external_url).to eq('https://limitlesstcg.com/players/370?season=2026')
       end
     end
 

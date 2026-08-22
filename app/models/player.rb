@@ -1,7 +1,5 @@
 class Player < ApplicationRecord
 
-  LABS_BASE_URI = 'https://labs.limitlesstcg.com'.freeze
-
   attr_accessor :cost
 
   validates :name, presence: true
@@ -48,7 +46,7 @@ class Player < ApplicationRecord
     season = game.current_season
     return super unless season
 
-    "#{LABS_BASE_URI}#{external_id}?season=#{CGI.escape(season.label)}"
+    "#{super}?season=#{CGI.escape(season.label)}"
   end
 
 end
