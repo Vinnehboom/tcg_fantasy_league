@@ -257,6 +257,12 @@ RSpec.describe ExternalData::Interface do
         it 'still saves the results that are valid' do
           expect { interface.update_results(tournament:) }.to change(Result, :count).by(results.length)
         end
+
+        it 'includes the failed result in field_size, since it still represents a real tournament entrant' do
+          interface.update_results(tournament:)
+
+          expect(tournament.reload.field_size).to eq(results.length + 1)
+        end
       end
 
       describe 'when no adapter is injected' do
