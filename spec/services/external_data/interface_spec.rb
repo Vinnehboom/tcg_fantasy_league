@@ -265,6 +265,36 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
+      describe 'when a field_size: override is given' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        it 'sets the tournament field_size to the override, not the processed count' do
+          interface.update_results(tournament:, field_size: 500)
+
+          expect(tournament.reload.field_size).to eq(500)
+        end
+
+        describe 'when the adapter returns no results' do
+          let(:interface) { described_class.new(game:, adapter: fake_adapter(results: [])) }
+
+          it 'still sets field_size from the override' do
+            interface.update_results(tournament:, field_size: 500)
+
+            expect(tournament.reload.field_size).to eq(500)
+          end
+        end
+      end
+
+      describe 'when no field_size: override is given' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        it 'preserves the existing computed-count behavior' do
+          interface.update_results(tournament:)
+
+          expect(tournament.reload.field_size).to eq(results.length)
+        end
+      end
+
       describe 'when no adapter is injected' do
         let(:interface) { described_class.new(game:) }
 
