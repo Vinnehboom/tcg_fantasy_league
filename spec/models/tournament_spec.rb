@@ -43,4 +43,31 @@ RSpec.describe Tournament do
       end
     end
   end
+
+  describe '#labs_tournament_id' do
+    describe 'when absent' do
+      it 'is a valid tournament' do
+        tournament = build(:tournament, labs_tournament_id: nil)
+
+        expect(tournament).to be_valid
+      end
+    end
+
+    describe 'when set to a value not used by any other tournament' do
+      it 'is a valid tournament' do
+        tournament = build(:tournament, labs_tournament_id: '0070')
+
+        expect(tournament).to be_valid
+      end
+    end
+
+    describe 'when another tournament already has the same value' do
+      it 'is not a valid tournament' do
+        create(:tournament, labs_tournament_id: '0070')
+        tournament = build(:tournament, labs_tournament_id: '0070')
+
+        expect(tournament).not_to be_valid
+      end
+    end
+  end
 end
