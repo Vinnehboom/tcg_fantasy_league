@@ -163,6 +163,32 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsStandings do
       end
     end
 
+    context 'when dropped/dqed arrive as numeric-boolean 0/1 rather than JSON booleans' do
+      before do
+        body = standings_body(message: [sample_entry(dropped: 0, dqed: 0), sample_entry(dropped: 1)])
+        allow(HTTParty).to receive(:get).and_return(stub_response(body:))
+      end
+
+      it 'treats 0 as false and 1 as true, not as Ruby truthiness would' do
+        results = described_class.call(tournament_id: '0070')
+
+        expect(results.map(&:placement)).to eq([1])
+      end
+    end
+
+    context 'when dropped/dqed arrive as the strings "0"/"false" rather than JSON booleans' do
+      before do
+        body = standings_body(message: [sample_entry(dropped: '0', dqed: 'false'), sample_entry(dropped: 'true')])
+        allow(HTTParty).to receive(:get).and_return(stub_response(body:))
+      end
+
+      it 'treats "0"/"false" as false and "true" as true, not as Ruby truthiness would' do
+        results = described_class.call(tournament_id: '0070')
+
+        expect(results.map(&:placement)).to eq([1])
+      end
+    end
+
     context 'when the message array is empty' do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: standings_body(message: []))) }
 

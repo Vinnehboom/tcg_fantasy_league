@@ -42,8 +42,11 @@ module ExternalData
           @response ||= client.get_json(path: STANDINGS_PATH, query: { tournamentId: tournament_id, division: })
         end
 
+        # The wire type of dropped/dqed isn't confirmed (unlike opw/opw2, no quirk is called out for them) -
+        # normalize defensively rather than trust Ruby truthiness, since a numeric-boolean 0/"0" would otherwise
+        # be misread as "dropped".
         def dropped_or_dqed?(entry)
-          entry['dropped'].present? || entry['dqed'].present?
+          ActiveModel::Type::Boolean.new.cast(entry['dropped']) || ActiveModel::Type::Boolean.new.cast(entry['dqed'])
         end
 
         def build_result(entry)
