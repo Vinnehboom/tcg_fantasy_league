@@ -12,6 +12,11 @@ module ExternalData
                                         'the #upcoming_tournaments method was called on an invalid adapter')
     end
 
+    def results(**)
+      raise ExternalData::Exception.new('Offline method called',
+                                        'the #results method was called on an invalid adapter')
+    end
+
   end
 
 end

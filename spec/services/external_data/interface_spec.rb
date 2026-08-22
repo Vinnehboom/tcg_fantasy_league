@@ -3,8 +3,10 @@ require 'rails_helper'
 RSpec.describe ExternalData::Interface do
   let(:game) { create(:game) }
 
-  def fake_adapter(players: nil, upcoming_tournaments: nil)
-    Struct.new(:players, :upcoming_tournaments, keyword_init: true).new(players:, upcoming_tournaments:)
+  def fake_adapter(players: nil, upcoming_tournaments: nil, results: nil)
+    adapter = Struct.new(:players, :upcoming_tournaments, keyword_init: true).new(players:, upcoming_tournaments:)
+    adapter.define_singleton_method(:results) { |**| results }
+    adapter
   end
 
   describe 'players' do
@@ -157,6 +159,117 @@ RSpec.describe ExternalData::Interface do
 
         it 'raises an exception' do
           expect { interface.update_upcoming_tournaments }.to raise_error(ExternalData::Exception)
+        end
+      end
+    end
+  end
+
+  describe 'results' do
+    let(:tournament) { create(:tournament, game:) }
+    let(:results) do
+      [
+        { player_external_id: '/players/11', player_name: 'Test Player One', player_country: 'US', placement: 1 },
+        { player_external_id: '/players/12', player_name: 'Test Player Two', player_country: 'CA', placement: 2 }
+      ].map { |attributes| ExternalData::Result.new(attributes:) }
+    end
+
+    describe '#results' do
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        it 'retrieves all the results for the tournament' do
+          expect(interface.results(tournament:).map(&:placement)).to match_array(results.map(&:placement))
+        end
+
+        it 'includes a relation to the tournament for each result' do
+          expect(interface.results(tournament:).sample.tournament).to eq(tournament)
+        end
+      end
+
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
+        it 'raises an exception' do
+          expect { interface.results(tournament:) }.to raise_error(ExternalData::Exception)
+        end
+      end
+    end
+
+    describe '#update_results' do
+      describe 'when an adapter is injected' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        it 'creates a player for each result entry' do
+          expect { interface.update_results(tournament:) }.to change(Player, :count).by(results.length)
+        end
+
+        it 'creates a result row for each entry' do
+          expect { interface.update_results(tournament:) }.to change(Result, :count).by(results.length)
+        end
+
+        it 'returns how many results were processed' do
+          expect(interface.update_results(tournament:)).to eq(results.length)
+        end
+
+        it 'sets the tournament field_size to the number of results processed' do
+          interface.update_results(tournament:)
+
+          expect(tournament.reload.field_size).to eq(results.length)
+        end
+
+        describe 'when called twice with the same fixture data' do
+          before { interface.update_results(tournament:) }
+
+          it 'does not create duplicate result rows' do
+            expect { interface.update_results(tournament:) }.not_to change(Result, :count)
+          end
+
+          it 'does not create duplicate players' do
+            expect { interface.update_results(tournament:) }.not_to change(Player, :count)
+          end
+
+          it 'leaves field_size unchanged' do
+            interface.update_results(tournament:)
+
+            expect(tournament.reload.field_size).to eq(results.length)
+          end
+        end
+      end
+
+      describe 'when the adapter returns no results' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results: [])) }
+
+        it 'does not set the tournament field_size' do
+          interface.update_results(tournament:)
+
+          expect(tournament.reload.field_size).to be_nil
+        end
+      end
+
+      describe 'when one result cannot resolve or create a valid player' do
+        let(:unresolvable_result) do
+          ExternalData::Result.new(
+            attributes: { player_external_id: '/players/13', player_name: nil, player_country: 'FR', placement: 3 }
+          )
+        end
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results: results + [unresolvable_result])) }
+
+        it 'still saves the results that are valid' do
+          expect { interface.update_results(tournament:) }.to change(Result, :count).by(results.length)
+        end
+
+        it 'includes the failed result in field_size, since it still represents a real tournament entrant' do
+          interface.update_results(tournament:)
+
+          expect(tournament.reload.field_size).to eq(results.length + 1)
+        end
+      end
+
+      describe 'when no adapter is injected' do
+        let(:interface) { described_class.new(game:) }
+
+        it 'raises an exception' do
+          expect { interface.update_results(tournament:) }.to raise_error(ExternalData::Exception)
         end
       end
     end
