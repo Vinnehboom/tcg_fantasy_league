@@ -36,7 +36,8 @@ module ExternalData
     def update_results(tournament:, field_size: nil)
       fetched_results = results(tournament:)
       processed = save_objects(objects: fetched_results)
-      tournament.update!(field_size: field_size || fetched_results.count) if field_size.present? || fetched_results.any?
+      effective_field_size = field_size&.positive? ? field_size : fetched_results.count
+      tournament.update!(field_size: effective_field_size) if effective_field_size.positive?
       processed
     end
 

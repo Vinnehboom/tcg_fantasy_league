@@ -283,6 +283,24 @@ RSpec.describe ExternalData::Interface do
             expect(tournament.reload.field_size).to eq(500)
           end
         end
+
+        describe 'when the override is zero' do
+          it 'falls back to the processed count instead of persisting a non-positive field_size' do
+            interface.update_results(tournament:, field_size: 0)
+
+            expect(tournament.reload.field_size).to eq(results.length)
+          end
+        end
+
+        describe 'when the override is zero and there are also no results' do
+          let(:interface) { described_class.new(game:, adapter: fake_adapter(results: [])) }
+
+          it 'does not set field_size at all' do
+            interface.update_results(tournament:, field_size: 0)
+
+            expect(tournament.reload.field_size).to be_nil
+          end
+        end
       end
 
       describe 'when no field_size: override is given' do
