@@ -69,5 +69,16 @@ RSpec.describe Game do
 
       it { is_expected.to have_attributes(label: '2026') }
     end
+
+    context 'when called more than once for the same date' do
+      let(:date) { Date.new(2026, 1, 15) }
+
+      it 'memoizes the result instead of querying again' do
+        first = current
+        second = game.current_season(on: date)
+
+        expect(second).to equal(first)
+      end
+    end
   end
 end

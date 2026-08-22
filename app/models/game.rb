@@ -14,9 +14,14 @@ class Game < ApplicationRecord
   end
 
   def current_season(on: Date.current)
-    seasons.covering(on).sole
-  rescue ActiveRecord::RecordNotFound
-    nil
+    @current_season_by_date ||= {}
+    return @current_season_by_date[on] if @current_season_by_date.key?(on)
+
+    @current_season_by_date[on] = begin
+      seasons.covering(on).sole
+    rescue ActiveRecord::RecordNotFound
+      nil
+    end
   end
 
 end
