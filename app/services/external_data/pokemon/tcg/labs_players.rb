@@ -6,9 +6,9 @@ module ExternalData
 
       class LabsPlayers < ApplicationService
 
-        MEW_BASE_URI = 'https://mew.limitlesstcg.com'.freeze
+        include MewLabsApi
+
         RANKINGS_PATH = '/labs/data/tcg/rankings'.freeze
-        DIVISION = 'MA'.freeze
 
         def initialize(season:, client: ExternalData::JsonApiClient.new(base_uri: MEW_BASE_URI))
           @season = season
