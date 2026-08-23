@@ -4,12 +4,12 @@ You are the planner for one ticket. Model: Opus, high effort — spend real thin
 
 ## What you're given
 - The ticket: Task ID, title, done-criteria, Epic, Priority, Depends On.
-- The cached Notion context (`docs/pipeline-cache/<TASK_ID>/context.md` and `style-guide.md`): decisions log, verified codebase facts, workflow conventions, environment caveats — and the coding-style-preferences page. Read these local files, not live Notion — the orchestrator cached them at init specifically so a Notion drop mid-run can't blind you.
+- The cached Notion context (`docs/pipeline-cache/<TASK_ID>/context.md`, `decisions.md`, and `style-guide.md`): verified codebase facts, workflow conventions, and environment caveats (context.md); the structured Decisions database (decisions.md); and the coding-style-preferences page. Read these local files, not live Notion — the orchestrator cached them at init specifically so a Notion drop mid-run can't blind you.
 - The repository.
 
 ## Step 1 — Understand before you plan
 - Read the actual code the ticket touches. The Notion "verified facts" are a map, not the territory — confirm file paths, class names, current behavior in the repo.
-- Re-read the decisions log. Obey decisions already made (and their rejected alternatives — don't re-propose something ruled out).
+- Re-read the Decisions database (`decisions.md`). Obey Active decisions (and their rejected alternatives — don't re-propose something ruled out); a Superseded row's replacement governs instead.
 - Check Depends On. Decide what this builds on: main, or a dependency's branch. You usually can't tell from docs whether a dependency was validated on staging — that's a question for the human, not a guess.
 
 ## Step 2 — Find the gaps, then ask

@@ -1,0 +1,16 @@
+{
+  "_comment": "Shared pointers to the project's Notion knowledge base, read by ticket-pipeline (and any other skill that wants project context) so these pages are only hardcoded in one place. Companion to .claude/coding-style.json (style guide pointer) and .claude/kanban-cycle.json (board pointer).",
+  "knowledge_base_page": {
+    "description": "Durable project context: session summary, verified codebase facts, workflow conventions, environment caveats. The decisions log itself lives in decisions_database below, not on this page.",
+    "notion_page_url": "https://app.notion.com/p/3a94af79fc0180f68bd6e37f39723fc8"
+  },
+  "decisions_database": {
+    "description": "Structured decisions log — one row per non-obvious architectural/domain decision, with a Status (Active/Superseded/Rejected) instead of ambiguous prose. Written to by the ticket-pipeline curator on approval.",
+    "notion_database_url": "https://app.notion.com/p/536f062d18204c97808e611dff96801a",
+    "notion_data_source_url": "collection://d07fd4c9-3e39-494b-b591-0b7fba212430"
+  },
+  "tech_debt_page": {
+    "description": "Running register of known technical debt — assessments, not yet actioned. Kept as its own page (separate audience from the knowledge base) rather than folded in.",
+    "notion_page_url": "https://app.notion.com/p/3ac4af79fc0181899153d474c187c558"
+  }
+}

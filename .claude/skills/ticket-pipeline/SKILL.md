@@ -35,7 +35,7 @@ The ORCHESTRATOR (you, running this skill) owns the flow between phases, the thr
 ## Inputs you need before starting
 - The ticket — a Task ID (e.g. C-3) or Notion card URL. If the user says "do the next one," read the board and pick the highest-priority Not started card whose dependencies are satisfied, then confirm before spending real effort.
 - The repo — the working directory unless the user points elsewhere.
-- Notion context — the project context/decisions page and the Coding Style Guide page. Shared source-of-truth for every phase.
+- Notion context — the Knowledge Base page, the Decisions database, and the Coding Style Guide page (pointers in `.claude/knowledge-base.json` and `.claude/coding-style.json` respectively — never hardcode these URLs, read the pointer files). Shared source-of-truth for every phase.
 
 If Notion's tools are not connected this session, say so and stop — the pipeline is Notion-backed and the planner, reviewer, and curator are meaningless without the context docs.
 
@@ -60,7 +60,7 @@ If either is unset, skip Phase 4 entirely and say so — don't attempt unauthent
 
 Notion MCP has previously dropped mid-run and blinded the developer/reviewer/curator (they fell back to guessing repo conventions instead of the style guide). To make a Notion disconnect mid-pipeline harmless:
 
-1. As the FIRST action of any pipeline run, fetch every doc phases will need — the ticket card, the project context/decisions page, and the Coding Style Guide — and write each one verbatim to a local cache file under `docs/pipeline-cache/<TASK_ID>/` (e.g. `ticket.md`, `context.md`, `style-guide.md`). Create the directory if needed.
+1. As the FIRST action of any pipeline run, fetch every doc phases will need — the ticket card, the Knowledge Base page, the Decisions database, and the Coding Style Guide — and write each one verbatim to a local cache file under `docs/pipeline-cache/<TASK_ID>/` (`ticket.md`, `context.md`, `decisions.md`, `style-guide.md`). Create the directory if needed. Read the page/database pointers from `.claude/knowledge-base.json` and `.claude/coding-style.json` — never hardcode them.
 2. From then on, every subagent (planner, developer, reviewer, curator) is handed the LOCAL CACHE FILES, not a live Notion fetch. Subagents should not need `mcp__Notion__*` tools at all except the curator, which re-fetches live at Phase 6 specifically to check proposals against the current state of the docs before proposing (see references/curator.md) — if that live re-fetch fails, it falls back to the cached copies and says so.
 3. The cache is scratch state for this run, not a repo artifact — `docs/pipeline-cache/` is gitignored. Never `git add`/commit it, even with a broad `git add -A`; it should not be treated as a source of truth after the run either — Notion is still canonical for the next run.
 4. If the initial fetch itself fails (Notion unavailable at init, before any cache exists), that's the "Notion not connected" stop condition above — don't start the pipeline on stale or partial context.
@@ -68,8 +68,11 @@ Notion MCP has previously dropped mid-run and blinded the developer/reviewer/cur
 ## Locating Notion context
 Fetch, in order, and cache per the section above:
 1. The card itself — properties (Epic, Priority, Depends On, Status) and body (done-criteria/notes).
-2. The project context page — decisions log, verified codebase facts, workflow conventions, environment caveats (the "Drafting app" page).
-3. The Coding Style Guide page (titled "Coding Style Guide", https://app.notion.com/p/3ac4af79fc018179b160c9bd5ebf1d4a). LOAD IT ON INITIALIZATION and hand it in full to the developer and reviewer. It supplements repo conventions; where they conflict, the style guide wins. Where it conflicts with tooling like .rubocop.yml, flag it (a curator job), don't silently pick a side. If genuinely missing, fall back to repo conventions and say so.
+2. The Knowledge Base page (pointer: `knowledge_base_page.notion_page_url` in `.claude/knowledge-base.json`) — verified codebase facts, workflow conventions, environment caveats. Currently titled "Drafting app" in Notion — go by the pointer, not the title, in case it's renamed.
+3. The Decisions database (pointer: `decisions_database` in `.claude/knowledge-base.json`) — structured log of non-obvious architectural/domain decisions, each row's Status marking whether it's Active, Superseded, or Rejected. Obey Active decisions (and note their rejected alternatives — don't re-propose something already ruled out); a Superseded row's replacement decision governs instead.
+4. The Coding Style Guide page (pointer: `notion_page_url` in `.claude/coding-style.json`). LOAD IT ON INITIALIZATION and hand it in full to the developer and reviewer. It supplements repo conventions; where they conflict, the style guide wins. Where it conflicts with tooling like .rubocop.yml, flag it (a curator job), don't silently pick a side. If genuinely missing, fall back to repo conventions and say so.
+
+The Tech Debt page (pointer: `tech_debt_page.notion_page_url` in `.claude/knowledge-base.json`) is companion reading, not part of the cached init context — only the curator (Phase 6) reads it, live, when checking whether a finding is already logged.
 
 ## The human checkpoints
 - Checkpoint 1 — planner's questions. Relay gaps to the user, get answers, feed back. Skip only if genuinely none.
@@ -147,8 +150,8 @@ See "Merge policy" below for how the PR itself eventually gets merged.
 No merge commits, anywhere. When a PR in this pipeline is merged, always use `merge_method: "rebase"` on `mcp__github__merge_pull_request` — never `"merge"`, which creates a merge commit. `"squash"` is a separate call Vinnie can make per-PR if he wants it; rebase is this skill's default unless told otherwise. Stacked-PR merges still respect bottom-up order (see "Stacked PRs for dependent tickets") on top of this.
 
 ### Phase 6 — Curator → read references/curator.md
-- Subagent opus, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, decisions log, board, tech-debt page) — re-fetched live where possible, falling back to the cache.
-- Proposes new tickets / style-guide additions / decisions-log or tech-debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
+- Subagent opus, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache.
+- Proposes new tickets / style-guide additions / Decisions-database entries (or a Status flip on an existing row, when this work supersedes it) / Tech Debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
 - Checkpoint 3: present proposals; on approval, create cards / edit pages. Nothing written without the user's go.
 
 ## Handling review feedback (re-entry)
