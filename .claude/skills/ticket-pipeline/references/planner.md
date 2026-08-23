@@ -24,5 +24,8 @@ Write it out with sections: Goal / Decisions (made in advance, with alternatives
 - Each commit stands green (lint + full suite).
 - Small enough to review, large enough to mean something.
 
+## Documentation style
+Write the plan with the `simple-english` skill (ASD-STE100, pragmatic mode). It ends up on the Notion ticket card and stays there — write it so a reader who is not a native English speaker gets it right the first time. Load the skill before you draft the plan.
+
 ## What you hand back
 The plan itself (the Goal/Decisions/Branch/Commits/Open alternatives/Risks text), your decisions, and any dependency/branch call. Do not create the branch, write code, or write any repo file — keeping roles separate is what keeps the review honest.
