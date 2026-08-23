@@ -221,6 +221,21 @@ orchestrator's own checkout while any dispatched agent is active, and if
 collision symptoms ever show up (a stray table/migration bleeding across
 branches), that's the first thing to suspect.
 
+**Trusting local git state:** local `HEAD` — in the orchestrator's own
+checkout and in a dispatched worktree alike — has been observed to
+revert to a stale pre-sync commit even right after a successful push,
+with no reflog entry that explains it (suspected container/session
+lifecycle effect, not a git operation gone wrong). Before you rely on
+local `HEAD` for anything that matters — deciding a branch is current,
+skipping a rebase, reporting a push succeeded, dispatching a triage
+agent onto a PR's branch — verify it first: `git fetch origin <branch>`,
+then compare `git rev-parse HEAD` against `git rev-parse
+origin/<branch>`. If they differ, don't act on the stale state — `git
+reset --hard origin/<branch>` when origin is known-good (e.g. right
+after your own push), or investigate before proceeding otherwise. This
+applies inside a dispatched agent's own worktree too, not just the
+orchestrator's checkout.
+
 ## 7. End-of-cycle rundown (always)
 
 Every cycle ends with exactly one bullet-point rundown, posted as this
@@ -280,6 +295,9 @@ push, not announced separately.
 - No merge commits, ever — rebase only, same as `/ticket-pipeline`.
 - Don't touch a PR that doesn't link a Notion ticket card — it isn't this
   automation's to drive.
+- Never trust local `HEAD` at face value — verify it against
+  `origin/<branch>` first (see "Trusting local git state" under
+  "Dispatch mechanics").
 - Every cycle ends with exactly one bullet-point rundown and exactly one
   push notification — never zero (no silent cycles), never more than one
   push per cycle (no mid-cycle notification spam for individual
