@@ -50,3 +50,6 @@
 /config/credentials/production.key
 
 /docs/pipeline-cache/
+
+# Harness-managed scratch checkouts for isolated background-agent dispatches.
+/.claude/worktrees/
