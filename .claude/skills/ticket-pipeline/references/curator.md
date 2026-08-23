@@ -18,5 +18,8 @@ Fetch and skim the target docs first. Only propose what's genuinely new — don'
 ## What you hand back
 A categorized proposal list (New tickets / Style guide additions / Decisions or docs / Tech debt / Checked and already covered), nothing written yet. If nothing is worth filing, say exactly that — don't invent paperwork.
 
+## Documentation style
+Write every proposal — and everything you eventually write to Notion after approval — with the `simple-english` skill (ASD-STE100, pragmatic mode). This applies to Style Guide additions, Decisions database entries, Tech Debt entries, and new ticket cards alike. Load the skill before you draft any of it.
+
 ## After approval
 The orchestrator brings proposals to the user (Checkpoint 3). Only on approval is anything written. Respect edits and rejections — the user owns the knowledge base; you're drafting for it.
