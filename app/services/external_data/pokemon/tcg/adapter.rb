@@ -20,11 +20,11 @@ module ExternalData
         end
 
         def results(tournament:)
-          ExternalData::Pokemon::Tcg::LabsStandings.call(tournament_id: labs_tournament_id_for(tournament))
+          ExternalData::Pokemon::Tcg::LabsStandings.call(tournament_id: results_source_id_for(tournament))
         end
 
         def field_size(tournament:)
-          tournament_id = labs_tournament_id_for(tournament)
+          tournament_id = results_source_id_for(tournament)
 
           ExternalData::Pokemon::Tcg::LabsTournament.call(tournament_id:) ||
             ExternalData::Pokemon::Tcg::LabsStandings.entrant_count(tournament_id:)
@@ -39,9 +39,9 @@ module ExternalData
                           'seed a Season before running this job.')
         end
 
-        def labs_tournament_id_for(tournament)
-          tournament.labs_tournament_id ||
-            raise("#{self.class.name}: no labs_tournament_id set on tournament ##{tournament.id} " \
+        def results_source_id_for(tournament)
+          tournament.results_source_id ||
+            raise("#{self.class.name}: no results_source_id set on tournament ##{tournament.id} " \
                   "('#{tournament.name}') — resolve it (e.g. via admin) before fetching Pokemon results.")
         end
 

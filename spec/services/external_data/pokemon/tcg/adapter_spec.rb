@@ -64,10 +64,10 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
   end
 
   describe '#results' do
-    context 'when the tournament has a labs_tournament_id' do
-      let(:tournament) { create(:tournament, game:, labs_tournament_id: '0070') }
+    context 'when the tournament has a results_source_id' do
+      let(:tournament) { create(:tournament, game:, results_source_id: '0070') }
 
-      it 'delegates to LabsStandings with the tournament\'s labs_tournament_id' do
+      it 'delegates to LabsStandings with the tournament\'s results_source_id' do
         allow(ExternalData::Pokemon::Tcg::LabsStandings).to receive(:call).and_return([:results])
 
         adapter.results(tournament:)
@@ -82,11 +82,11 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
       end
     end
 
-    context 'when the tournament has no labs_tournament_id' do
-      let(:tournament) { create(:tournament, game:, labs_tournament_id: nil) }
+    context 'when the tournament has no results_source_id' do
+      let(:tournament) { create(:tournament, game:, results_source_id: nil) }
 
       it 'raises a semantic error instead of fetching with a blank id' do
-        message = "ExternalData::Pokemon::Tcg::Adapter: no labs_tournament_id set on tournament ##{tournament.id} " \
+        message = "ExternalData::Pokemon::Tcg::Adapter: no results_source_id set on tournament ##{tournament.id} " \
                   "('#{tournament.name}') — resolve it (e.g. via admin) before fetching Pokemon results."
 
         expect { adapter.results(tournament:) }.to raise_error(RuntimeError, message)
@@ -95,8 +95,8 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
   end
 
   describe '#field_size' do
-    context 'when the tournament has a labs_tournament_id' do
-      let(:tournament) { create(:tournament, game:, labs_tournament_id: '0070') }
+    context 'when the tournament has a results_source_id' do
+      let(:tournament) { create(:tournament, game:, results_source_id: '0070') }
 
       context 'when LabsTournament returns an authoritative count' do
         before { allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call).and_return(3752) }
@@ -125,7 +125,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
         end
       end
 
-      it 'queries both services with the tournament\'s labs_tournament_id' do
+      it 'queries both services with the tournament\'s results_source_id' do
         allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call).and_return(nil)
         allow(ExternalData::Pokemon::Tcg::LabsStandings).to receive(:entrant_count).and_return(3750)
 
@@ -136,11 +136,11 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
       end
     end
 
-    context 'when the tournament has no labs_tournament_id' do
-      let(:tournament) { create(:tournament, game:, labs_tournament_id: nil) }
+    context 'when the tournament has no results_source_id' do
+      let(:tournament) { create(:tournament, game:, results_source_id: nil) }
 
       it 'raises a semantic error instead of fetching with a blank id' do
-        message = "ExternalData::Pokemon::Tcg::Adapter: no labs_tournament_id set on tournament ##{tournament.id} " \
+        message = "ExternalData::Pokemon::Tcg::Adapter: no results_source_id set on tournament ##{tournament.id} " \
                   "('#{tournament.name}') — resolve it (e.g. via admin) before fetching Pokemon results."
 
         expect { adapter.field_size(tournament:) }.to raise_error(RuntimeError, message)
