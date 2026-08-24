@@ -1,6 +1,7 @@
 class Season < ApplicationRecord
 
   belongs_to :game
+  has_one :game_setting, dependent: :destroy
 
   validates :label, presence: true
   validates :start_date, presence: true

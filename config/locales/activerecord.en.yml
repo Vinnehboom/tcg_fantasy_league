@@ -25,6 +25,9 @@ en:
       season:
         one: Season
         other: Seasons
+      game_setting:
+        one: Game setting
+        other: Game settings
     attributes:
       user:
         email: Email
@@ -89,6 +92,11 @@ en:
         label: Label
         start_date: Start date
         end_date: End date
+      game_setting:
+        season: Season
+        season_id: Season
+        game: Game
+        settings: Settings
     enums:
       external_request:
         kind:
