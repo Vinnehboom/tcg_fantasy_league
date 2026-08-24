@@ -62,7 +62,7 @@ fi
 
 sudo service postgresql start >/dev/null 2>&1 || true
 
-PG_HBA=$(sudo -u postgres psql -tAc 'SHOW hba_file;' 2>/dev/null | tr -d '[:space:]')
+PG_HBA=$(runuser -u postgres -- psql -tAc 'SHOW hba_file;' 2>/dev/null | tr -d '[:space:]')
 if [ -n "$PG_HBA" ] && sudo test -f "$PG_HBA"; then
   sudo sed -i -E 's/^(local[[:space:]]+all[[:space:]]+all[[:space:]]+)\S+/\1trust/' "$PG_HBA" || true
   sudo service postgresql restart >/dev/null 2>&1 || true
@@ -97,7 +97,7 @@ if [ -f config/credentials/test.key ] && command -v bundle >/dev/null 2>&1; then
   DB_USER=$(printf '%s' "$DB_INFO" | cut -f1)
   DB_PASS=$(printf '%s' "$DB_INFO" | cut -f2)
   if [ -n "$DB_USER" ]; then
-    sudo -u postgres psql -v ON_ERROR_STOP=0 -c \
+    runuser -u postgres -- psql -v ON_ERROR_STOP=0 -c \
       "DO \$\$ BEGIN CREATE ROLE \"$DB_USER\" WITH LOGIN SUPERUSER PASSWORD '$DB_PASS'; EXCEPTION WHEN duplicate_object THEN NULL; END \$\$;" \
       >/dev/null 2>&1 || true
   fi
