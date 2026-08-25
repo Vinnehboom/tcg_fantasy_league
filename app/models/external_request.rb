@@ -12,7 +12,7 @@ class ExternalRequest < ApplicationRecord
   validates :started_at, presence: true
   validates :records_processed, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-  enum kind: { players: 0, tournaments: 1 }
+  enum kind: { players: 0, tournaments: 1, results: 2 }
   enum status: { running: 0, success: 1, failure: 2 }
 
   def duration_seconds

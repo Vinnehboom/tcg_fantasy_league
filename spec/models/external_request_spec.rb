@@ -94,6 +94,14 @@ RSpec.describe ExternalRequest do
     end
   end
 
+  describe 'the results kind' do
+    it 'persists and round-trips a results-import audit row' do
+      external_request = create(:external_request, kind: :results)
+
+      expect(external_request.reload.kind).to eq('results')
+    end
+  end
+
   describe 'the default scope' do
     subject(:all_requests) { described_class.all }
 
