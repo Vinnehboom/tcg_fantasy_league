@@ -252,6 +252,17 @@ a background `Agent` subagent of THIS session, with `isolation:
   it a clearly identifiable name/description (ticket ID or PR number) so a
   later cycle's `ListAgents` call and this cycle's rundown (step 7) can
   match it back to the right card/PR.
+- **When the ticket being dispatched is stacked on another open PR, tell
+  the dispatch explicitly to open its new PR with `base:` set to that
+  other PR's branch, not `main`.** This isn't automatic — a PR-creation
+  call defaults to the repo's default branch unless told otherwise, even
+  when the underlying git branch was itself branched off the other PR's
+  branch. Getting this right is what makes GitHub show only this ticket's
+  own commits in the PR's diff for review, instead of the combined diff
+  of both tickets — the whole point of stacking instead of waiting for
+  the base PR to merge first. Confirmed working this way on PR #57
+  (stacked on #56): base set explicitly to `feat/C-17-...`, diff shows
+  only C-6's own 5 commits.
 - Since it's a subagent of this session (not a disconnected CCR session),
   checkpoints route through the normal subagent flow: it stops and its
   `<task-notification>` arrives back into THIS session when it needs an
