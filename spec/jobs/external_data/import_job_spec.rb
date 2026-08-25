@@ -89,6 +89,22 @@ module ExternalData
         expect(ExternalRequest.last.requestable).to be_nil
       end
 
+      context 'when the subclass overrides #requestable' do
+        let(:tournament) { create(:tournament) }
+        let(:job_class) do
+          record = tournament
+          Class.new(build_job_class(game:, adapter: fake_adapter(players:))) do
+            define_method(:requestable) { record }
+          end
+        end
+
+        it 'links the ExternalRequest to the record the job ran for' do
+          job.perform_now
+
+          expect(ExternalRequest.last.requestable).to eq(tournament)
+        end
+      end
+
       describe 'when run a second time with the same batch' do
         it 'does not duplicate the persisted records' do
           job.perform_now

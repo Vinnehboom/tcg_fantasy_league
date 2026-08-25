@@ -14,6 +14,12 @@ module ExternalData
              wait: :polynomially_longer, attempts: ExternalData::RetryPolicy.new.max_attempts
 
     def perform
+      run_import
+    end
+
+    private
+
+    def run_import
       current_game = game
       current_adapter = adapter
 
@@ -23,10 +29,12 @@ module ExternalData
       end
     end
 
-    private
-
     def build_result(records_processed:)
-      Struct.new(:records_processed, :requestable, keyword_init: true).new(records_processed:, requestable: nil)
+      Struct.new(:records_processed, :requestable, keyword_init: true).new(records_processed:, requestable:)
+    end
+
+    def requestable
+      nil
     end
 
     def game
