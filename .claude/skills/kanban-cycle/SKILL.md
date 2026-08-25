@@ -121,10 +121,20 @@ active agent:
   updated, that ISN'T an "lgtm"/approval covered above) → dispatch an
   agent to run `/ticket-pipeline`'s "Handling review feedback (re-entry)"
   flow for that ticket/PR.
-- **Stale branch / merge conflict** → dispatch an agent to rebase onto the
-  repo's default branch only (never merge into the branch — no merge
-  commits, ever), force-push with `--force-with-lease`, per the same rule
-  `/ticket-pipeline`'s Gatekeeper uses.
+- **Stale branch / merge conflict** → dispatch an agent to rebase, force-push
+  with `--force-with-lease` (never merge into the branch — no merge
+  commits, ever), per the same rule `/ticket-pipeline`'s Gatekeeper uses.
+  **The rebase target is the PR's own current base branch, not
+  automatically the repo's default branch** — for a stacked PR (base is
+  another open PR's branch, not `main`), that base branch is what may have
+  moved (e.g. a review-feedback fix landed new commits on it) while this
+  PR sat unrebased; rebase onto that branch's current tip so this PR
+  picks up those changes. Only rebase directly onto the default branch
+  once this PR's own base already is the default branch, or once the PR
+  it was stacked on has merged and this PR's base has been retargeted
+  (see the lgtm-merge case above, which does that retargeting) — don't
+  rebase past a still-open base PR onto `main` early, that would silently
+  drop whatever that base PR hasn't merged yet.
 - **Waiting on CI / waiting on the user** → nothing to dispatch; just
   reflect its state in the cycle rundown.
 
