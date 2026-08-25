@@ -103,15 +103,33 @@ active agent:
   merge with `merge_method: "rebase"` (preserves the ticket's individual
   test-first commits, produces no merge commit — same spirit as the
   no-merge-commits rule elsewhere in this skill). After merging: flip the
-  ticket's Notion Status to "Done"; if any other open PR is stacked on the
-  branch just merged, retarget its base to the repo's default branch
-  (`mcp__github__update_pull_request` with `base:`) — the merge usually
-  doesn't auto-retarget a stacked PR's base the way GitHub does when the
-  head branch is deleted, since `rebase`-merging doesn't delete it. A
-  merge frees a slot under `max_open_prs` — don't wait for the next
-  scheduled firing to use it; re-run step 4 onward in this same cycle.
-  If the CI-green condition isn't met yet (still running, or red), leave
-  it — that's the CI-red or waiting-on-CI case below, not this one.
+  ticket's Notion Status to "Done", then **rebase every other open PR
+  onto the new default-branch tip — every one, not only PRs literally
+  stacked on the branch just merged.** This is a standing instruction
+  (2026-08-25): a merge moves the default branch forward, and any open
+  PR benefits from staying current rather than silently drifting,
+  regardless of whether it was technically stacked on what just merged.
+  For a PR whose base was the branch that just merged, this means BOTH
+  retargeting its base to the default branch (`mcp__github__update_pull_request`
+  with `base:` — the merge usually doesn't auto-retarget on its own, since
+  `rebase`-merging doesn't delete the head branch the way GitHub's normal
+  auto-retarget expects) AND actually running `git rebase` on its
+  branch — **retargeting the API `base` field alone is not a rebase and
+  does not touch the branch's real commit history; doing only that
+  leaves the PR's diff silently bloated/wrong against its new base while
+  looking superficially fine.** (Confirmed the hard way on PR #56: it was
+  API-retargeted after C-5 merged but never actually rebased, so its real
+  git ancestry stayed rooted before C-5's commits — 9 commits behind
+  `main` including the merge itself — while GitHub kept computing a
+  bloated diff against the new base it was never rebased onto.) For a PR
+  whose base wasn't the merged branch, a plain rebase onto the
+  now-updated default branch is enough, no retargeting needed. Push each
+  rebased branch with `--force-with-lease`, confirm the test suite and
+  lint are still green post-rebase before pushing. A merge frees a slot
+  under `max_open_prs` — don't wait for the next scheduled firing to use
+  it; re-run step 4 onward in this same cycle. If the CI-green condition
+  isn't met yet (still running, or red), leave it — that's the CI-red or
+  waiting-on-CI case below, not this one.
 - **CI red** → dispatch a worktree-isolated background agent (see
   "Dispatch mechanics" below) to fix it with the same rigor as
   `/ticket-pipeline`'s Gatekeeper CI-fix step (references/developer.md
