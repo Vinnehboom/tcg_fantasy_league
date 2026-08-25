@@ -1,20 +1,20 @@
 require 'rails_helper'
 
-RSpec.describe GameSetting do
+RSpec.describe Setting do
   it { is_expected.to belong_to(:settingable) }
   it { is_expected.to belong_to(:season) }
   it { is_expected.to have_one(:game).through(:season) }
   it { is_expected.to validate_presence_of(:settings) }
 
   describe 'uniqueness' do
-    subject(:new_game_setting) { build(:game_setting, season:) }
+    subject(:new_setting) { build(:setting, season:) }
 
     let(:season) { create(:season) }
 
-    before { create(:game_setting, season:) }
+    before { create(:setting, season:) }
 
     it 'rejects a second row for the same season' do
-      expect(new_game_setting).not_to be_valid
+      expect(new_setting).not_to be_valid
     end
   end
 
@@ -34,11 +34,11 @@ RSpec.describe GameSetting do
 
     context 'when the looked-up season has its own row' do
       let(:lookup_season) { mid_season }
-      let(:own_setting) { create(:game_setting, season: mid_season) }
+      let(:own_setting) { create(:setting, season: mid_season) }
 
       before do
         own_setting
-        create(:game_setting, season: late_season)
+        create(:setting, season: late_season)
       end
 
       it 'returns that season\'s own row' do
@@ -48,10 +48,10 @@ RSpec.describe GameSetting do
 
     context 'when the looked-up season has no row of its own but an earlier season does' do
       let(:lookup_season) { late_season }
-      let(:nearest_prior_setting) { create(:game_setting, season: mid_season) }
+      let(:nearest_prior_setting) { create(:setting, season: mid_season) }
 
       before do
-        create(:game_setting, season: early_season)
+        create(:setting, season: early_season)
         nearest_prior_setting
       end
 
@@ -63,14 +63,14 @@ RSpec.describe GameSetting do
     context 'when only a later season has a row' do
       let(:lookup_season) { early_season }
 
-      before { create(:game_setting, season: late_season) }
+      before { create(:setting, season: late_season) }
 
       it 'does not fall forward, returning nil' do
         expect(looked_up_setting).to be_nil
       end
     end
 
-    context 'when the game has no GameSetting row at all' do
+    context 'when the game has no Setting row at all' do
       let(:lookup_season) { mid_season }
 
       it { is_expected.to be_nil }
@@ -84,7 +84,7 @@ RSpec.describe GameSetting do
                         start_date: Date.new(2023, 9, 1), end_date: Date.new(2024, 8, 31))
       end
 
-      before { create(:game_setting, season: other_season) }
+      before { create(:setting, season: other_season) }
 
       it 'never falls back to another game\'s row' do
         expect(looked_up_setting).to be_nil

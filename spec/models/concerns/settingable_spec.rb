@@ -2,11 +2,11 @@ require 'rails_helper'
 
 RSpec.describe Settingable do
   # A second, independent includer, backed by the same table shape as
-  # GameSetting. Proves the behavior below comes from the concern itself,
-  # not something only GameSetting happens to do.
+  # Setting. Proves the behavior below comes from the concern itself,
+  # not something only Setting happens to do.
   let(:record_class) do
     Class.new(ApplicationRecord) do
-      self.table_name = 'game_settings'
+      self.table_name = 'settings'
       include Settingable
 
       def self.name
