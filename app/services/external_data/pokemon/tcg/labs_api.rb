@@ -4,7 +4,7 @@ module ExternalData
 
     module Tcg
 
-      module MewLabsApi
+      module LabsApi
 
         MEW_BASE_URI = 'https://mew.limitlesstcg.com'.freeze
         DIVISION = 'MA'.freeze
