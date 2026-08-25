@@ -44,11 +44,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_24_140000) do
   end
 
   create_table "game_settings", force: :cascade do |t|
-    t.bigint "season_id", null: false
+    t.string "settingable_type", null: false
+    t.bigint "settingable_id", null: false
     t.jsonb "settings", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["season_id"], name: "index_game_settings_on_season_id", unique: true
+    t.index ["settingable_type", "settingable_id"], name: "index_game_settings_on_settingable", unique: true
   end
 
   create_table "games", id: :string, force: :cascade do |t|
@@ -176,7 +177,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_24_140000) do
 
   add_foreign_key "external_requests", "games"
   add_foreign_key "external_scores", "players"
-  add_foreign_key "game_settings", "seasons"
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
   add_foreign_key "players", "games"
