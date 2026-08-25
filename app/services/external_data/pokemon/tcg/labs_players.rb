@@ -6,7 +6,7 @@ module ExternalData
 
       class LabsPlayers < ApplicationService
 
-        include MewLabsApi
+        include LabsApi
 
         RANKINGS_PATH = '/labs/data/tcg/rankings'.freeze
 

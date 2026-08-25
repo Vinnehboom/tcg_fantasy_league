@@ -6,7 +6,7 @@ module ExternalData
 
       class LabsStandings < ApplicationService
 
-        include MewLabsApi
+        include LabsApi
 
         STANDINGS_PATH = '/labs/data/tcg/standings'.freeze
 
