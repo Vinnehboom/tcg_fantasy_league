@@ -94,9 +94,9 @@ en:
         end_date: End date
       game_setting:
         season: Season
-        season_id: Season
         game: Game
         settings: Settings
+        settingable: Settingable
     enums:
       external_request:
         kind:

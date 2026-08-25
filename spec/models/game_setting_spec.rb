@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe GameSetting do
+  it { is_expected.to belong_to(:settingable) }
   it { is_expected.to belong_to(:season) }
   it { is_expected.to have_one(:game).through(:season) }
   it { is_expected.to validate_presence_of(:settings) }
