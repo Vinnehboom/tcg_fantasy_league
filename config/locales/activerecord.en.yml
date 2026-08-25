@@ -103,6 +103,7 @@ en:
         kind:
           players: Players
           tournaments: Tournaments
+          results: Results
         status:
           running: Running
           success: Success
