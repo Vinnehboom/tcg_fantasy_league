@@ -19,6 +19,9 @@ Rails.application.routes.draw do
 
     namespace :api do
       resources :external_imports, only: :create
+      resources :tournaments, only: [] do
+        patch :results_source_id, on: :member
+      end
     end
   end
 
