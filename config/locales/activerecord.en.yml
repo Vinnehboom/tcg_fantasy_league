@@ -47,6 +47,7 @@ en:
         starting_date: Starting date
         format: Format
         game_id: Game
+        results_source_id: Results source id
       salary_draft:
         game: Game
         tournament: Tournament
