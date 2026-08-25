@@ -131,10 +131,21 @@ active agent:
   PR sat unrebased; rebase onto that branch's current tip so this PR
   picks up those changes. Only rebase directly onto the default branch
   once this PR's own base already is the default branch, or once the PR
-  it was stacked on has merged and this PR's base has been retargeted
-  (see the lgtm-merge case above, which does that retargeting) — don't
-  rebase past a still-open base PR onto `main` early, that would silently
-  drop whatever that base PR hasn't merged yet.
+  it was stacked on has merged.
+  **Check the base-PR-merged case explicitly here too, every time — don't
+  rely solely on the lgtm-merge case above to have caught it.** That case
+  only fires when this automation is the one merging; a base PR can also
+  merge some other way (Vinnie merging it himself on GitHub, for
+  instance), which this stale-branch triage may be the first thing to
+  notice. If the branch this PR is/was stacked on shows as merged, do
+  both: retarget this PR's `base` to the repo's default branch
+  (`mcp__github__update_pull_request` with `base:`) *and* rebase its
+  commits onto that default branch's current tip — GitHub does not
+  reliably do this automatically on its own (confirmed firsthand: a
+  `rebase`-merge doesn't delete the base branch, so the auto-retarget
+  GitHub normally does on branch deletion never fires). Don't rebase past
+  a still-open base PR onto `main` early, that would silently drop
+  whatever that base PR hasn't merged yet.
 - **Waiting on CI / waiting on the user** → nothing to dispatch; just
   reflect its state in the cycle rundown.
 
