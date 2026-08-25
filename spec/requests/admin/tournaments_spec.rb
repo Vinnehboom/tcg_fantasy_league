@@ -68,6 +68,27 @@ module Admin
           expect(response).to have_http_status(:not_found)
         end
       end
+
+      context 'when the tournament has a results_source_id' do
+        it 'shows the results-import trigger' do
+          tournament = create(:tournament, results_source_id: '0070')
+
+          get admin_tournament_path(tournament)
+
+          expect(response.body).to include('data-controller="results-import-trigger"')
+          expect(response.body).to include(results_import_admin_api_tournament_path(tournament))
+        end
+      end
+
+      context 'when the tournament has no results_source_id' do
+        it 'shows an explanatory message instead of the results-import trigger' do
+          tournament = create(:tournament, results_source_id: nil)
+
+          get admin_tournament_path(tournament)
+
+          expect(response.body).to include(I18n.t('admin.tournaments.show.results_source_id_required'))
+        end
+      end
     end
 
     describe '#update' do

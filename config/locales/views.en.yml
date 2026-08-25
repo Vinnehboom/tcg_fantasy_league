@@ -49,6 +49,10 @@ en:
       show:
         results_source_id_placeholder: mew tournament id
         set_results_source_id: Set
+        trigger_results_import: Import results
+        trigger_success: Import started.
+        trigger_failure: Failed to start import.
+        results_source_id_required: Set a results source id first.
     games:
       index:
         no_games: No games found yet.
