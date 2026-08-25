@@ -95,14 +95,32 @@ For each open PR whose body links a Notion ticket (i.e. one this
 automation is responsible for driving) that does NOT already have an
 active agent:
 
+- **Vinnie commented/reviewed "lgtm" (or a clear equivalent — "looks
+  good," "approved," "ship it") and CI is green** → merge it. This is a
+  standing instruction (2026-08-25), not a one-off: don't wait for a
+  further "go ahead," and don't leave it sitting merge-ready across
+  cycles. Mark it ready for review if still draft (`draft: false`), then
+  merge with `merge_method: "rebase"` (preserves the ticket's individual
+  test-first commits, produces no merge commit — same spirit as the
+  no-merge-commits rule elsewhere in this skill). After merging: flip the
+  ticket's Notion Status to "Done"; if any other open PR is stacked on the
+  branch just merged, retarget its base to the repo's default branch
+  (`mcp__github__update_pull_request` with `base:`) — the merge usually
+  doesn't auto-retarget a stacked PR's base the way GitHub does when the
+  head branch is deleted, since `rebase`-merging doesn't delete it. A
+  merge frees a slot under `max_open_prs` — don't wait for the next
+  scheduled firing to use it; re-run step 4 onward in this same cycle.
+  If the CI-green condition isn't met yet (still running, or red), leave
+  it — that's the CI-red or waiting-on-CI case below, not this one.
 - **CI red** → dispatch a worktree-isolated background agent (see
   "Dispatch mechanics" below) to fix it with the same rigor as
   `/ticket-pipeline`'s Gatekeeper CI-fix step (references/developer.md
   discipline: test-first, lint+test before pushing). New commit(s), push,
   done — don't just report it.
 - **Unresolved review feedback** (a review or comment since the PR last
-  updated) → dispatch an agent to run `/ticket-pipeline`'s "Handling
-  review feedback (re-entry)" flow for that ticket/PR.
+  updated, that ISN'T an "lgtm"/approval covered above) → dispatch an
+  agent to run `/ticket-pipeline`'s "Handling review feedback (re-entry)"
+  flow for that ticket/PR.
 - **Stale branch / merge conflict** → dispatch an agent to rebase onto the
   repo's default branch only (never merge into the branch — no merge
   commits, ever), force-push with `--force-with-lease`, per the same rule
