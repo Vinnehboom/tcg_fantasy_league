@@ -43,15 +43,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_24_140000) do
     t.index ["player_id"], name: "index_external_scores_on_player_id"
   end
 
-  create_table "game_settings", force: :cascade do |t|
-    t.string "settingable_type", null: false
-    t.bigint "settingable_id", null: false
-    t.jsonb "settings", default: {}, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["settingable_type", "settingable_id"], name: "index_game_settings_on_settingable", unique: true
-  end
-
   create_table "games", id: :string, force: :cascade do |t|
     t.string "name"
     t.string "base_uri"
@@ -136,6 +127,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_24_140000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["game_id"], name: "index_seasons_on_game_id"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string "settingable_type", null: false
+    t.bigint "settingable_id", null: false
+    t.jsonb "settings", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["settingable_type", "settingable_id"], name: "index_settings_on_settingable", unique: true
   end
 
   create_table "tournaments", force: :cascade do |t|

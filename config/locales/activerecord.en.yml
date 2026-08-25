@@ -25,9 +25,9 @@ en:
       season:
         one: Season
         other: Seasons
-      game_setting:
-        one: Game setting
-        other: Game settings
+      setting:
+        one: Setting
+        other: Settings
     attributes:
       user:
         email: Email
@@ -92,7 +92,7 @@ en:
         label: Label
         start_date: Start date
         end_date: End date
-      game_setting:
+      setting:
         season: Season
         game: Game
         settings: Settings

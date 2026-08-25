@@ -1,8 +1,8 @@
-class GameSetting < ApplicationRecord
+class Setting < ApplicationRecord
 
   include Settingable
 
-  belongs_to :season, foreign_key: :settingable_id, inverse_of: :game_setting
+  belongs_to :season, foreign_key: :settingable_id, inverse_of: :setting
   has_one :game, through: :season
 
   before_validation :assign_settingable_type
@@ -25,8 +25,8 @@ class GameSetting < ApplicationRecord
   private
 
   # `season=`/`season:` (the public interface kept for callers) only sets
-  # settingable_id, not settingable_type — GameSetting only ever means
-  # Season, so this fills in the other half of the polymorphic pair itself.
+  # settingable_id, not settingable_type — this model only ever means
+  # Season here, so this fills in the other half of the polymorphic pair itself.
   def assign_settingable_type
     self.settingable_type = 'Season'
   end

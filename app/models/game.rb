@@ -8,7 +8,7 @@ class Game < ApplicationRecord
   has_many :salary_drafts, through: :tournaments
   has_many :external_requests, dependent: :restrict_with_error
   has_many :seasons, dependent: :destroy
-  has_many :game_settings, through: :seasons
+  has_many :settings, through: :seasons
 
   def upcoming_drafts
     salary_drafts.upcoming
