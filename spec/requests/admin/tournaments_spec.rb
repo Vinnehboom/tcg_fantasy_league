@@ -99,6 +99,8 @@ module Admin
         end
 
         context 'with a full URL' do
+          let(:tournament) { create(:tournament, results_source_id: nil, game: create(:game, :ptcg)) }
+
           it 'extracts the id and sets it' do
             patch admin_tournament_path(tournament),
                   params: { results_source_id: 'https://labs.limitlesstcg.com/0070/standings' }
