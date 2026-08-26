@@ -21,12 +21,14 @@ description: >-
 
 Take one ticket and carry it, in order, through six specialist phases:
 
-1. Planner (Opus, high effort) — understands the ticket, closes knowledge gaps with you, and writes a commit-by-commit plan directly onto the Notion ticket card.
+1. Planner (Sonnet, high effort) — understands the ticket, closes knowledge gaps with you, and writes a commit-by-commit plan directly onto the Notion ticket card.
 2. Developer (Sonnet, medium effort) — builds it test-first on a branch, following the coding style guide, linting and testing before every commit.
-3. Reviewer (Opus, high effort) — reviews the whole branch against ONLY the ticket, the style guide, and Notion docs, blind to the developer's reasoning, and loops fixes back before the PR opens.
+3. Reviewer (Opus, high effort) — reviews the whole branch against ONLY the ticket, the style guide, and Notion docs, blind to the developer's reasoning, and loops fixes back before the PR opens. Kept at Opus deliberately: this is the one phase whose whole job is catching what a Sonnet-tier pass already missed, and downgrading it is where a cost cut would show up as real bugs reaching a PR.
 4. Tester (Sonnet, medium effort) — once Render's PR-preview environment deploys, exercises the ticket's done-criteria against the live app with a real test account, capturing screenshots as evidence.
 5. Gatekeeper (orchestrator-run, no separate subagent) — keeps the PR a draft until CI is green, testing evidence is attached, and the branch is rebased onto the latest main (never merged) — only then marks it ready for review.
-6. Curator (Opus, high effort) — after review, harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval.
+6. Curator (Sonnet, high effort) — after review, harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval.
+
+**2026-08-26 cost pass:** Planner and Curator moved from Opus to Sonnet (effort kept at high) — both are organizing/synthesizing existing context (the ticket, the diff, the docs) rather than the adversarial "find what's wrong" job the Reviewer does, so the effort level buys most of the quality that mattered here, at a fraction of the cost. Reviewer stays Opus. If a Sonnet-tier Planner or Curator starts producing visibly worse plans/proposals, that's the signal to move it back — don't silently reduce effort level too as a second cut without checking that first.
 
 Each role runs as a SEPARATE subagent on purpose (except the Gatekeeper, which is mechanical orchestrator work, not judgment work — see Phase 5). Isolation matters most for the reviewer — it must not inherit the developer's justifications, or it will rubber-stamp them. The curator is the deliberate exception: it needs the whole picture.
 
@@ -87,7 +89,7 @@ Between Checkpoints 2 and 3 the developer, reviewer, and tester run to completio
 
 ## The flow
 ### Phase 1 — Planner → read references/planner.md
-- Subagent model opus, high effort. Reads ticket + cached Notion context (see caching section) + code, lists gaps.
+- Subagent model sonnet, high effort. Reads ticket + cached Notion context (see caching section) + code, lists gaps.
 - Checkpoint 1: relay questions; return answers.
 - Hands back the plan as text — broken into commits, decisions up front, alternatives noted. Do NOT write it to a repo file (no `docs/plans/`).
 - The orchestrator appends the plan to the Notion ticket card itself, under a `## Plan` heading (`notion-update-page`, `insert_content`, position `end`), then refreshes that ticket's cache file (see caching section) so the cache reflects the card with its plan attached — downstream phases that read the cache see it too.
@@ -154,7 +156,7 @@ See "Merge policy" below for how the PR itself eventually gets merged.
 No merge commits, anywhere. When a PR in this pipeline is merged, always use `merge_method: "rebase"` on `mcp__github__merge_pull_request` — never `"merge"`, which creates a merge commit. `"squash"` is a separate call Vinnie can make per-PR if he wants it; rebase is this skill's default unless told otherwise. Stacked-PR merges still respect bottom-up order (see "Stacked PRs for dependent tickets") on top of this.
 
 ### Phase 6 — Curator → read references/curator.md
-- Subagent opus, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache.
+- Subagent sonnet, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache.
 - Proposes new tickets / style-guide additions / Decisions-database entries (or a Status flip on an existing row, when this work supersedes it) / Tech Debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
 - Checkpoint 3: present proposals; on approval, create cards / edit pages. Nothing written without the user's go.
 
@@ -172,7 +174,7 @@ A review comment on a pipeline-opened PR is NOT a quick ad hoc patch — rerun t
 9. Reply on the PR thread once the round resolves the feedback (per this environment's PR-babysitting conventions) — the pushed commits are the record, the reply is just the "handled" signal.
 
 ## Model and effort summary
-Planner opus/high; Developer sonnet/medium; Reviewer opus/high; Tester sonnet/medium; Gatekeeper — orchestrator, no subagent/model of its own (CI fixes it dispatches reuse the Developer role); Curator opus/high. If a model isn't available, fall back to the closest stronger model and say so rather than silently downgrading the reviewer.
+Planner sonnet/high; Developer sonnet/medium; Reviewer opus/high; Tester sonnet/medium; Gatekeeper — orchestrator, no subagent/model of its own (CI fixes it dispatches reuse the Developer role); Curator sonnet/high. If a model isn't available, fall back to the closest stronger model and say so rather than silently downgrading the reviewer. Reviewer is the one phase that must not be downgraded further as a future cost cut without the user explicitly signing off — see the 2026-08-26 cost pass note above.
 
 ## Notion status transitions
 Planner starts → In progress. PR opens as a draft after clean review — card stays In progress. Gatekeeper marks the PR ready for review → card moves to Review. Leave Done for a human on merge. If a phase fails or the user aborts, return the card to its previous status and say what happened.
