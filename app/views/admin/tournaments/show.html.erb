@@ -1,0 +1,23 @@
+<h2 class="mb-3"><%= @tournament.name %></h2>
+
+<table class="table table-primary w-50">
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.tournament.external_id') %></td>
+    <td><%= @tournament.external_id %></td>
+  </tr>
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.tournament.starting_date') %></td>
+    <td><%= l(@tournament.starting_date) %></td>
+  </tr>
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.tournament.results_source_id') %></td>
+    <td><%= @tournament.results_source_id %></td>
+  </tr>
+</table>
+
+<%= form_with url: admin_tournament_path(@tournament), method: :patch, class: 'd-flex gap-2 align-items-center' do |f| %>
+  <%= f.text_field :results_source_id, value: @tournament.results_source_id,
+                    class: 'form-control form-control-sm', style: 'width: 20rem;',
+                    placeholder: t('.results_source_id_placeholder') %>
+  <%= f.submit t('.set_results_source_id'), class: 'btn btn-sm btn-primary' %>
+<% end %>

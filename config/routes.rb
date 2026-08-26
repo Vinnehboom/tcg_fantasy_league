@@ -16,13 +16,10 @@ Rails.application.routes.draw do
     end
     resources :external_requests, only: %i[index show]
     resources :games, only: %i[index show], constraints: { id: %r{[^/]+} }
-    resources :tournaments, only: :index
+    resources :tournaments, only: %i[index show update]
 
     namespace :api do
       resources :external_imports, only: :create
-      resources :tournaments, only: [] do
-        patch :results_source_id, on: :member
-      end
     end
   end
 

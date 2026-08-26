@@ -13,8 +13,5 @@ application.register("hello", HelloController)
 import RemovalsController from "./removals_controller"
 application.register("removals", RemovalsController)
 
-import ResultsSourceIdController from "./results_source_id_controller"
-application.register("results-source-id", ResultsSourceIdController)
-
 import TableFiltersController from "./table_filters_controller"
 application.register("table-filters", TableFiltersController)

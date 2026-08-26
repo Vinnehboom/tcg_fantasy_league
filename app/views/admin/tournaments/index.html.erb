@@ -5,32 +5,14 @@
         <th><%= t('activerecord.attributes.tournament.name') %></th>
         <th><%= t('activerecord.attributes.tournament.external_id') %></th>
         <th><%= t('activerecord.attributes.tournament.starting_date') %></th>
-        <th><%= t('activerecord.attributes.tournament.results_source_id') %></th>
       </tr>
     </thead>
     <tbody>
       <% @tournaments.each do |tournament| %>
         <tr>
-          <td><%= tournament.name %></td>
+          <td><%= link_to tournament.name, admin_tournament_path(tournament) %></td>
           <td><%= tournament.external_id %></td>
           <td><%= l(tournament.starting_date) %></td>
-          <td>
-            <div class="d-flex gap-2 align-items-center"
-                 data-controller="results-source-id"
-                 data-results-source-id-url-value="<%= results_source_id_admin_api_tournament_path(tournament) %>"
-                 data-results-source-id-success-text-value="<%= t('.set_success') %>"
-                 data-results-source-id-failure-text-value="<%= t('.set_failure') %>">
-              <input type="text" class="form-control form-control-sm" style="width: 10rem;"
-                     value="<%= tournament.results_source_id %>"
-                     placeholder="<%= t('.results_source_id_placeholder') %>"
-                     data-results-source-id-target="input">
-              <button type="button" class="btn btn-sm btn-primary"
-                      data-action="results-source-id#submit">
-                <%= t('.set_results_source_id') %>
-              </button>
-              <span data-results-source-id-target="status"></span>
-            </div>
-          </td>
         </tr>
       <% end %>
     </tbody>

@@ -6,7 +6,7 @@ class TournamentPolicy < ApplicationPolicy
     super
   end
 
-  def set_results_source_id?
+  def update?
     admin?
   end
 
