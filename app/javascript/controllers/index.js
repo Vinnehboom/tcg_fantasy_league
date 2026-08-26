@@ -7,9 +7,6 @@ import { application } from "./application"
 import ExternalImportTriggerController from "./external_import_trigger_controller"
 application.register("external-import-trigger", ExternalImportTriggerController)
 
-import HelloController from "./hello_controller"
-application.register("hello", HelloController)
-
 import RemovalsController from "./removals_controller"
 application.register("removals", RemovalsController)
 
