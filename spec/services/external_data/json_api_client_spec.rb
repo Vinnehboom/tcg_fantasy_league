@@ -157,6 +157,39 @@ module ExternalData
         end
       end
 
+      context 'when the connection fails with a SocketError' do
+        before { allow(HTTParty).to receive(:get).and_raise(SocketError) }
+
+        it 'raises a ConnectionError instead of the raw SocketError' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::ConnectionError)
+        end
+
+        it 'carries the request URL on the raised ConnectionError' do
+          error = nil
+          begin
+            client.get_json(path: '/players/1')
+          rescue described_class::ConnectionError => e
+            error = e
+          end
+
+          expect(error).to have_attributes(url: 'https://example.com/players/1')
+        end
+
+        it 'does not retry, since a connection failure is unlikely to succeed on immediate retry' do
+          suppress(described_class::ConnectionError) { client.get_json(path: '/players/1') }
+
+          expect(HTTParty).to have_received(:get).once
+        end
+      end
+
+      context 'when the connection fails with ECONNREFUSED' do
+        before { allow(HTTParty).to receive(:get).and_raise(Errno::ECONNREFUSED) }
+
+        it 'raises a ConnectionError instead of the raw Errno::ECONNREFUSED' do
+          expect { client.get_json(path: '/players/1') }.to raise_error(described_class::ConnectionError)
+        end
+      end
+
       context 'when the response is rate-limited once and then succeeds' do
         let(:retry_policy) { RetryPolicy.new(retry_delays: [0, 0]) }
 

@@ -2,6 +2,15 @@ module ExternalData
 
   class JsonApiClient
 
+    NETWORK_ERRORS = [
+      SocketError,
+      Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
+      OpenSSL::SSL::SSLError,
+      EOFError,
+      HTTParty::RedirectionTooDeep
+    ].freeze
+
     def initialize(base_uri:, retry_policy: RetryPolicy.new)
       @base_uri = base_uri
       @retry_policy = retry_policy
@@ -31,6 +40,8 @@ module ExternalData
       raise HttpError.new(status: response.code, url:)
     rescue Timeout::Error
       retry_after_timeout(url:, query:, attempt:)
+    rescue *NETWORK_ERRORS
+      raise ConnectionError.new(url:)
     end
 
     def retry_after_timeout(url:, query:, attempt:)
