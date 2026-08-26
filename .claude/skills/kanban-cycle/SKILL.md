@@ -326,6 +326,14 @@ a background `Agent` subagent of THIS session, with `isolation:
   the base PR to merge first. Confirmed working this way on PR #57
   (stacked on #56): base set explicitly to `feat/C-17-...`, diff shows
   only C-6's own 5 commits.
+- `model: "sonnet"` — set this explicitly on every dispatch here (CI
+  fixes, review-feedback rounds, rebases). These are Developer-shaped
+  tasks (execute a known fix, test-first), not the adversarial-critique
+  job that justifies Opus inside `/ticket-pipeline`'s Reviewer phase — see
+  that skill's 2026-08-26 cost-cut note. Don't leave `model` unset on the
+  assumption it'll inherit something equivalent; pin it so a future change
+  to this session's own model doesn't silently change every dispatch's
+  cost with it.
 - Since it's a subagent of this session (not a disconnected CCR session),
   checkpoints route through the normal subagent flow: it stops and its
   `<task-notification>` arrives back into THIS session when it needs an
