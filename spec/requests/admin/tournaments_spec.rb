@@ -76,7 +76,7 @@ module Admin
           get admin_tournament_path(tournament)
 
           expect(response.body).to include('data-controller="results-import-trigger"')
-          expect(response.body).to include(results_import_admin_api_tournament_path(tournament))
+          expect(response.body).to include(admin_api_tournament_results_path(tournament))
         end
       end
 

@@ -21,7 +21,7 @@ Rails.application.routes.draw do
     namespace :api do
       resources :external_imports, only: :create
       resources :tournaments, only: [] do
-        post :results_import, on: :member
+        resource :results, only: :update, controller: 'tournaments/results'
       end
     end
   end

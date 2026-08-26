@@ -26,7 +26,7 @@
   <% if @tournament.results_source_id.present? %>
     <div class="d-flex gap-2 align-items-center"
          data-controller="results-import-trigger"
-         data-results-import-trigger-url-value="<%= results_import_admin_api_tournament_path(@tournament) %>"
+         data-results-import-trigger-url-value="<%= admin_api_tournament_results_path(@tournament) %>"
          data-results-import-trigger-success-text-value="<%= t('.trigger_success') %>"
          data-results-import-trigger-failure-text-value="<%= t('.trigger_failure') %>">
       <button type="button" class="btn btn-sm btn-primary"
