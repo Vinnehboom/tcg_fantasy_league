@@ -10,7 +10,7 @@ class TournamentPolicy < ApplicationPolicy
     admin?
   end
 
-  def trigger_results_import?
+  def update_results?
     admin?
   end
 
