@@ -12,9 +12,7 @@ module ExternalData
       private
 
       def game
-        Game.find('PTCG')
-      rescue ActiveRecord::RecordNotFound
-        raise "#{self.class.name}: no Game row with id 'PTCG' — seed it before running this job."
+        Game.ptcg || raise("#{self.class.name}: no Game row with id 'PTCG' — seed it before running this job.")
       end
 
       def adapter
