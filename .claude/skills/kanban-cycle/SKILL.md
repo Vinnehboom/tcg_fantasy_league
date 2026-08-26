@@ -298,6 +298,17 @@ a background `Agent` subagent of THIS session, with `isolation:
   its steps manually. The script is idempotent and safe to run
   unconditionally on every dispatch, including triage dispatches that
   never end up touching Ruby.
+- **Tell every dispatch to push after its FIRST commit, not just at the
+  end.** Standing instruction, 2026-08-26, after a dispatched agent
+  vanished twice this session with zero trace — no commits, no push, no
+  completion notification, no `git worktree list` entry — losing all its
+  work (once on a planner that had done real research before writing
+  anything, once on a whole review-feedback round). The cause isn't
+  confirmed (suspected container/session lifecycle effect, same family as
+  the stale-HEAD bug below, not a code bug in the agent's own logic), but
+  the fix doesn't need the cause: if an agent pushes incrementally,
+  losing the agent later loses at most its most recent uncommitted work,
+  not everything. Don't wait for "done" to have something recoverable.
 - `subagent_type: "general-purpose"`, prompt: instruct it exactly what to
   do (run `/ticket-pipeline <Task ID>` including all three human
   checkpoints; or the specific triage task for an existing PR), and give
