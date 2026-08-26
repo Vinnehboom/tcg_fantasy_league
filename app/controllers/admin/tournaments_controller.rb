@@ -2,8 +2,6 @@ module Admin
 
   class TournamentsController < ApplicationController
 
-    RESULTS_SOURCE_ID_URL_PATTERN = %r{\Ahttps?://labs\.limitlesstcg\.com/(?<results_source_id>[^/]+)}
-
     def index
       @tournaments = Tournament.order(starting_date: :desc).page(params[:page])
     end
@@ -29,7 +27,8 @@ module Admin
     private
 
     def extract_results_source_id(value)
-      match = RESULTS_SOURCE_ID_URL_PATTERN.match(value.to_s)
+      pattern = @tournament.game.results_source_id_url_pattern
+      match = pattern&.match(value.to_s)
       match ? match[:results_source_id] : value
     end
 
