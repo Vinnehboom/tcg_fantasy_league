@@ -84,58 +84,99 @@ module Admin
       end
 
       context 'when the user is an admin' do
-        context 'with a bare id' do
-          it "sets the tournament's results_source_id" do
-            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+        context 'when results_source_id_override is absent' do
+          context 'with a bare id' do
+            it "sets the tournament's results_source_id" do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
 
-            expect(tournament.reload.results_source_id).to eq('0070')
+              expect(tournament.reload.results_source_id).to eq('0070')
+            end
+
+            it 'redirects to the show page' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+              expect(response).to redirect_to(admin_tournament_path(tournament))
+            end
+          end
+
+          context 'with a full URL' do
+            let(:tournament) { create(:tournament, results_source_id: nil, game: create(:game, :ptcg)) }
+
+            it 'extracts the id and sets it' do
+              patch admin_tournament_path(tournament),
+                    params: { results_source_id: 'https://labs.limitlesstcg.com/0070/standings' }
+
+              expect(tournament.reload.results_source_id).to eq('0070')
+            end
+          end
+
+          context 'with a blank results_source_id' do
+            it 'does not change the tournament' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '' }
+
+              expect(tournament.reload.results_source_id).to be_nil
+            end
+
+            it 'returns 422' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '' }
+
+              expect(response).to have_http_status(:unprocessable_content)
+            end
+          end
+
+          context 'with a results_source_id already used by another tournament' do
+            before { create(:tournament, results_source_id: '0070') }
+
+            it 'does not change the tournament' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+              expect(tournament.reload.results_source_id).to be_nil
+            end
+
+            it 'returns 422' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+              expect(response).to have_http_status(:unprocessable_content)
+            end
+          end
+
+          context 'with an unchanged results_source_id' do
+            let(:tournament) { create(:tournament, results_source_id: '0070') }
+
+            it 'keeps the same results_source_id' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+              expect(tournament.reload.results_source_id).to eq('0070')
+            end
+
+            it 'redirects to the show page' do
+              patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+              expect(response).to redirect_to(admin_tournament_path(tournament))
+            end
+          end
+        end
+
+        context 'when results_source_id_override is present' do
+          it 'takes precedence over results_source_id' do
+            patch admin_tournament_path(tournament),
+                  params: { results_source_id: 'https://labs.limitlesstcg.com/0070/standings',
+                            results_source_id_override: '0099' }
+
+            expect(tournament.reload.results_source_id).to eq('0099')
+          end
+
+          it 'takes precedence even when results_source_id is blank' do
+            patch admin_tournament_path(tournament),
+                  params: { results_source_id: '', results_source_id_override: '0099' }
+
+            expect(tournament.reload.results_source_id).to eq('0099')
           end
 
           it 'redirects to the show page' do
-            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+            patch admin_tournament_path(tournament), params: { results_source_id_override: '0099' }
 
             expect(response).to redirect_to(admin_tournament_path(tournament))
-          end
-        end
-
-        context 'with a full URL' do
-          let(:tournament) { create(:tournament, results_source_id: nil, game: create(:game, :ptcg)) }
-
-          it 'extracts the id and sets it' do
-            patch admin_tournament_path(tournament),
-                  params: { results_source_id: 'https://labs.limitlesstcg.com/0070/standings' }
-
-            expect(tournament.reload.results_source_id).to eq('0070')
-          end
-        end
-
-        context 'with a blank results_source_id' do
-          it 'does not change the tournament' do
-            patch admin_tournament_path(tournament), params: { results_source_id: '' }
-
-            expect(tournament.reload.results_source_id).to be_nil
-          end
-
-          it 'returns 422' do
-            patch admin_tournament_path(tournament), params: { results_source_id: '' }
-
-            expect(response).to have_http_status(:unprocessable_content)
-          end
-        end
-
-        context 'with a results_source_id already used by another tournament' do
-          before { create(:tournament, results_source_id: '0070') }
-
-          it 'does not change the tournament' do
-            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
-
-            expect(tournament.reload.results_source_id).to be_nil
-          end
-
-          it 'returns 422' do
-            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
-
-            expect(response).to have_http_status(:unprocessable_content)
           end
         end
 

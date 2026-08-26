@@ -19,5 +19,8 @@
   <%= f.text_field :results_source_id, value: @tournament.results_source_id,
                     class: 'form-control form-control-sm', style: 'width: 20rem;',
                     placeholder: t('.results_source_id_placeholder') %>
+  <%= f.text_field :results_source_id_override,
+                    class: 'form-control form-control-sm', style: 'width: 14rem;',
+                    placeholder: t('.results_source_id_override_placeholder') %>
   <%= f.submit t('.set_results_source_id'), class: 'btn btn-sm btn-primary' %>
 <% end %>
