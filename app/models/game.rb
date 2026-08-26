@@ -13,7 +13,8 @@ class Game < ApplicationRecord
     )
   end
 
-  register :ptcg, id: 'PTCG', results_verifier: PTCG_RESULTS_VERIFIER
+  register :ptcg, id: 'PTCG', results_verifier: PTCG_RESULTS_VERIFIER,
+                  results_import_job: ExternalData::Ptcg::ImportResultsJob
 
   validates :name, presence: true
   validates :base_uri, presence: true
