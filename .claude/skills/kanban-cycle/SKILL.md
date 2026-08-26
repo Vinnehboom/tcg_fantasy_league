@@ -310,6 +310,21 @@ a background `Agent` subagent of THIS session, with `isolation:
   check-ins, so each subagent should sit blocked on its own
   `<task-notification>` without doing anything destructive in the
   meantime.
+- **A ticket dispatch's hand-back isn't always a human checkpoint — it can
+  be a request for YOU to dispatch something on its behalf.** A dispatched
+  agent running `/ticket-pipeline` cannot itself call the `Agent` tool
+  (nested subagent dispatch isn't available to a subagent, confirmed
+  2026-08-26 on ticket H-1) — so when it reaches Phase 3 (reviewer, or
+  Phase 4/6 if those need real isolation too), it stops and hands back
+  with a request to dispatch that phase's genuinely isolated subagent
+  FOR it. Recognize this case (it names the phase and gives you what you
+  need — branch, PR, ticket context) and act on it like normal PR triage:
+  dispatch the isolated reviewer/tester/curator per "Dispatch mechanics"
+  above, then relay its result back to the ORIGINAL dispatched agent via
+  `SendMessage` so it can continue. This can happen mid-cycle, not just at
+  cycle boundaries — treat it as immediate triage work, not something to
+  fold into the end-of-cycle rundown the way an actual human-facing
+  checkpoint question is.
 
 **Classifier blocks plain `git rebase` inside a dispatched agent, not just
 history-rewriting flags.** The earlier-known classifier block was for
