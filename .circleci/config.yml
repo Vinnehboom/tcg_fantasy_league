@@ -29,19 +29,14 @@ executors:
       RAILS_ENV: test
 
 commands:
-  setup:
+  db_setup:
     description: >
-      Shared test-container bootstrap for the test and feature_specs jobs:
-      checkout, system deps, gem install, wait for the DB, then create and
-      load the test schema. Each job adds its own steps (assets, lint, the
-      actual test command) after this.
+      Wait for this job's own Postgres service container to accept
+      connections, then create and load the test schema. A fresh Postgres
+      container is spun up per job, so this can't be shared through the
+      workspace persisted by the setup job — only files carry over that way,
+      not live service containers.
     steps:
-      - checkout
-      - run:
-          name: Fix stale Google Chrome apt key
-          command: sudo wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
-      - run: sudo apt update && sudo apt install zlib1g-dev
-      - ruby/install-deps
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
@@ -50,13 +45,28 @@ commands:
           command: bundle exec rails db:create && bundle exec rails db:schema:load --trace
 
 jobs:
-  test:
+  setup:
     executor: test-container
     steps:
-      - setup
+      - checkout
+      - run:
+          name: Fix stale Google Chrome apt key
+          command: sudo wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
+      - run: sudo apt update && sudo apt install zlib1g-dev
+      - ruby/install-deps
       - run:
           name: Assets precompile
           command: bundle exec rake assets:precompile
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  test:
+    executor: test-container
+    steps:
+      - attach_workspace:
+          at: .
+      - db_setup
       - run:
           name: Lint
           command: bundle exec rubocop -P
@@ -66,7 +76,9 @@ jobs:
   feature_specs:
     executor: test-container
     steps:
-      - setup
+      - attach_workspace:
+          at: .
+      - db_setup
       - run:
           name: Tests
           command: bundle exec rspec spec/features
@@ -75,11 +87,19 @@ workflows:
   version: 2
   CI:
     jobs:
+      - setup:
+          filters:
+            branches:
+              ignore: main
       - test:
+          requires:
+            - setup
           filters:
             branches:
               ignore: main
       - feature_specs:
+          requires:
+            - setup
           filters:
             branches:
               ignore: main
