@@ -144,6 +144,7 @@ en:
         blank: Results source id can't be blank.
         not_found: That results source id was not recognized. Check the id and try again.
         failed: Results source id failed to update.
+        verification_unavailable: We could not verify that id right now. Try again shortly.
   games:
     not_found: Game not found. Please select a valid game to continue.
   rosters:

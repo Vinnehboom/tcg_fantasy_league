@@ -10,8 +10,8 @@ module ExternalData
 
         TOURNAMENT_PATH = '/labs/data/tcg/tournament'.freeze
 
-        def initialize(tournament_id:, division: DIVISION,
-                       client: ExternalData::JsonApiClient.new(base_uri: MEW_BASE_URI))
+        def initialize(tournament_id:, division: DIVISION, retry_policy: ExternalData::RetryPolicy.new,
+                       client: ExternalData::JsonApiClient.new(base_uri: MEW_BASE_URI, retry_policy:))
           @tournament_id = tournament_id
           @division = division
           @client = client
