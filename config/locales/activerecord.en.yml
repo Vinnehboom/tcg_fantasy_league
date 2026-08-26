@@ -141,6 +141,8 @@ en:
     tournaments:
       update:
         success: Results source id successfully updated.
+        blank: Results source id can't be blank.
+        not_found: That results source id was not recognized. Check the id and try again.
         failed: Results source id failed to update.
   games:
     not_found: Game not found. Please select a valid game to continue.

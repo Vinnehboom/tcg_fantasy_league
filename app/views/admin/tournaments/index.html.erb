@@ -5,6 +5,7 @@
         <th><%= t('activerecord.attributes.tournament.name') %></th>
         <th><%= t('activerecord.attributes.tournament.external_id') %></th>
         <th><%= t('activerecord.attributes.tournament.starting_date') %></th>
+        <th><%= t('activerecord.attributes.tournament.results_source_id') %></th>
       </tr>
     </thead>
     <tbody>
@@ -13,6 +14,7 @@
           <td><%= link_to tournament.name, admin_tournament_path(tournament) %></td>
           <td><%= tournament.external_id %></td>
           <td><%= l(tournament.starting_date) %></td>
+          <td><%= tournament.results_source_id %></td>
         </tr>
       <% end %>
     </tbody>
