@@ -14,10 +14,15 @@ module Admin
       @tournament = Tournament.find(params[:id])
       authorize @tournament
 
-      results_source_id = extract_results_source_id(override: params[:results_source_id_override],
-                                                    value: params[:results_source_id])
+      results_source_id = params[:results_source_id].to_s.strip
 
-      if results_source_id.present? && @tournament.update(results_source_id:)
+      if results_source_id.blank?
+        flash.now[:alert] = t('.blank')
+        render :show, status: :unprocessable_entity
+      elsif !verified_results_source_id?(results_source_id)
+        flash.now[:alert] = t('.not_found')
+        render :show, status: :unprocessable_entity
+      elsif @tournament.update(results_source_id:)
         redirect_to admin_tournament_path(@tournament), notice: t('.success')
       else
         flash.now[:alert] = t('.failed')
@@ -27,12 +32,14 @@ module Admin
 
     private
 
-    def extract_results_source_id(override:, value:)
-      return override if override.present?
-
-      pattern = @tournament.game.results_source_id_url_pattern
-      match = pattern&.match(value.to_s)
-      match ? match[:results_source_id] : value
+    # Confirms the id is real by asking the source itself for the tournament's
+    # player count, instead of guessing from the string's shape. A positive
+    # count means the id resolves to a real tournament; a nil result or a
+    # failed request both mean we cannot vouch for the id, so we reject it.
+    def verified_results_source_id?(results_source_id)
+      ExternalData::Pokemon::Tcg::LabsTournament.call(tournament_id: results_source_id).present?
+    rescue ExternalData::Exception
+      false
     end
 
   end
