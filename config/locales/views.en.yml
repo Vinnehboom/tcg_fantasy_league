@@ -48,6 +48,7 @@ en:
         no_tournaments: No tournaments found yet.
       show:
         results_source_id_placeholder: mew results source id
+        results_source_id_override_placeholder: or paste the id directly
         set_results_source_id: Set
     games:
       index:
