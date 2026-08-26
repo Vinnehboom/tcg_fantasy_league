@@ -139,9 +139,28 @@ active agent:
   discipline: test-first, lint+test before pushing). New commit(s), push,
   done — don't just report it.
 - **Unresolved review feedback** (a review or comment since the PR last
+- **Unresolved review feedback** (a review or comment since the PR last
   updated, that ISN'T an "lgtm"/approval covered above) → dispatch an
   agent to run `/ticket-pipeline`'s "Handling review feedback (re-entry)"
-  flow for that ticket/PR.
+  flow for that ticket/PR. **Gather every unresolved comment/thread on
+  that PR first and hand them all to ONE dispatch — never one dispatch
+  per comment.** Standing instruction, 2026-08-26, after a token-usage
+  audit found ~1.2M tokens across 9 dispatched agents in one session,
+  several of them sequential rounds on the SAME PR (rebase, then a
+  rename, then a redesign proposal, then its implementation, then a
+  further refactor) that arrived close together and could have been one
+  dispatch instead of four or five. Each dispatch pays a fixed cost
+  regardless of how small its task is — the session-start hook,
+  fetching/caching Notion context fresh, re-grepping the codebase,
+  running the full suite multiple times — so splitting one PR's feedback
+  across dispatches multiplies that fixed cost for no benefit; only real
+  human checkpoints (Checkpoint 1/2 answers, a design go-ahead) justify a
+  new dispatch boundary, not "a new comment arrived." If a dispatch for
+  this PR is already active (checked via `ListAgents` per the guardrail
+  below), do not queue a second one for feedback that arrives while it's
+  running — let it finish, then re-check the PR for anything still
+  unaddressed (including what arrived mid-run) before deciding whether a
+  further dispatch is actually needed.
 - **Stale branch / merge conflict** → **do the rebase directly in this
   orchestrator session, do not dispatch a worktree-isolated agent for it.**
   (Standing instruction, 2026-08-25 — see the classifier note under
