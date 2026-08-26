@@ -39,6 +39,10 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # Match Capybara.default_host, so Devise mailer views that build a full URL
+  # (e.g. edit_password_url in the reset-password email) have a host to use.
+  config.action_mailer.default_url_options = { host: 'www.example.com' }
+
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
