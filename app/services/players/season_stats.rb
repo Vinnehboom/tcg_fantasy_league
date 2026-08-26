@@ -13,6 +13,15 @@ module Players
       scores.sum / scores.size.to_f
     end
 
+    def median
+      return if scores.empty?
+
+      middle = scores.size / 2
+      return scores[middle].to_f if scores.size.odd?
+
+      (scores[middle - 1] + scores[middle]) / 2.0
+    end
+
     private
 
     attr_reader :game, :season

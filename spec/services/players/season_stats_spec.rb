@@ -43,6 +43,37 @@ module Players
         expect(average).to eq(20.0)
       end
     end
+
+    describe '#median' do
+      it 'returns the middle score of an odd-sized population' do
+        players = create_list(:player, 3, :without_scores, game:)
+        create(:external_score, player: players[0], season: '2026', score: 10)
+        create(:external_score, player: players[1], season: '2026', score: 20)
+        create(:external_score, player: players[2], season: '2026', score: 90)
+
+        median = described_class.new(game:, season: '2026').median
+
+        expect(median).to eq(20.0)
+      end
+
+      it 'returns the mean of the two middle scores of an even-sized population' do
+        players = create_list(:player, 4, :without_scores, game:)
+        create(:external_score, player: players[0], season: '2026', score: 10)
+        create(:external_score, player: players[1], season: '2026', score: 20)
+        create(:external_score, player: players[2], season: '2026', score: 30)
+        create(:external_score, player: players[3], season: '2026', score: 90)
+
+        median = described_class.new(game:, season: '2026').median
+
+        expect(median).to eq(25.0)
+      end
+
+      it 'returns nil when the season holds no scores' do
+        median = described_class.new(game:, season: '2026').median
+
+        expect(median).to be_nil
+      end
+    end
   end
 
 end
