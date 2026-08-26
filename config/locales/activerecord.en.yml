@@ -138,6 +138,10 @@ en:
       destroy:
         success: Salary draft successfully deleted.
         failed: Salary draft failed to delete.
+    tournaments:
+      update:
+        success: Results source id successfully updated.
+        failed: Results source id failed to update.
   games:
     not_found: Game not found. Please select a valid game to continue.
   rosters:

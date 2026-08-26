@@ -46,10 +46,9 @@ en:
     tournaments:
       index:
         no_tournaments: No tournaments found yet.
+      show:
         results_source_id_placeholder: mew results source id
         set_results_source_id: Set
-        set_success: Saved.
-        set_failure: Failed to save.
     games:
       index:
         no_games: No games found yet.

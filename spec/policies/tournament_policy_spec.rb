@@ -7,7 +7,7 @@ RSpec.describe TournamentPolicy, type: :policy do
   let(:admin) { create(:user, :with_role, role: :admin) }
   let(:tournament) { create(:tournament) }
 
-  permissions :set_results_source_id? do
+  permissions :update? do
     it { is_expected.not_to permit(user, tournament) }
     it { is_expected.to permit(admin, tournament) }
   end
