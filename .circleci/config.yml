@@ -52,13 +52,38 @@ jobs:
           command: bundle exec rubocop -P
       - run:
           name: Tests
-          command: bundle exec rspec
+          command: bundle exec rspec --exclude-pattern "features/**/*_spec.rb"
+  feature_specs:
+    executor: test-container
+    steps:
+      - checkout
+      - run:
+          name: Fix stale Google Chrome apt key
+          command: sudo wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
+      - run: sudo apt update && sudo apt install zlib1g-dev
+      - ruby/install-deps
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Database setup
+          command: bundle exec rails db:create && bundle exec rails db:schema:load --trace
+      - run:
+          name: Assets precompile
+          command: bundle exec rake assets:precompile
+      - run:
+          name: Tests
+          command: bundle exec rspec spec/features
 
 workflows:
   version: 2
   CI:
     jobs:
       - test:
+          filters:
+            branches:
+              ignore: main
+      - feature_specs:
           filters:
             branches:
               ignore: main
