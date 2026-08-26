@@ -1,10 +1,5 @@
 class Game < ApplicationRecord
 
-  include GameRegistry
-
-  register :ptcg, id: 'PTCG',
-                  results_source_id_url_pattern: %r{\Ahttps?://labs\.limitlesstcg\.com/(?<results_source_id>[^/]+)}
-
   validates :name, presence: true
   validates :base_uri, presence: true
 
