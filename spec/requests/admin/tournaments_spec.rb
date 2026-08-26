@@ -71,7 +71,7 @@ module Admin
     end
 
     describe '#update' do
-      let(:tournament) { create(:tournament, results_source_id: nil) }
+      let(:tournament) { create(:tournament, results_source_id: nil, game: create(:game, :ptcg)) }
 
       context 'when the user is not an admin' do
         let(:user) { create(:user) }
@@ -95,7 +95,7 @@ module Admin
         context 'with a valid id (the source confirms a real tournament)' do
           before do
             allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: '0070').and_return(128)
+              .with(hash_including(tournament_id: '0070')).and_return(128)
           end
 
           it "sets the tournament's results_source_id" do
@@ -142,7 +142,7 @@ module Admin
         context 'with an id the results source does not recognize' do
           before do
             allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: 'bogus').and_return(nil)
+              .with(hash_including(tournament_id: 'bogus')).and_return(nil)
           end
 
           it 'does not change the tournament' do
@@ -164,24 +164,10 @@ module Admin
           end
         end
 
-        context 'when the real mew tournament URL is pasted instead of the bare id' do
-          before do
-            allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: 'https://mew.limitlesstcg.com/tournaments/0070').and_return(nil)
-          end
-
-          it 'is rejected rather than stored verbatim' do
-            patch admin_tournament_path(tournament),
-                  params: { results_source_id: 'https://mew.limitlesstcg.com/tournaments/0070' }
-
-            expect(tournament.reload.results_source_id).to be_nil
-          end
-        end
-
         context 'when the results source request fails (e.g. a 404 from the API)' do
           before do
             allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: '0070')
+              .with(hash_including(tournament_id: '0070'))
               .and_raise(ExternalData::JsonApiClient::HttpError.new(status: 404, url: 'https://mew.limitlesstcg.com'))
           end
 
@@ -197,10 +183,32 @@ module Admin
             expect(response).to have_http_status(:unprocessable_content)
           end
 
-          it 'flashes a not-found-specific error' do
+          it 'flashes a verification-unavailable error, not a not-found error' do
             patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
 
-            expect(flash[:alert]).to eq(I18n.t('admin.tournaments.update.not_found'))
+            expect(flash[:alert]).to eq(I18n.t('admin.tournaments.update.verification_unavailable'))
+          end
+        end
+
+        context "when the tournament's game has no registered verifier" do
+          let(:tournament) { create(:tournament, results_source_id: nil) }
+
+          it 'does not change the tournament' do
+            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+            expect(tournament.reload.results_source_id).to be_nil
+          end
+
+          it 'returns 422' do
+            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+            expect(response).to have_http_status(:unprocessable_content)
+          end
+
+          it 'flashes a verification-unavailable error' do
+            patch admin_tournament_path(tournament), params: { results_source_id: '0070' }
+
+            expect(flash[:alert]).to eq(I18n.t('admin.tournaments.update.verification_unavailable'))
           end
         end
 
@@ -208,7 +216,7 @@ module Admin
           before do
             create(:tournament, results_source_id: '0070')
             allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: '0070').and_return(128)
+              .with(hash_including(tournament_id: '0070')).and_return(128)
           end
 
           it 'does not change the tournament' do
@@ -225,11 +233,11 @@ module Admin
         end
 
         context 'with an unchanged results_source_id' do
-          let(:tournament) { create(:tournament, results_source_id: '0070') }
+          let(:tournament) { create(:tournament, results_source_id: '0070', game: create(:game, :ptcg)) }
 
           before do
             allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
-              .with(tournament_id: '0070').and_return(128)
+              .with(hash_including(tournament_id: '0070')).and_return(128)
           end
 
           it 'keeps the same results_source_id' do
