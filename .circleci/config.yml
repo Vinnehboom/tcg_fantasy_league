@@ -28,9 +28,13 @@ executors:
       PGHOST: 127.0.0.1
       RAILS_ENV: test
 
-jobs:
-  test:
-    executor: test-container
+commands:
+  setup:
+    description: >
+      Shared test-container bootstrap for the test and feature_specs jobs:
+      checkout, system deps, gem install, wait for the DB, then create and
+      load the test schema. Each job adds its own steps (assets, lint, the
+      actual test command) after this.
     steps:
       - checkout
       - run:
@@ -44,6 +48,12 @@ jobs:
       - run:
           name: Database setup
           command: bundle exec rails db:create && bundle exec rails db:schema:load --trace
+
+jobs:
+  test:
+    executor: test-container
+    steps:
+      - setup
       - run:
           name: Assets precompile
           command: bundle exec rake assets:precompile
@@ -56,21 +66,7 @@ jobs:
   feature_specs:
     executor: test-container
     steps:
-      - checkout
-      - run:
-          name: Fix stale Google Chrome apt key
-          command: sudo wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
-      - run: sudo apt update && sudo apt install zlib1g-dev
-      - ruby/install-deps
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - run:
-          name: Database setup
-          command: bundle exec rails db:create && bundle exec rails db:schema:load --trace
-      - run:
-          name: Assets precompile
-          command: bundle exec rake assets:precompile
+      - setup
       - run:
           name: Tests
           command: bundle exec rspec spec/features
