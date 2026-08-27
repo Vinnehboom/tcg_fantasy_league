@@ -96,6 +96,16 @@ session-specific — find it with `ToolSearch` rather than hardcoding it):
 - `environment_id` — omit, so it inherits this session's environment. That
   is what carries the GitHub and Notion MCP connectors across; do not try
   to name an environment by hand.
+- `source_url` and `source_revision` — **required, and the easiest thing to
+  get wrong.** A new session clones the repo's *default* branch unless told
+  otherwise. If the skill files live on a working branch rather than the
+  default branch, a successor spawned without these comes up with no
+  `/handoff` skill and a stale `/kanban-cycle` — an orchestrator missing the
+  definition of its own job, which cannot even hand off again. Set
+  `source_url` to the config's `repo` as a clone URL and `source_revision`
+  to its `orchestrator_branch`. Before spawning, verify that branch actually
+  carries the current skills (`git ls-tree -r --name-only <rev> -- .claude`)
+  rather than assuming it.
 - `model` — pin `"claude-sonnet-5"` explicitly. Triage and dispatch are not
   adversarial-critique work, and the expensive judgement in this system is
   already isolated in `/ticket-pipeline`'s Reviewer phase. Do not leave it
@@ -167,3 +177,11 @@ yourself — the successor owns that, and doing it early strands the Routines.
   subagent of the predecessor does not survive into the successor.
 - **The note is overwritten, not appended.** It describes the present, not
   the history. Durable lessons belong in the skill files (step 1).
+- **Never spawn a successor from a revision that lacks the current skill
+  files.** Check before spawning, not after. A successor without
+  `/handoff` and the current `/kanban-cycle` looks healthy — it starts, it
+  answers, it has its connectors — but it silently runs the old automation
+  and can never cycle itself again, so the failure only surfaces
+  generations later. Getting the skills onto the repo's default branch
+  removes this whole class of bug; pinning `source_revision` only works
+  around it.
