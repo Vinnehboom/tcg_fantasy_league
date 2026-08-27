@@ -19,10 +19,14 @@ description: >-
   on the orchestrator's own checkout or on each other. In-flight detection
   reads real state (open PRs, Notion card status, `ListAgents`), not
   conversation memory, so it's correct regardless of which cycle or
-  dispatch last touched a ticket. Every cycle ends with exactly one
-  PushNotification pointing at a bullet-point rundown of every active
-  agent's status, posted directly in this session — no notifications
-  mid-cycle for individual checkpoints or events. Use when the user says
+  dispatch last touched a ticket. A cycle notifies only when it produced
+  something worth raising — a decision needed, a state change, a failure —
+  ending in exactly one bullet-point rundown and one PushNotification;
+  quiet cycles end with a single in-session line and no push at all, and
+  nothing is ever announced mid-cycle. Before each cycle it checks its own
+  session cost against a ceiling and hands off to a fresh orchestrator
+  session (`/handoff`) once it gets too expensive to keep running in.
+  Use when the user says
   "run the board
   cycle," "/kanban-cycle," or asks to check the kanban board and PR status on
   a schedule. Do not use for a one-off "work this ticket" request — that's
@@ -38,8 +42,24 @@ guessing: end every cycle with a status push, even when nothing happened.
 ## 0. Load config
 
 Read `.claude/kanban-cycle.json` (repo `owner/name`, `notion_board_url`,
-`max_open_prs`, `max_stacked_prs`). If it's missing, say so and stop —
-don't guess a repo or board.
+`max_open_prs`, `max_stacked_prs`, `orchestrator_cost_ceiling_usd`). If
+it's missing, say so and stop — don't guess a repo or board.
+
+**Then check whether this session is still worth running in.** Call the
+claude-code-remote MCP `get_session` tool with `session_id` omitted (it
+then describes this session) and read
+`external_metadata.usage.cost_usd`. If that exceeds
+`orchestrator_cost_ceiling_usd`, **run `/handoff` instead of this cycle**
+and stop — the successor picks up at the next scheduled firing.
+
+This is not housekeeping, it's the single largest cost lever in the whole
+automation. Cost per turn is proportional to context length, context only
+grows, so a standing session's total cost grows with roughly the *square*
+of its turn count. Generation 1 was measured at 1,944 requests, mean prompt
+371,729 tokens, 700M cache-read tokens, ~$237 — most of it spent in the
+long tail where each trivial turn was still dragging a ~400K-token context
+behind it. A cycle skipped for a handoff costs one cycle; not handing off
+costs compounding money every turn after.
 
 ## 1. Check for in-flight work — from real state, not memory
 
@@ -138,7 +158,6 @@ active agent:
   `/ticket-pipeline`'s Gatekeeper CI-fix step (references/developer.md
   discipline: test-first, lint+test before pushing). New commit(s), push,
   done — don't just report it.
-- **Unresolved review feedback** (a review or comment since the PR last
 - **Unresolved review feedback** (a review or comment since the PR last
   updated, that ISN'T an "lgtm"/approval covered above) → dispatch an
   agent to run `/ticket-pipeline`'s "Handling review feedback (re-entry)"
@@ -315,6 +334,18 @@ a background `Agent` subagent of THIS session, with `isolation:
   it a clearly identifiable name/description (ticket ID or PR number) so a
   later cycle's `ListAgents` call and this cycle's rundown (step 7) can
   match it back to the right card/PR.
+- **Tell every dispatch to hand back a summary, not a transcript.** Its
+  full output — review findings, test logs, diagnosis, file-by-file
+  reasoning — goes into a file in its own worktree (or straight onto the
+  PR/Notion card where that's the natural home). What comes back to this
+  session is at most a few lines: what it did, what it needs, and where
+  the detail lives. Standing instruction, 2026-08-27, from a token-cost
+  audit: anything a subagent returns is pasted into this session's context
+  and then **re-read on every single subsequent turn for the rest of the
+  session**. A 5,000-token findings dump handed back at turn 400 of a
+  1,944-turn session gets re-read ~1,500 times. The dispatch prompt itself
+  is cheap and paid once; the return path is the expensive direction, and
+  it's the one that's easy to miss.
 - **When the ticket being dispatched is stacked on another open PR, tell
   the dispatch explicitly to open its new PR with `base:` set to that
   other PR's branch, not `main`.** This isn't automatic — a PR-creation
@@ -415,12 +446,27 @@ orchestrator's checkout.
 
 ## 7. End-of-cycle rundown (always)
 
-Every cycle ends with exactly one bullet-point rundown, posted as this
-turn's own visible output in this session, regardless of whether anything
-happened — the user checks in on this session when they have time, not on
-remembering every individual alert. `ListAgents` to get the full current
-set of active dispatched agents (this cycle's new dispatches plus any
-still running from earlier cycles), and give one bullet per agent:
+**Notify only when something is worth raising.** Standing instruction,
+2026-08-27, replacing the earlier always-notify rule: the user does not
+want a report on every cycle, only when a cycle produced something they'd
+act on. A cycle is **worth raising** if any of these is true:
+
+- something needs the user's decision, answer, or review;
+- a PR merged, a ticket was dispatched, or a PR's state changed;
+- something failed, is stuck, or a dispatched agent went missing.
+
+Everything else — CI still running, PRs sitting where they were, no ready
+tickets, nothing dispatched — is a **quiet cycle**. End a quiet cycle with
+a single line in this session (`Kanban cycle: quiet — 2 PRs open, nothing
+needing you`) and **no `PushNotification` at all**. Don't build the full
+rundown for a quiet cycle; the point is to stop paying for a report nobody
+asked for.
+
+When the cycle IS worth raising, end it with exactly one bullet-point
+rundown, posted as this turn's own visible output in this session.
+`ListAgents` to get the full current set of active dispatched agents (this
+cycle's new dispatches plus any still running from earlier cycles), and
+give one bullet per agent:
 
 ```
 - [<Task ID>](<Notion card URL>) · [PR #<n>](<PR URL>): <one-line status>
@@ -443,12 +489,11 @@ Then send exactly one `PushNotification` for the whole cycle — never more,
 regardless of how many checkpoints were hit or agents dispatched during
 it. Keep it to the tool's own one-line/200-character limit; it exists to
 point at the rundown, not to contain it, e.g. `"Kanban cycle: 3 agents
-active, 1 needs your OK — see session"` or, when nothing needs attention,
-something as minimal as `"Kanban cycle: all quiet, 2 PRs open"`. Do not
-send any other `PushNotification` mid-cycle — a subagent reaching a
-checkpoint, a PR opening, or anything else that happens between the start
-and end of a cycle gets folded into this one end-of-cycle rundown and
-push, not announced separately.
+active, 1 needs your OK — see session"`. Say what changed or what's
+needed, not that a cycle ran. Do not send any other `PushNotification`
+mid-cycle — a subagent reaching a checkpoint, a PR opening, or anything
+else that happens between the start and end of a cycle gets folded into
+this one end-of-cycle rundown and push, not announced separately.
 
 ## Guardrails
 
@@ -475,7 +520,11 @@ push, not announced separately.
 - Never trust local `HEAD` at face value — verify it against
   `origin/<branch>` first (see "Trusting local git state" under
   "Dispatch mechanics").
-- Every cycle ends with exactly one bullet-point rundown and exactly one
-  push notification — never zero (no silent cycles), never more than one
-  push per cycle (no mid-cycle notification spam for individual
-  checkpoints or events).
+- Notify only when a cycle is worth raising (step 7's test). A quiet cycle
+  gets one line in-session and no push at all; a cycle worth raising gets
+  exactly one rundown and exactly one push — never more than one push per
+  cycle, no mid-cycle notification spam for individual checkpoints.
+- Check the orchestrator cost ceiling at step 0 before doing anything
+  else. Over the ceiling means `/handoff`, not another cycle.
+- Dispatches hand back summaries, not transcripts — the return path is
+  what inflates this session's context permanently.

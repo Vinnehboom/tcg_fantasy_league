@@ -1,0 +1,158 @@
+---
+name: handoff
+description: >-
+  Retire the current standing Kanban orchestrator session and hand its role to
+  a brand-new session, so the automation keeps running without dragging a huge
+  conversation context (and its per-turn cost) along with it. Writes a compact
+  handoff note, spawns the successor session, and has the successor re-point
+  every recurring Routine at itself before the predecessor stands down. Use
+  when the user says "hand off the orchestrator", "cycle the orchestrator",
+  "start a fresh orchestrator", "/handoff", or when `/kanban-cycle`'s own
+  cost-ceiling check (step 0) says this session has got too expensive to keep
+  using. Do NOT use it to start a second parallel orchestrator — this is a
+  replacement, not a fan-out — and do not use it for handing a single ticket
+  to a subagent, which is `/ticket-pipeline`'s job.
+---
+
+# Orchestrator handoff
+
+A standing orchestrator session gets more expensive every turn it lives.
+Cost per turn is proportional to context length, and context only grows, so
+total cost over a session's life grows roughly with the *square* of its turn
+count. Measured on the first orchestrator generation: 1,944 requests, mean
+prompt 371,729 tokens, 700M cache-read tokens, ~$237. The same work at a
+capped context would have cost a fraction of that.
+
+This skill is the fix: retire the session, keep the role. Nothing about the
+automation's behaviour changes — only which session runs it.
+
+## Why this is cheap to do
+
+The handoff note can be tiny, because almost nothing actually needs handing
+over:
+
+- **Board and ticket state** — `/kanban-cycle` already re-derives all of it
+  from live sources (Notion board, open PRs, `ListAgents`) on every run, and
+  its step 1 explicitly says conversation memory is NOT a reliable record.
+- **Accumulated lessons and standing instructions** — already written into
+  the skill files in `.claude/skills/`, which the successor reads fresh.
+- **Environment caveats** (stale local `HEAD`, the classifier blocking
+  `git rebase` inside dispatched agents, agents vanishing without trace) —
+  also already in those skill files.
+
+So the note carries only what genuinely cannot be re-derived: open questions
+waiting on the user, work in flight that live state would misrepresent, and
+anything learned since the last commit to the skill files. If you find
+yourself writing more than a page, the lesson probably belongs in a skill
+file instead — put it there and reference it.
+
+## Steps
+
+### 1. Fold new lessons into the skill files first
+
+Anything this generation learned that should outlive it goes into the
+relevant `.claude/skills/**/SKILL.md` (or its `references/`) now, as a
+normal commit. This is the durable channel; the handoff note is not. A
+lesson left only in the note will be lost at the *next* handoff.
+
+### 2. Write the handoff note
+
+Update `docs/orchestrator-handoff.md` (create it from scratch if absent).
+Keep it short and current — it is overwritten each generation, not appended
+to. It must contain:
+
+- **Generation number** — increment it.
+- **Predecessor session ID** — from `get_session` with `session_id` omitted.
+- **Open questions awaiting the user** — anything the predecessor asked and
+  never got an answer to. Without this the successor cannot know a question
+  is outstanding, since it never asked it.
+- **In-flight nuance that live state would misread** — e.g. a PR that looks
+  stalled but is deliberately waiting, a ticket whose card status lags
+  reality, a dispatch known to have vanished. Only real exceptions; do not
+  restate what the board already says.
+- **Pending automation work** — changes to the skill files that were agreed
+  but not yet made. This is what "update the automations" means for the
+  successor.
+
+Commit and push it on the designated branch. The successor gets a fresh
+clone, so an uncommitted note does not reach it.
+
+### 3. Spawn the successor
+
+Use the claude-code-remote MCP `create_session` tool (the server prefix is
+session-specific — find it with `ToolSearch` rather than hardcoding it):
+
+- `environment_id` — omit, so it inherits this session's environment. That
+  is what carries the GitHub and Notion MCP connectors across; do not try
+  to name an environment by hand.
+- `model` — pin `"claude-sonnet-5"` explicitly. Triage and dispatch are not
+  adversarial-critique work, and the expensive judgement in this system is
+  already isolated in `/ticket-pipeline`'s Reviewer phase. Do not leave it
+  unset and assume it inherits.
+- `title` — `"Kanban orchestrator gen <N>"`.
+- `permission_mode` — omit, so it inherits.
+- `prompt` — the seed below.
+
+Seed prompt, filled in:
+
+```
+You are the standing Kanban orchestrator for <repo>, generation <N>,
+taking over from session <predecessor id>.
+
+Do these in order, then stop and stay idle until a Routine fires:
+
+1. Read docs/orchestrator-handoff.md in this repo.
+2. Find your own session ID: the claude-code-remote MCP get_session tool
+   with session_id omitted describes this session.
+3. Re-point every recurring Routine at yourself. list_triggers shows them;
+   each is currently bound to the predecessor via persistent_session_id.
+   That field cannot be changed by update_trigger, so for EACH trigger:
+   create a new one with the same name, the same cron_expression, the same
+   prompt, and persistent_session_id set to your own session ID, then
+   delete the old one. Create before deleting, so a failure leaves the
+   automation running rather than stranded. Verify with list_triggers that
+   the count is unchanged and every trigger now names you.
+4. Do the "pending automation work" listed in the handoff note.
+5. Archive the predecessor: archive_session with its session ID. Only
+   after step 3 verified — an archived session that still owns triggers
+   would silently drop every scheduled cycle.
+6. Report back in one short message: generation number, triggers
+   re-pointed, automation work done. Raise anything that failed. Do not
+   restate the board's state — the next scheduled cycle covers that.
+
+Standing role from here: you run /kanban-cycle when a Routine fires, and
+answer the user directly when they message you. Read
+.claude/skills/kanban-cycle/SKILL.md when the first cycle fires — do not
+read it now, it costs context you do not need yet.
+```
+
+The successor does the re-pointing, not the predecessor, for two reasons:
+it knows its own session ID first-hand, and if it never runs, the triggers
+still point at a live predecessor instead of nothing.
+
+### 4. Report and stand down
+
+Tell the user the successor's session ID and that the predecessor will be
+archived by the successor once triggers are verified. Then stop. Do not
+run another `/kanban-cycle` in the predecessor, and do not archive it
+yourself — the successor owns that, and doing it early strands the Routines.
+
+## Guardrails
+
+- **Create every replacement trigger before deleting its original.** A
+  delete-then-create ordering that fails halfway loses a scheduled cycle
+  permanently.
+- **Never archive the predecessor before `list_triggers` confirms the
+  re-point.** Triggers bound to an archived session do not fire.
+- **The trigger count must not change** across a handoff. This project runs
+  four daily cycles; a handoff that leaves three is a silent regression.
+  Count before and after.
+- **One orchestrator at a time.** This replaces the session, it does not add
+  one. Two live orchestrators would both triage the same PRs and dispatch
+  duplicate agents onto the same branches.
+- **Don't hand off mid-checkpoint.** If a dispatched agent is blocked
+  waiting on an answer that only the predecessor's context can interpret,
+  resolve it or write it into the note's open-questions section first — a
+  subagent of the predecessor does not survive into the successor.
+- **The note is overwritten, not appended.** It describes the present, not
+  the history. Durable lessons belong in the skill files (step 1).
