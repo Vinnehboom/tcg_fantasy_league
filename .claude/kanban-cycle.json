@@ -3,5 +3,6 @@
   "repo": "Vinnehboom/tcg_fantasy_league",
   "notion_board_url": "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0?pvs=25",
   "max_open_prs": 3,
-  "max_stacked_prs": 2
+  "max_stacked_prs": 2,
+  "orchestrator_cost_ceiling_usd": 50
 }

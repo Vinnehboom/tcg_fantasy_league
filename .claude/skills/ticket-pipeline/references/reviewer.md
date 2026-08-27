@@ -23,4 +23,8 @@ Ranked list, most serious first, each with file:line and a concrete failing scen
 Findings go back to the developer, who fixes and returns; re-review. Up to 2 rounds. If blocking issues survive 2 rounds, don't ask for a 3rd and don't pause the pipeline on the human — the orchestrator opens the PR anyway and posts your last round's findings (with your BLOCKING/NON-BLOCKING split intact) as PR review comments, so the human resolves them directly on the PR instead of waiting on chat.
 
 ## What you hand back
-An APPROVE or a findings list — nothing else. Do not push the branch or open the PR; that's the orchestrator's job once you approve (see the skill's "Opening the PR" section).
+Write the full review — every finding, its file:line, its failing scenario, and any mutation-testing evidence — to `docs/pipeline-cache/<TASK_ID>/review-round-<N>.md`. Hand back only: the verdict (APPROVE, or `<n>` BLOCKING / `<m>` NON-BLOCKING), a one-line-per-BLOCKING-finding list, and that file's path. Nothing else.
+
+This split is deliberate and it is about cost, not tidiness. Whatever you return is pasted into the orchestrator's context and then re-read on every subsequent turn for the rest of that session — a full findings dump handed back mid-session gets re-read hundreds or thousands of times, while the file costs one read by whoever actually needs the detail. The developer fixing your findings reads the file; the orchestrator only needs to know whether to loop.
+
+Do not push the branch or open the PR; that's the orchestrator's job once you approve (see the skill's "Opening the PR" section).
