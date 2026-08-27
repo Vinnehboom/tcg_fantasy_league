@@ -6,8 +6,9 @@ not here.
 
 **Generation:** 1 (first; no predecessor)
 **Predecessor session:** `session_01Jow5PUwwqA9vNBuBzEgQuE`
-**Repo / branch:** `Vinnehboom/tcg_fantasy_league` ·
-`claude/kanban-orchestrator-setup-7jgaqe`
+**Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main` carries the
+skills since PR #64 merged on 2026-08-27, so a successor cloning the
+default branch comes up fully equipped.
 **Routines:** 4 daily cycles — 08:00, 12:30, 17:30, 21:30 BST. The count
 matters: a handoff that leaves fewer is a silent regression.
 
@@ -26,15 +27,17 @@ not a summary of them.
 
 ## In-flight nuance that live state would misread
 
-- **PRs #62, #63 and #64 are all genuinely waiting on the user**, not
-  stalled. All three are ready for review with CI green on every check,
-  and there is nothing for the automation to do on any of them.
+- **PRs #62 and #63 are genuinely waiting on the user**, not stalled. Both
+  are ready for review with CI green on every check, and there is nothing
+  for the automation to do on either. PR #64 merged on 27 August.
 - **The handoff is deferred pending a decision.** The 12:30 cycle on
   27 August reached the cost ceiling and would have run `/handoff`. It was
   held instead: the mechanism had never run once, and its first run would
   have archived the session the user was working in, while the PR that
-  adds that mechanism was still open. The question is with the user. Until
-  they answer, treat reaching the ceiling as a reason to ask, not to act.
+  adds that mechanism was still open. Merging #64 approved the code. It is
+  not an answer to "archive this session now", so the question is still
+  with the user. Until they answer, treat reaching the ceiling as a reason
+  to ask, not to act.
 - **A stash is parked in the predecessor's checkout** (`stash@{0}`, labelled
   "stale-checkout schema.rb artifact"). It is a *bad* `db/schema.rb` — an
   artifact of migrating against a stale checkout, which drops the `settings`

@@ -6,6 +6,6 @@
   "max_open_prs": 3,
   "max_stacked_prs": 2,
   "orchestrator_cost_ceiling_usd": 50,
-  "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Set this to the default branch once the skill files are merged there — that is the real fix; this field is the stopgap.",
-  "orchestrator_branch": "claude/kanban-orchestrator-setup-7jgaqe"
+  "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff checks this out explicitly rather than assuming. Since 2026-08-27 the skills live on main, so this matches the default branch and the trap is closed. Point it elsewhere only while skills sit on an unmerged branch, and put it back on merge — a value naming a branch that has been merged and auto-deleted makes /handoff clone a ref that no longer exists, and the successor never starts.",
+  "orchestrator_branch": "main"
 }
