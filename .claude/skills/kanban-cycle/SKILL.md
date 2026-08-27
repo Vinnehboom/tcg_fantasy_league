@@ -459,13 +459,29 @@ with no reflog entry that explains it (suspected container/session
 lifecycle effect, not a git operation gone wrong). Before you rely on
 local `HEAD` for anything that matters — deciding a branch is current,
 skipping a rebase, reporting a push succeeded, dispatching a triage
-agent onto a PR's branch — verify it first: `git fetch origin <branch>`,
+agent onto a PR's branch, **or making a commit** — verify it first:
+`git fetch origin <branch>`,
 then compare `git rev-parse HEAD` against `git rev-parse
 origin/<branch>`. If they differ, don't act on the stale state — `git
 reset --hard origin/<branch>` when origin is known-good (e.g. right
 after your own push), or investigate before proceeding otherwise. This
 applies inside a dispatched agent's own worktree too, not just the
 orchestrator's checkout.
+
+**The remote-tracking ref goes stale with it — `git fetch` before you
+compare.** Observed three times on 2026-08-27, the third time worse than
+the first two: `git rev-parse HEAD` and `git rev-parse origin/<branch>`
+BOTH read the same old commit, so a comparison between them agreed with
+itself and looked healthy while the real remote was five commits ahead.
+The checkout was old code too — the suite ran 425 examples where the
+branch has 553. A commit made in that state is parented on ancient
+history, and the push is correctly rejected as non-fast-forward. **Do not
+reach for `--force` there**: the rejection is the safety net doing its
+job, and forcing would erase the real branch. Recover instead: save the
+stray commit (`git format-patch -1 HEAD`), `git fetch origin <branch>`,
+`git reset --hard origin/<branch>`, then re-apply the change. Re-applying
+by hand is usually faster than `git am`, which conflicts when the stale
+base differs much from the real one.
 
 ## 7. End-of-cycle rundown (always)
 
