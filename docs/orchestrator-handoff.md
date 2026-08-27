@@ -4,11 +4,13 @@ Written by `/handoff`. Overwritten at each handoff — this describes the
 present, not the history. Durable lessons belong in `.claude/skills/**`,
 not here.
 
-**Generation:** 1 (first; no predecessor)
-**Predecessor session:** `session_01Jow5PUwwqA9vNBuBzEgQuE`
-**Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main` carries the
-skills since PR #64 merged on 2026-08-27, so a successor cloning the
-default branch comes up fully equipped.
+**Generation:** 2
+**Predecessor session:** `session_01Jow5PUwwqA9vNBuBzEgQuE` (generation 1,
+ran 23–27 August 2026)
+**Repo / branch:** `Vinnehboom/tcg_fantasy_league` ·
+`claude/kanban-orchestrator-setup-7jgaqe`. Generation 2 was spawned from
+that branch, not `main`, because `main` still carries the pre-fix
+`orchestrator_branch` value — see pending work item 1.
 **Routines:** 4 daily cycles — 08:00, 12:30, 17:30, 21:30 BST. The count
 matters: a handoff that leaves fewer is a silent regression.
 
@@ -30,21 +32,11 @@ not a summary of them.
 - **PRs #62 and #63 are genuinely waiting on the user**, not stalled. Both
   are ready for review with CI green on every check, and there is nothing
   for the automation to do on either. PR #64 merged on 27 August.
-- **The handoff is deferred pending a decision.** The 12:30 cycle on
-  27 August reached the cost ceiling and would have run `/handoff`. It was
-  held instead: the mechanism had never run once, and its first run would
-  have archived the session the user was working in, while the PR that
-  adds that mechanism was still open. Merging #64 approved the code. It is
-  not an answer to "archive this session now", so the question is still
-  with the user. Until they answer, treat reaching the ceiling as a reason
-  to ask, not to act.
-- **A stash is parked in the predecessor's checkout** (`stash@{0}`, labelled
-  "stale-checkout schema.rb artifact"). It is a *bad* `db/schema.rb` — an
-  artifact of migrating against a stale checkout, which drops the `settings`
-  table and rolls the migration version backwards. Never apply it. It was
-  stashed rather than discarded only to avoid destroying something
-  unexamined. The successor gets a fresh clone and will not see it; drop it
-  from the note once the predecessor is archived.
+- **This handoff is the first one ever run.** The user approved it
+  explicitly on 27 August, after holding it earlier that day so its first
+  run would not be unattended. If any step of it misbehaved, that is new
+  information about the mechanism, not routine noise — say so plainly
+  rather than working around it quietly.
 
 ## Pending automation work
 
@@ -54,7 +46,16 @@ tokens, ending the week at `allowed_warning` on a seven-day rate-limit
 window). The account is on a subscription, so the payoff is reclaimed
 capacity before throttling, not money. Ranked by measured saving:
 
-1. **Finish "summaries, not transcripts" across the remaining phase
+1. **Get the `orchestrator_branch` fix onto `main`.** The branch
+   `claude/kanban-orchestrator-setup-7jgaqe` holds one commit that `main`
+   lacks: it points `orchestrator_branch` at `main` instead of at a
+   working branch. PR #64 merged just before that fix, so `main` still
+   names the working branch. Nothing is broken today — that branch exists
+   and carries the skills — but the value is wrong in principle and will
+   rot. Ask the user whether to open a PR for it; do not open one
+   unprompted. Once it merges, `main` is self-consistent and every later
+   handoff can spawn from the default branch.
+2. **Finish "summaries, not transcripts" across the remaining phase
    briefs.** Generation 1 already did this for
    `.claude/skills/kanban-cycle/SKILL.md` ("Dispatch mechanics") and
    `ticket-pipeline/references/reviewer.md`. Still to do: the same
@@ -65,7 +66,7 @@ capacity before throttling, not money. Ranked by measured saving:
    report there does not survive the run; where the detail needs to
    outlive the pipeline (review outcomes, curator proposals) put it on the
    PR or the Notion card instead and hand back the link.
-2. **Fix the worktree setup cost.** `.claude/hooks/session-start.sh` is
+3. **Fix the worktree setup cost.** `.claude/hooks/session-start.sh` is
    already run first thing by every dispatch, which covers `test.key`, the
    Postgres role, and assets. Verify that is actually sufficient in a fresh
    worktree — generation 1 saw agents still rediscovering setup failures
