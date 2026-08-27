@@ -16,10 +16,11 @@ module Players
     def median
       return if scores.empty?
 
-      middle = scores.size / 2
-      return scores[middle].to_f if scores.size.odd?
+      sorted = scores.sort
+      middle = sorted.size / 2
+      return sorted[middle].to_f if sorted.size.odd?
 
-      (scores[middle - 1] + scores[middle]) / 2.0
+      (sorted[middle - 1] + sorted[middle]) / 2.0
     end
 
     private
@@ -27,14 +28,14 @@ module Players
     attr_reader :game, :season_label
 
     def scores
-      @scores ||= newest_scores.sort
+      @scores ||= newest_score_per_player
     end
 
     # Oldest rows first, so `to_h` keeps the newest row of each player.
-    # ExternalScore is an append-only time series: taking every row would
-    # let import cadence (how often a player gets rescored) bend the
+    # ExternalScore is an append-only time series, so newest wins over
+    # taking every row: that keeps import cadence from bending the
     # distribution, and therefore every price.
-    def newest_scores
+    def newest_score_per_player
       ExternalScore.joins(:player)
                    .where(players: { game_id: game.id }, season: season_label)
                    .order(:created_at, :id).pluck(:player_id, :score).to_h.values
