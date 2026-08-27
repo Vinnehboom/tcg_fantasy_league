@@ -133,13 +133,21 @@ Do these in order, then stop and stay idle until a Routine fires:
    delete the old one. Create before deleting, so a failure leaves the
    automation running rather than stranded. Verify with list_triggers that
    the count is unchanged and every trigger now names you.
-4. Do the "pending automation work" listed in the handoff note.
-5. Archive the predecessor: archive_session with its session ID. Only
-   after step 3 verified — an archived session that still owns triggers
-   would silently drop every scheduled cycle.
-6. Report back in one short message: generation number, triggers
-   re-pointed, automation work done. Raise anything that failed. Do not
-   restate the board's state — the next scheduled cycle covers that.
+4. Re-subscribe to every open PR. PR subscriptions belong to the session
+   that made them, and they die with it. List the repo's open PRs and
+   call subscribe_pr_activity for each one this automation drives (any
+   PR whose body links a Notion ticket card, plus any PR opened for the
+   automation itself). Without this the successor never learns about a
+   CI failure or a review comment on work already in flight.
+5. Do the "pending automation work" listed in the handoff note.
+6. Archive the predecessor: archive_session with its session ID. Only
+   after steps 3 and 4 verified — an archived session that still owns
+   triggers would silently drop every scheduled cycle, and archiving
+   before re-subscribing loses PR events in the gap.
+7. Report back in one short message: generation number, triggers
+   re-pointed, PRs re-subscribed, automation work done. Raise anything
+   that failed. Do not restate the board's state — the next scheduled
+   cycle covers that.
 
 Standing role from here: you run /kanban-cycle when a Routine fires, and
 answer the user directly when they message you. Read
@@ -165,6 +173,10 @@ yourself — the successor owns that, and doing it early strands the Routines.
   permanently.
 - **Never archive the predecessor before `list_triggers` confirms the
   re-point.** Triggers bound to an archived session do not fire.
+- **Carry the PR subscriptions across.** They are session-scoped, not
+  repo-scoped, so every one dies with the predecessor. A successor that
+  re-points its Routines but forgets this runs its cycles correctly and
+  still goes deaf to CI failures and review comments between them.
 - **The trigger count must not change** across a handoff. This project runs
   four daily cycles; a handoff that leaves three is a silent regression.
   Count before and after.
