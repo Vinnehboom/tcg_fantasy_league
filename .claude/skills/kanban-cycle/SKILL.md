@@ -111,6 +111,19 @@ that's `stacked_count`, capped at `max_stacked_prs`.
 submitted at least one review (any state — comment, approve, or changes
 requested) on it — check via the PR's reviews, not just comments.
 
+**Keep this step cheap on repeat cycles.** `minimal_output: true` does NOT
+suppress PR bodies, and `search_pull_requests` returns them too — measured
+2026-08-27, a 3-PR inventory cost roughly 9,000 tokens and told the cycle
+nothing it did not already know. Those bodies are the pipeline's own long
+PR descriptions, and they land in this session's context permanently. So:
+do the full listing when you need to discover PRs (the first cycle after a
+gap, or when something may have opened or merged). Otherwise, when the
+open PR numbers are already known from earlier in this session, use
+`pull_request_read` per number for `get_status` and `get_reviews`
+instead — those responses are small and carry no body. A cycle whose whole
+job is "did anything change" does not need to re-read three PR
+descriptions to answer it.
+
 ## 3. Triage existing PRs before starting anything new
 
 Open PRs always come before new work. First, `ListAgents` to see which
