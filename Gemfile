@@ -80,5 +80,8 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem 'capybara'
-  gem 'selenium-webdriver'
+  # Drives Chrome directly over the DevTools protocol for JS feature specs — no
+  # separate chromedriver binary to version-match against the Chrome build in use
+  # (see H-3: Selenium + chromedriver was broken in the sandbox that added this).
+  gem 'cuprite'
 end

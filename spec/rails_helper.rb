@@ -8,19 +8,33 @@ abort('The Rails environment is running in production mode!') if Rails.env.produ
 require 'rspec/rails'
 require 'pundit/rspec'
 require 'capybara/rspec'
+require 'capybara/cuprite'
 # Add additional requires below this line. Rails is not loaded until this point!
 Dir['./spec/support/**/*.rb'].each { |f| require f }
 
 Capybara.default_driver = :rack_test
-Capybara.javascript_driver = :headless_chrome
+Capybara.javascript_driver = :cuprite
 
-Capybara.register_driver :headless_chrome do |app|
-  options = Selenium::WebDriver::Chrome::Options.new
-  options.add_argument('--headless=new')
-  options.add_argument('--disable-dev-shm-usage')
-  options.add_argument('--window-size=1400,1400')
+# Cuprite drives Chrome directly over the DevTools protocol, so it needs a Chrome or
+# Chromium program, but no separate chromedriver binary to keep version-matched
+# against it. In a sandbox with Playwright's own Chromium install, use that program
+# directly; elsewhere (CircleCI's browser-enabled executor), let Cuprite find the
+# system Chrome on its own.
+def cuprite_browser_path
+  return nil unless ENV['PLAYWRIGHT_BROWSERS_PATH']
 
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options:)
+  path = File.join(ENV.fetch('PLAYWRIGHT_BROWSERS_PATH', nil), 'chromium')
+  path if File.executable?(path)
+end
+
+Capybara.register_driver :cuprite do |app|
+  Capybara::Cuprite::Driver.new(
+    app,
+    window_size: [1400, 1400],
+    browser_path: cuprite_browser_path,
+    browser_options: { 'no-sandbox' => nil, 'disable-dev-shm-usage' => nil },
+    process_timeout: 20
+  )
 end
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
