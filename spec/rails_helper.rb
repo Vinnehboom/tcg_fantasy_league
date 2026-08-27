@@ -14,26 +14,31 @@ Dir['./spec/support/**/*.rb'].each { |f| require f }
 
 Capybara.default_driver = :rack_test
 Capybara.javascript_driver = :cuprite
+Capybara.default_max_wait_time = 5
 
 # Cuprite drives Chrome directly over the DevTools protocol, so it needs a Chrome or
 # Chromium program, but no separate chromedriver binary to keep version-matched
 # against it. In a sandbox with Playwright's own Chromium install, use that program
-# directly; elsewhere (CircleCI's browser-enabled executor), let Cuprite find the
-# system Chrome on its own.
-def cuprite_browser_path
-  return nil unless ENV['PLAYWRIGHT_BROWSERS_PATH']
-
-  path = File.join(ENV.fetch('PLAYWRIGHT_BROWSERS_PATH', nil), 'chromium')
-  path if File.executable?(path)
-end
-
+# directly; elsewhere, this degrades to whatever system Chrome Cuprite finds on its
+# own (the direct `.../chromium/chromium` path only resolves because this sandbox
+# image symlinks it to `chrome-linux/chrome` - stock Playwright installs don't have
+# that symlink).
 Capybara.register_driver :cuprite do |app|
+  cuprite_browser_path = lambda do
+    playwright_browsers_path = ENV.fetch('PLAYWRIGHT_BROWSERS_PATH', nil)
+    next nil unless playwright_browsers_path
+
+    path = File.join(playwright_browsers_path, 'chromium')
+    path if File.executable?(path)
+  end.call
+
   Capybara::Cuprite::Driver.new(
     app,
     window_size: [1400, 1400],
     browser_path: cuprite_browser_path,
     browser_options: { 'no-sandbox' => nil, 'disable-dev-shm-usage' => nil },
-    process_timeout: 20
+    process_timeout: 20,
+    js_errors: true
   )
 end
 
