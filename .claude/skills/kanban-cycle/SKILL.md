@@ -37,7 +37,8 @@ description: >-
 
 One pass of: triage what's already open, then start what's next — never both
 blindly. Runs unattended on a schedule, so it must never leave the user
-guessing: end every cycle with a status push, even when nothing happened.
+guessing about anything that actually needs them — but it must not report
+for the sake of reporting either. See step 7 for which cycles notify.
 
 ## 0. Load config
 

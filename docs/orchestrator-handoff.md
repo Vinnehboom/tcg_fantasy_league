@@ -26,18 +26,15 @@ not a summary of them.
 
 ## In-flight nuance that live state would misread
 
-- **PR #62's body is stale in a misleading way.** It ends with "a separate,
-  isolated review step runs next against this open PR — it has not run yet
-  at the time this PR opens." That review *has* since run: two rounds
-  against an isolated reviewer, ending in approval, with three real
-  spec-pinning bugs found and fixed by mutation testing. The PR was opened
-  earlier in the pipeline than `/ticket-pipeline` prescribes (the skill
-  opens the PR *after* the reviewer loop; this one opened before it), which
-  is why the body reads that way. Don't re-run review on the strength of
-  that sentence — check the Notion card's review-outcome note instead. Fix
-  the body if convenient.
-- **PR #62 and #63 are both genuinely waiting on the user**, not stalled.
-  Ready for review, CI green, nothing for the automation to do on either.
+- **PRs #62, #63 and #64 are all genuinely waiting on the user**, not
+  stalled. All three are ready for review with CI green on every check,
+  and there is nothing for the automation to do on any of them.
+- **The handoff is deferred pending a decision.** The 12:30 cycle on
+  27 August reached the cost ceiling and would have run `/handoff`. It was
+  held instead: the mechanism had never run once, and its first run would
+  have archived the session the user was working in, while the PR that
+  adds that mechanism was still open. The question is with the user. Until
+  they answer, treat reaching the ceiling as a reason to ask, not to act.
 - **A stash is parked in the predecessor's checkout** (`stash@{0}`, labelled
   "stale-checkout schema.rb artifact"). It is a *bad* `db/schema.rb` — an
   artifact of migrating against a stale checkout, which drops the `settings`
