@@ -5,5 +5,7 @@
   "notion_board_url": "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0?pvs=25",
   "max_open_prs": 3,
   "max_stacked_prs": 2,
-  "orchestrator_cost_ceiling_usd": 50
+  "orchestrator_cost_ceiling_usd": 50,
+  "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Set this to the default branch once the skill files are merged there — that is the real fix; this field is the stopgap.",
+  "orchestrator_branch": "claude/kanban-orchestrator-setup-7jgaqe"
 }
