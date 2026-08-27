@@ -16,12 +16,23 @@ description: >-
 
 # Orchestrator handoff
 
-A standing orchestrator session gets more expensive every turn it lives.
-Cost per turn is proportional to context length, and context only grows, so
-total cost over a session's life grows roughly with the *square* of its turn
+A standing orchestrator session burns more tokens every turn it lives.
+Tokens per turn are proportional to context length, and context only grows,
+so a session's total consumption grows roughly with the *square* of its turn
 count. Measured on the first orchestrator generation: 1,944 requests, mean
-prompt 371,729 tokens, 700M cache-read tokens, ~$237. The same work at a
-capped context would have cost a fraction of that.
+prompt 371,729 tokens, 700M cache-read tokens. The same work at a capped
+context would have used a fraction of that.
+
+**What that actually costs depends on the plan.** On a subscription there is
+no per-token bill — the constraint is the rate-limit window, and
+`get_session`'s `external_metadata.rate_limit_info` is where it shows up
+(`rateLimitType`, `status`, `resetsAt`). Generation 1 drove the account to
+`allowed_warning` on a seven-day window. So the thing being conserved here is
+**capacity**: how much orchestration fits in a window before the automation
+gets throttled and scheduled cycles start failing. On usage-based API billing
+the same tokens are money instead. Either way the lever is the same, but do
+not tell the user they are "spending" money without knowing which plan they
+are on.
 
 This skill is the fix: retire the session, keep the role. Nothing about the
 automation's behaviour changes — only which session runs it.

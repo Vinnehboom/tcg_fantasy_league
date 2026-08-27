@@ -52,14 +52,23 @@ then describes this session) and read
 `orchestrator_cost_ceiling_usd`, **run `/handoff` instead of this cycle**
 and stop — the successor picks up at the next scheduled firing.
 
-This is not housekeeping, it's the single largest cost lever in the whole
-automation. Cost per turn is proportional to context length, context only
-grows, so a standing session's total cost grows with roughly the *square*
-of its turn count. Generation 1 was measured at 1,944 requests, mean prompt
-371,729 tokens, 700M cache-read tokens, ~$237 — most of it spent in the
-long tail where each trivial turn was still dragging a ~400K-token context
-behind it. A cycle skipped for a handoff costs one cycle; not handing off
-costs compounding money every turn after.
+`cost_usd` is the harness valuing this session's tokens at API list
+prices. On a subscription plan it is **not** a bill — treat it purely as a
+convenient running total of token volume, which is what the ceiling is
+really thresholding. Check `external_metadata.rate_limit_info` in the same
+response for the constraint that actually binds (`status`, `rateLimitType`,
+`resetsAt`); `allowed_warning` or worse means the window is close to
+throttling, which is a reason to hand off now regardless of the ceiling.
+
+This is the single largest efficiency lever in the automation. Tokens per
+turn are proportional to context length, context only grows, so a standing
+session's total consumption grows with roughly the *square* of its turn
+count. Generation 1 measured 1,944 requests, mean prompt 371,729 tokens,
+700M cache-read tokens — most of it in the long tail, where each trivial
+turn still dragged a ~400K-token context behind it, and it ended the week
+at `allowed_warning`. A cycle skipped for a handoff costs one cycle; not
+handing off compounds every turn after, and eventually the automation goes
+dark mid-window.
 
 ## 1. Check for in-flight work — from real state, not memory
 

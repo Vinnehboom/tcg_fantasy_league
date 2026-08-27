@@ -48,9 +48,11 @@ not a summary of them.
 
 ## Pending automation work
 
-The successor should do these, then report. They come from a token-cost
-audit of generation 1 (1,944 requests, mean prompt 371,729 tokens, 700M
-cache-read tokens, ~$237 for the session). Ranked by measured saving:
+The successor should do these, then report. They come from a token audit of
+generation 1 (1,944 requests, mean prompt 371,729 tokens, 700M cache-read
+tokens, ending the week at `allowed_warning` on a seven-day rate-limit
+window). The account is on a subscription, so the payoff is reclaimed
+capacity before throttling, not money. Ranked by measured saving:
 
 1. **Finish "summaries, not transcripts" across the remaining phase
    briefs.** Generation 1 already did this for
