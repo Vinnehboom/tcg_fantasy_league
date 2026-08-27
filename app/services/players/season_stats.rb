@@ -2,9 +2,9 @@ module Players
 
   class SeasonStats
 
-    def initialize(game:, season:)
+    def initialize(game:, season_label:)
       @game = game
-      @season = season
+      @season_label = season_label
     end
 
     def average
@@ -24,18 +24,19 @@ module Players
 
     private
 
-    attr_reader :game, :season
+    attr_reader :game, :season_label
 
     def scores
-      @scores ||= latest_score_per_player.sort
+      @scores ||= newest_scores.sort
     end
 
     # Oldest rows first, so `to_h` keeps the newest row of each player.
-    # Scoped by game_id too, so two games sharing a season label (should
-    # that ever happen) can never mix their scores.
-    def latest_score_per_player
+    # ExternalScore is an append-only time series: taking every row would
+    # let import cadence (how often a player gets rescored) bend the
+    # distribution, and therefore every price.
+    def newest_scores
       ExternalScore.joins(:player)
-                   .where(players: { game_id: game.id }, season:)
+                   .where(players: { game_id: game.id }, season: season_label)
                    .order(:created_at, :id).pluck(:player_id, :score).to_h.values
     end
 
