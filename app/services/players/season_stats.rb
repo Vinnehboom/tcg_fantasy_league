@@ -28,14 +28,14 @@ module Players
     attr_reader :game, :season_label
 
     def scores
-      @scores ||= newest_score_per_player
+      @scores ||= newest_scores_per_player
     end
 
     # Oldest rows first, so `to_h` keeps the newest row of each player.
     # ExternalScore is an append-only time series, so newest wins over
     # taking every row: that keeps import cadence from bending the
     # distribution, and therefore every price.
-    def newest_score_per_player
+    def newest_scores_per_player
       ExternalScore.joins(:player)
                    .where(players: { game_id: game.id }, season: season_label)
                    .order(:created_at, :id).pluck(:player_id, :score).to_h.values
