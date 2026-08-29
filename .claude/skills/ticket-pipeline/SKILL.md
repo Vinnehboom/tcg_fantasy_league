@@ -1,20 +1,18 @@
 ---
 name: ticket-pipeline
 description: >-
-  Drive a single tracked ticket from its Notion card all the way to a reviewed,
-  ready-to-merge pull request, using a planner → developer → reviewer → live-verification
-  → gatekeeper → curator pipeline (live verification exercises the Render PR-preview
-  deploy with a real test account and posts screenshot evidence; the gatekeeper keeps
-  the PR a draft — CI green, evidence attached, branch rebased onto main, never merged —
-  until it's genuinely ready for human review; the curator harvests reusable knowledge —
-  new tickets, style-guide and doc updates — from the finished work).
-  Use this skill whenever the user wants to "work", "pick up", "start",
-  "ship", or "rattle through" a ticket/story/card — especially when they reference
-  a ticket ID (like A-1, C-3), a Notion board card, or a backlog item — even if
-  they don't say the word "pipeline". Also trigger when someone asks to plan a
-  ticket into commits, build a ticket test-first, or review a branch against its
-  ticket. Do NOT use it for ad-hoc coding with no ticket behind it, or for setting
-  up / populating the board itself.
+  Drive a single tracked ticket from its Notion card to a reviewed,
+  ready-to-merge pull request via a planner → developer → reviewer →
+  live-verification → gatekeeper → curator pipeline. The gatekeeper keeps
+  the PR a draft until CI is green, evidence is attached, and it's rebased
+  onto main; the curator harvests follow-up tickets and doc updates
+  afterward. Use this skill whenever the user wants to "work", "pick up",
+  "start", "ship", or "rattle through" a ticket/story/card — especially
+  with a ticket ID (like A-1, C-3), a Notion card, or a backlog item — even
+  without the word "pipeline". Also trigger for planning a ticket into
+  commits, building test-first, or reviewing a branch against its ticket.
+  Do NOT use for ad-hoc coding with no ticket behind it, or for setting up
+  / populating the board itself.
 ---
 
 # Ticket pipeline

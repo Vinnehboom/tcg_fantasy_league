@@ -2,35 +2,18 @@
 name: kanban-cycle
 description: >-
   Run one scheduled review cycle of a project's Kanban board and its GitHub
-  pull requests: triage any open PRs first (CI fixes, review-feedback
-  re-entry, rebases), then — if there's room under the PR caps — pick up the
-  next ready ticket and hand it to the /ticket-pipeline skill. Reads its
-  target repo, board, and caps from `.claude/kanban-cycle.json`, so it's
-  portable to any project with a Notion kanban board: copy this skill folder
-  and write a new config file pointing at that project's repo/board. Designed
-  to be fired by a recurring Routine bound to a persistent session (not a
-  fresh session per firing) — this session is the standing orchestrator,
-  doing triage and picking what's next; it does NOT run ticket-pipeline
-  inline in its own working directory. Both PR triage and picked-up ticket
-  work are dispatched as background Agent-tool subagents, each on its own
-  isolated git worktree (own checkout, own branch — not a separate
-  container or session), so up to `max_open_prs` of them can run in
-  parallel without a scheduled cycle ever colliding with in-progress work
-  on the orchestrator's own checkout or on each other. In-flight detection
-  reads real state (open PRs, Notion card status, `ListAgents`), not
-  conversation memory, so it's correct regardless of which cycle or
-  dispatch last touched a ticket. A cycle notifies only when it produced
-  something worth raising — a decision needed, a state change, a failure —
-  ending in exactly one bullet-point rundown and one PushNotification;
-  quiet cycles end with a single in-session line and no push at all, and
-  nothing is ever announced mid-cycle. Before each cycle it checks its own
-  session cost against a ceiling and hands off to a fresh orchestrator
-  session (`/handoff`) once it gets too expensive to keep running in.
-  Use when the user says
-  "run the board
-  cycle," "/kanban-cycle," or asks to check the kanban board and PR status on
-  a schedule. Do not use for a one-off "work this ticket" request — that's
-  /ticket-pipeline directly.
+  pull requests: triage open PRs first (CI fixes, review-feedback re-entry,
+  rebases), then — if there's room under the PR caps — pick up the next
+  ready ticket via the /ticket-pipeline skill. Config-driven
+  (`.claude/kanban-cycle.json`), portable to any project with a Notion
+  kanban board. Runs as the standing orchestrator on a persistent session;
+  actual PR/ticket work is dispatched to isolated background subagents, not
+  run inline. Checks its own session cost each cycle and hands off to a
+  fresh orchestrator (`/handoff`) once it gets too expensive. Notifies only
+  when a cycle produces something worth raising. Use when the user says
+  "run the board cycle," "/kanban-cycle," or asks to check the kanban board
+  and PR status on a schedule. Do not use for a one-off "work this ticket"
+  request — that's /ticket-pipeline directly.
 ---
 
 # Kanban cycle
