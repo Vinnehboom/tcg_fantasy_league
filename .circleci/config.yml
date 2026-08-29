@@ -79,18 +79,24 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      # The cimg/*-browsers convenience images ship only the OS-level
-      # libraries browsers need, not an actual Chrome binary or a
-      # chromedriver matched to one (see
-      # https://github.com/CircleCI-Public/browser-tools-orb) — and system
-      # package installs from the `setup` job's container don't carry over
-      # through persist_to_workspace/attach_workspace (that only copies the
-      # `.` checkout, not installed binaries), so every job that drives a
-      # real browser has to install its own pair. install_chromedriver
-      # dynamically selects the driver version to match whatever Chrome
-      # install_chrome just installed, so the two can't drift apart.
-      - browser-tools/install_chrome:
-          replace_existing: true
+      # cimg/ruby:*-browsers images DO ship a real Chrome binary — it's
+      # baked into the image at build time (see the "Install a single
+      # version of Google Chrome Stable" step in
+      # https://github.com/CircleCI-Public/cimg-ruby/blob/main/3.3/browsers/Dockerfile),
+      # along with its own /etc/apt/sources.list.d/google-chrome.list.
+      # `replace_existing: true` here previously forced install_chrome to
+      # purge and reinstall that baked-in Chrome, which makes its script
+      # append a second, byte-identical `deb ...` line to that same
+      # already-populated sources file — apt then refuses to update at all
+      # ("Target Packages ... is configured multiple times"), which is what
+      # actually failed this job. Leaving replace_existing at its default
+      # (false) makes install_chrome recognize Chrome is already present
+      # and exit without touching apt/sources.list.d, so it never hits that
+      # duplicate-entry error. install_chromedriver doesn't touch apt at
+      # all — it fetches a chromedriver matched to whatever Chrome version
+      # is already on PATH via the Chrome for Testing JSON endpoints, so
+      # the two still can't drift apart.
+      - browser-tools/install_chrome
       - browser-tools/install_chromedriver
       - run:
           name: Check browser install
