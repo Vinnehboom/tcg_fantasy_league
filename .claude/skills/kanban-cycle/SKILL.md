@@ -2,18 +2,35 @@
 name: kanban-cycle
 description: >-
   Run one scheduled review cycle of a project's Kanban board and its GitHub
-  pull requests: triage open PRs first (CI fixes, review-feedback re-entry,
-  rebases), then — if there's room under the PR caps — pick up the next
-  ready ticket via the /ticket-pipeline skill. Config-driven
-  (`.claude/kanban-cycle.json`), portable to any project with a Notion
-  kanban board. Runs as the standing orchestrator on a persistent session;
-  actual PR/ticket work is dispatched to isolated background subagents, not
-  run inline. Checks its own session cost each cycle and hands off to a
-  fresh orchestrator (`/handoff`) once it gets too expensive. Notifies only
-  when a cycle produces something worth raising. Use when the user says
-  "run the board cycle," "/kanban-cycle," or asks to check the kanban board
-  and PR status on a schedule. Do not use for a one-off "work this ticket"
-  request — that's /ticket-pipeline directly.
+  pull requests: triage any open PRs first (CI fixes, review-feedback
+  re-entry, rebases), then — if there's room under the PR caps — pick up the
+  next ready ticket and hand it to the /ticket-pipeline skill. Reads its
+  target repo, board, and caps from `.claude/kanban-cycle.json`, so it's
+  portable to any project with a Notion kanban board: copy this skill folder
+  and write a new config file pointing at that project's repo/board. Designed
+  to be fired by a recurring Routine bound to a persistent session (not a
+  fresh session per firing) — this session is the standing orchestrator,
+  doing triage and picking what's next; it does NOT run ticket-pipeline
+  inline in its own working directory. Both PR triage and picked-up ticket
+  work are dispatched as background Agent-tool subagents, each on its own
+  isolated git worktree (own checkout, own branch — not a separate
+  container or session), so up to `max_open_prs` of them can run in
+  parallel without a scheduled cycle ever colliding with in-progress work
+  on the orchestrator's own checkout or on each other. In-flight detection
+  reads real state (open PRs, Notion card status, `ListAgents`), not
+  conversation memory, so it's correct regardless of which cycle or
+  dispatch last touched a ticket. A cycle notifies only when it produced
+  something worth raising — a decision needed, a state change, a failure —
+  ending in exactly one bullet-point rundown and one PushNotification;
+  quiet cycles end with a single in-session line and no push at all, and
+  nothing is ever announced mid-cycle. Before each cycle it checks its own
+  session cost against a ceiling and hands off to a fresh orchestrator
+  session (`/handoff`) once it gets too expensive to keep running in.
+  Use when the user says
+  "run the board
+  cycle," "/kanban-cycle," or asks to check the kanban board and PR status on
+  a schedule. Do not use for a one-off "work this ticket" request — that's
+  /ticket-pipeline directly.
 ---
 
 # Kanban cycle
@@ -37,22 +54,22 @@ then describes this session) and read
 and stop — the successor picks up at the next scheduled firing.
 
 `cost_usd` is the harness valuing this session's tokens at API list
-prices. On a subscription plan it is **not** a bill — treat it purely as a
-convenient running total of token volume, which is what the ceiling is
-really thresholding. Check `external_metadata.rate_limit_info` in the same
-response for the constraint that actually binds (`status`, `rateLimitType`,
-`resetsAt`); `allowed_warning` or worse means the window is close to
-throttling, which is a reason to hand off now regardless of the ceiling.
+prices. On a subscription plan it is **not** a bill — treat it as a
+running total of this session's own token volume, which is what the
+ceiling thresholds. It does NOT reflect account-wide usage (other
+sessions, other dispatches) — check `external_metadata.rate_limit_info`
+in the same response for the constraint that actually binds (`status`,
+`rateLimitType`, `resetsAt`). Treat `allowed_warning` or worse as a signal
+to hand off *if this session's own turn count is genuinely driving it* —
+don't hand off reflexively on a fresh, cheap session just because the
+account-wide window shows warning status; a fresh session repeating that
+handoff gains nothing (the account-wide number doesn't reset per session)
+and just loops.
 
-This is the single largest efficiency lever in the automation. Tokens per
-turn are proportional to context length, context only grows, so a standing
-session's total consumption grows with roughly the *square* of its turn
-count. Generation 1 measured 1,944 requests, mean prompt 371,729 tokens,
-700M cache-read tokens — most of it in the long tail, where each trivial
-turn still dragged a ~400K-token context behind it, and it ended the week
-at `allowed_warning`. A cycle skipped for a handoff costs one cycle; not
-handing off compounds every turn after, and eventually the automation goes
-dark mid-window.
+Context only grows within a session, so tokens per turn — and total
+consumption — grow with roughly the *square* of turn count. Skipping a
+cycle for a handoff costs one cycle; not handing off compounds every turn
+after.
 
 ## 1. Check for in-flight work — from real state, not memory
 
@@ -274,17 +291,9 @@ up to `max_open_prs`.)
 ## Dispatch mechanics (used by both step 3 and step 6)
 
 **Do not use `mcp__Claude_Code_Remote__create_trigger` with
-`create_new_session_on_fire: true` for this.** That was the original
-design and it is broken for this org: a freshly-spawned CCR session gets
-none of this session's MCP connectors — confirmed via `list_triggers`
-(such triggers show no `mcp_connections` at all, unlike self-bound ones,
-which inherit the calling session's) and via `create_trigger` itself
-rejecting an explicit `connectors` param ("not available for this
-organization"). Two real dispatch attempts on ticket A-1 both confirmed
-`run_once_fired` server-side and then did precisely nothing — no session,
-no branch, no PR, not even a startup `PushNotification` — because the
-spawned session had no GitHub or Notion tools to do anything with, and
-apparently not enough life left to report that before giving up.
+`create_new_session_on_fire: true` for this.** A freshly-spawned CCR
+session gets none of this session's MCP connectors (GitHub, Notion), so
+it can't actually do the work — confirmed broken for this org.
 
 Instead, dispatch the work (`/ticket-pipeline <Task ID>` for a new ticket,
 or the specific CI-fix/review-feedback/rebase task for an existing PR) as
