@@ -1,1 +1,61 @@
-npm test
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+ruby_files=$(printf '%s\n' "$staged" | grep -E '\.rb$|\.rake$' || true)
+other_ruby_relevant=$(printf '%s\n' "$staged" | grep -E '^Gemfile$|^Gemfile\.lock$|^\.rubocop\.yml$|schema\.rb$' || true)
+
+if [ -z "$ruby_files" ] && [ -z "$other_ruby_relevant" ]; then
+  echo "pre-commit: no Ruby-relevant files staged, skipping rubocop/rspec (CI runs the full suite on push)"
+  exit 0
+fi
+
+if [ -n "$ruby_files" ]; then
+  echo "pre-commit: running rubocop on staged Ruby files"
+  # shellcheck disable=SC2086
+  bundle exec rubocop $ruby_files || exit 1
+fi
+
+specs=""
+for f in $ruby_files; do
+  case "$f" in
+    spec/*_spec.rb)
+      specs="$specs $f"
+      ;;
+    app/*.rb)
+      rel=${f#app/}
+      rel=${rel%.rb}
+      candidate="spec/${rel}_spec.rb"
+      [ -f "$candidate" ] && specs="$specs $candidate"
+      ;;
+    lib/*.rb|lib/*.rake)
+      rel=${f#lib/}
+      rel=${rel%.rb}
+      rel=${rel%.rake}
+      candidate="spec/${rel}_spec.rb"
+      [ -f "$candidate" ] && specs="$specs $candidate"
+      ;;
+    config/*.rb)
+      rel=${f#config/}
+      rel=${rel%.rb}
+      candidate="spec/config/${rel}_spec.rb"
+      [ -f "$candidate" ] && specs="$specs $candidate"
+      ;;
+  esac
+done
+
+specs=$(printf '%s\n' $specs | sort -u | tr '\n' ' ' | xargs)
+
+if [ -n "$specs" ]; then
+  echo "pre-commit: running scoped rspec: $specs"
+  # shellcheck disable=SC2086
+  bundle exec rspec $specs || exit 1
+elif [ -n "$ruby_files" ]; then
+  echo "pre-commit: no mapped spec files found for the staged Ruby changes, skipping rspec locally (CI runs the full suite on push)"
+fi
+
+if [ -n "$other_ruby_relevant" ] && [ -z "$ruby_files" ]; then
+  echo "pre-commit: Gemfile/rubocop-config change with no code changes, skipping local rubocop/rspec (CI runs the full suite on push)"
+fi
