@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["status"]
 
   trigger({ params: { kind } }) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
 
     fetch(this.urlValue, {
       method: "POST",

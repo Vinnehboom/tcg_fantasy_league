@@ -10,7 +10,7 @@ RSpec.describe 'Admin external imports', :js do
 
     click_button I18n.t('admin.games.show.trigger_players')
 
-    expect(page).to have_content(I18n.t('admin.games.show.trigger_success'))
+    expect(page).to have_content('Import started.')
     expect(ExternalData::Ptcg::ImportPlayersJob).to have_been_enqueued
   end
 end
