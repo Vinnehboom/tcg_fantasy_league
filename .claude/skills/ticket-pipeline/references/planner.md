@@ -48,7 +48,7 @@ Write it out with sections: Goal / **Convention check** (Step 2.5's output) / De
 ### What makes the commit breakdown good
 - The history tells a story: scaffolding/models before the behavior that needs them.
 - Code and specs travel together in the same commit. No "tests later" commit.
-- Each commit stands green (lint + full suite).
+- Each commit stands green (lint + the specs it touches — see developer.md's scoped commit gate; GitHub CI covers the full suite).
 - Small enough to review, large enough to mean something.
 
 ## Documentation style
