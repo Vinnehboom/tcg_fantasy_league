@@ -92,17 +92,18 @@ jobs:
       # actually failed this job. Leaving replace_existing at its default
       # (false) makes install_chrome recognize Chrome is already present
       # and exit without touching apt/sources.list.d, so it never hits that
-      # duplicate-entry error. install_chromedriver doesn't touch apt at
-      # all — it fetches a chromedriver matched to whatever Chrome version
-      # is already on PATH via the Chrome for Testing JSON endpoints, so
-      # the two still can't drift apart.
+      # duplicate-entry error.
+      #
+      # No install_chromedriver step: this repo's :js driver is Cuprite
+      # (see spec/rails_helper.rb), which drives Chrome directly over the
+      # DevTools protocol and needs no separate chromedriver binary kept
+      # version-matched against it — that's the whole problem Cuprite
+      # replaced Selenium+chromedriver to get rid of, so installing a
+      # chromedriver here would be dead weight at best.
       - browser-tools/install_chrome
-      - browser-tools/install_chromedriver
       - run:
           name: Check browser install
-          command: |
-            google-chrome --version
-            chromedriver --version
+          command: google-chrome --version
       - db_setup
       - run:
           name: Tests
