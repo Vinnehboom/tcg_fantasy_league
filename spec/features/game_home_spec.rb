@@ -13,9 +13,9 @@ RSpec.describe 'Game home page', :js do
 
     visit game_root_path(game:)
 
-    expect(page).to have_content(I18n.t('pages.home.upcoming_drafts'))
+    expect(page).to have_content('Upcoming drafts')
     expect(page).to have_content(tournament.name)
-    expect(page).to have_content(I18n.t('pages.home.top_players'))
+    expect(page).to have_content('Top scoring users')
     expect(page).to have_content(scoring_user.username)
   end
 end
