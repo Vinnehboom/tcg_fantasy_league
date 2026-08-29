@@ -40,8 +40,8 @@ module Players
       context 'when a player was rescored' do
         it "counts them one time, with that player's newest score" do
           player = create(:player, :without_scores, game:)
-          travel_to(2.days.ago) { create(:external_score, player:, season: '2026', score: 10) }
           create(:external_score, player:, season: '2026', score: 20)
+          travel_to(2.days.ago) { create(:external_score, player:, season: '2026', score: 10) }
 
           average = described_class.new(game:, season_label: '2026').average
 
