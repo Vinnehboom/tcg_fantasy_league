@@ -475,6 +475,12 @@ stray commit (`git format-patch -1 HEAD`), `git fetch origin <branch>`,
 by hand is usually faster than `git am`, which conflicts when the stale
 base differs much from the real one.
 
+**Four more environment facts, learned 2026-08-29, worth knowing before they cost a cycle:**
+- **`circleci.com` is unreachable from this environment** — the network egress proxy blocks it outright (confirmed via direct `curl`, both the web UI and the v1.1 API return a 403 at the proxy). A CI-red dispatch cannot read CircleCI job logs at all. Diagnose CI failures by reading `.circleci/config.yml` and the diff statically, reproducing what's reproducible locally, and reasoning from the commit status alone — don't waste a dispatch's budget trying to fetch the log.
+- **A dispatched agent can be killed by an org-wide rate-limit/spend-limit error**, not just this session's own cost ceiling — it arrives as a `failed` (not `completed`) task-notification carrying a raw 429 error instead of a clean hand-back. Don't take that at face value: check the branch/PR/Notion state directly (git log, `git diff` against origin, the PR's current commits) before assuming work was lost — the underlying commits/pushes had often already succeeded, and only the final clean summary was cut off.
+- **A container restart can kill every live background dispatch at once**, silently — a system notice names which tasks stopped, but any that don't get named may just vanish. Re-check `git worktree list` and real PR/Notion state after any such notice rather than trusting what a cycle thought was still running.
+- **Direct `git push` to `main` from this orchestrator session gets blocked by the permission classifier**, including for `.claude/skills/` maintenance commits — despite earlier repo history showing such commits pushed directly. Push a normal branch and open a PR for skill-file changes too, don't assume direct-to-main still works.
+
 ## 7. End-of-cycle rundown (always)
 
 **Notify only when something is worth raising.** Standing instruction,
