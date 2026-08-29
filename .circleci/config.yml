@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   ruby: circleci/ruby@1.4.0
   node: circleci/node@5.0.0
+  browser-tools: circleci/browser-tools@2.4.2
 
 executors:
   lite-container:
@@ -78,6 +79,24 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      # The cimg/*-browsers convenience images ship only the OS-level
+      # libraries browsers need, not an actual Chrome binary or a
+      # chromedriver matched to one (see
+      # https://github.com/CircleCI-Public/browser-tools-orb) — and system
+      # package installs from the `setup` job's container don't carry over
+      # through persist_to_workspace/attach_workspace (that only copies the
+      # `.` checkout, not installed binaries), so every job that drives a
+      # real browser has to install its own pair. install_chromedriver
+      # dynamically selects the driver version to match whatever Chrome
+      # install_chrome just installed, so the two can't drift apart.
+      - browser-tools/install_chrome:
+          replace_existing: true
+      - browser-tools/install_chromedriver
+      - run:
+          name: Check browser install
+          command: |
+            google-chrome --version
+            chromedriver --version
       - db_setup
       - run:
           name: Tests
