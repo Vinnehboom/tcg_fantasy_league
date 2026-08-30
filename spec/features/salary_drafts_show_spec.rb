@@ -8,8 +8,9 @@ RSpec.describe 'Salary draft show', :js do
 
     visit game_salary_draft_path(salary_draft, game:)
 
-    expect(page).to have_content(tournament.name)
-    expect(page).to have_content(salary_draft.price_cap.to_s)
-    expect(page).to have_content(salary_draft.roster_size.to_s)
+    within('table', text: tournament.name) do
+      expect(page).to have_content(salary_draft.price_cap.to_s)
+      expect(page).to have_content(salary_draft.roster_size.to_s)
+    end
   end
 end
