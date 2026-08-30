@@ -17,9 +17,10 @@ RSpec.describe 'Participation show', :js do
     click_button I18n.t('devise.sessions.sign_in')
     visit game_participation_path(participation, game:)
 
-    expect(page).to have_content(tournament.name)
-    expect(page).to have_content(salary_draft.price_cap.to_s)
-    expect(page).to have_content(salary_draft.roster_size.to_s)
+    within('table', text: tournament.name) do
+      expect(page).to have_content(salary_draft.price_cap.to_s)
+      expect(page).to have_content(salary_draft.roster_size.to_s)
+    end
     expect(page).to have_content(player.name)
     expect(page).to have_content('1 / 3')
   end
