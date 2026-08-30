@@ -22,7 +22,7 @@ RSpec.describe 'Roster edit', :js do
     within("#roster_#{roster.id}") do
       expect(page).to have_content(player.name)
       expect(page).to have_css('tr', text: "1 / #{salary_draft.roster_size}")
-      expect(page).to have_css('tr', text: "#{roster.reload.total_cost} / #{salary_draft.price_cap}")
+      expect(page).to have_css('tr', text: '1.0 / 250')
     end
     within('#player_table') { expect(page).to have_no_content(player.name) }
   end
@@ -70,7 +70,7 @@ RSpec.describe 'Roster edit', :js do
 
     within('#player_table') { click_link I18n.t('rosters.edit.add_player') }
 
-    expect(page).to have_content(I18n.t('rosters.update.failed'))
+    expect(page).to have_content('Roster failed to update.')
     within("#roster_#{roster.id}") { expect(page).to have_css('tr', text: "0 / #{salary_draft.roster_size}") }
     within('#player_table') { expect(page).to have_content(player.name) }
   end
