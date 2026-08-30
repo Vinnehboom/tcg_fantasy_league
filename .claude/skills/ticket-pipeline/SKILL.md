@@ -84,7 +84,7 @@ The Tech Debt page (pointer: `tech_debt_page.notion_page_url` in `.claude/knowle
 ## The human checkpoints
 - Checkpoint 1 — planner's questions. Relay gaps to the user, get answers, feed back. Skip only if genuinely none.
 - Checkpoint 2 — plan approval. **Surface the plan's actual content in the chat, in full or faithfully summarized section-by-section — not a one-line "plan's ready, approve?"** A plan the human never really reads is not a checkpoint, it's a formality; skimpy surfacing here is how design mistakes (see the reviewer-isolation note above) reach code before anyone who'd object has actually seen them. Call out the **Convention check** section (see references/planner.md Step 2.5) explicitly and by name — any flagged deviation from a default pattern needs its own visible line, not a mention buried in a Decisions bullet — and ask directly whether it's acceptable, don't assume silence on it means yes. Wait for a go before any branch or code.
-- Checkpoint 3 — curator proposals. After review (and live verification) passes, present proposals; wait for a go before writing anything to Notion.
+- Checkpoint 3 — curator proposals. **Standing pre-approval, 2026-08-30: the user has the orchestrator write proposals directly instead of waiting for a presented go — see references/curator.md's "After approval."** Historical default, still the fallback if that pre-approval is ever revoked: after review (and live verification) passes, present proposals and wait for a go before writing anything to Notion.
 
 Between Checkpoints 2 and 3 the developer and reviewer run to completion (including the one review→fix pass) without further prompts, unless the reviewer escalates. (Tester/Phase 4 is currently disabled — see Phase 4 — so it isn't part of this stretch right now.)
 
@@ -168,7 +168,7 @@ No merge commits, anywhere. When a PR in this pipeline is merged, always use `me
 ### Phase 6 — Curator → read references/curator.md
 - Subagent sonnet, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache.
 - Proposes new tickets / style-guide additions / Decisions-database entries (or a Status flip on an existing row, when this work supersedes it) / Tech Debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
-- Checkpoint 3: present proposals; on approval, create cards / edit pages. Nothing written without the user's go.
+- Checkpoint 3: standing pre-approval as of 2026-08-30 — write proposals directly (create cards / edit pages), then tell the user what got filed. See references/curator.md's "After approval" for the fallback if this is ever revoked.
 
 ## Handling review feedback (re-entry)
 A review comment on a pipeline-opened PR is NOT a quick ad hoc patch — rerun the pipeline's phases scoped to just that feedback, the same rigor as the original ticket at a smaller size, instead of editing the branch directly.
