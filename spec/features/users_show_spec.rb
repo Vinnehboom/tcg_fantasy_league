@@ -108,4 +108,18 @@ RSpec.describe 'User profile', :js do
       expect(page).to have_no_content(profile_user.email)
     end
   end
+
+  context "when a signed-in admin views another user's profile" do
+    it "shows the regular user's email" do
+      game = create(:game)
+      admin = create(:user, :with_role, password: 'testtest')
+      regular_user = create(:user)
+
+      sign_in_with(admin)
+      visit game_user_path(id: regular_user.id, game:)
+
+      expect(page).to have_content('User profile')
+      expect(page).to have_css('td', exact_text: regular_user.email)
+    end
+  end
 end
