@@ -42,8 +42,16 @@ deviations from default Rails/repo conventions") rather than omitting the
 subsection — an omitted section reads as "not checked," not "checked, none
 found."
 
+## Step 2.6 — Classify risk (standing instruction, 2026-08-31)
+State the ticket's risk level as one of **Low / Medium / High**, with a one-line reason, up front in the plan. This gates whether the orchestrator may self-approve the plan at Checkpoint 2 (see SKILL.md's Checkpoint 2 section) instead of waiting on the user — so classify honestly, not optimistically:
+- **High**: a large refactor (touches many files or an existing model's shape), or anything in a business-critical flow — scoring, pricing/cost calculation, salary-draft math, anything that changes data other records already depend on. Always High if genuinely unsure between Medium and High; this gate protects the user's attention, not the planner's convenience.
+- **Medium**: a real but contained change — new behavior on an existing flow, a new model with limited blast radius, non-trivial but reviewable in one sitting.
+- **Low**: additive and narrow — new spec coverage with no production-code change, a new admin-only view, a small isolated utility.
+
+This is a separate judgment from the prose **Risks** section below (which lists specific concerns/edge cases) — Risk classification is the one-line categorical tag the self-approval gate reads mechanically.
+
 ## Step 3 — Write the plan
-Write it out with sections: Goal / **Convention check** (Step 2.5's output) / Decisions (made in advance, with alternatives) / Branch / Commits (ordered, code+specs together, each green) / Open alternatives / Risks. This is text you hand back to the orchestrator — NOT a repo file. The orchestrator appends it to the Notion ticket card; a plan living in `docs/plans/` is the old convention and no longer used.
+Write it out with sections: Goal / **Risk classification** (Step 2.6's output) / **Convention check** (Step 2.5's output) / Decisions (made in advance, with alternatives) / Branch / Commits (ordered, code+specs together, each green) / Open alternatives / Risks. This is text you hand back to the orchestrator — NOT a repo file. The orchestrator appends it to the Notion ticket card; a plan living in `docs/plans/` is the old convention and no longer used.
 
 ### What makes the commit breakdown good
 - The history tells a story: scaffolding/models before the behavior that needs them.
@@ -55,4 +63,4 @@ Write it out with sections: Goal / **Convention check** (Step 2.5's output) / De
 Write the plan with the `simple-english` skill (ASD-STE100, pragmatic mode). It ends up on the Notion ticket card and stays there — write it so a reader who is not a native English speaker gets it right the first time. Load the skill before you draft the plan.
 
 ## What you hand back
-The plan itself (the Goal/Decisions/Branch/Commits/Open alternatives/Risks text), your decisions, and any dependency/branch call. Do not create the branch, write code, or write any repo file — keeping roles separate is what keeps the review honest.
+The plan itself (the Goal/Risk classification/Convention check/Decisions/Branch/Commits/Open alternatives/Risks text), your decisions, and any dependency/branch call. Do not create the branch, write code, or write any repo file — keeping roles separate is what keeps the review honest.
