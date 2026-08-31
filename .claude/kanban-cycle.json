@@ -6,6 +6,6 @@
   "max_open_prs": 2,
   "max_stacked_prs": 2,
   "orchestrator_cost_ceiling_usd": 50,
-  "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Set this to the default branch once the skill files are merged there — that is the real fix; this field is the stopgap.",
-  "orchestrator_branch": "claude/kanban-orchestrator-setup-7jgaqe"
+  "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Fixed to main at generation 4's handoff (2026-08-31), 3 generations after this was first flagged wrong — main now carries the current skill files (verified via git ls-tree before making this change). If this ever needs to point elsewhere again, that's a regression to investigate, not a new normal.",
+  "orchestrator_branch": "main"
 }
