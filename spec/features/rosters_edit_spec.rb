@@ -10,11 +10,7 @@ RSpec.describe 'Roster edit', :js do
     player = create(:player, :without_scores, game:, name: 'Ash Ketchum')
     create(:external_score, player:, score: 5)
 
-    visit new_user_session_path
-    fill_in 'user_email', with: user.email
-    fill_in 'user_password', with: 'testtest'
-    click_button I18n.t('devise.sessions.sign_in')
-    expect(page).to have_content(I18n.t('devise.sessions.signed_in'))
+    sign_in_with(user)
     visit edit_game_roster_path(id: roster.id, game:)
 
     within('#player_table') { click_link I18n.t('rosters.edit.add_player') }
@@ -37,11 +33,7 @@ RSpec.describe 'Roster edit', :js do
     create(:external_score, player:, score: 5)
     create(:roster_player, roster:, player:)
 
-    visit new_user_session_path
-    fill_in 'user_email', with: user.email
-    fill_in 'user_password', with: 'testtest'
-    click_button I18n.t('devise.sessions.sign_in')
-    expect(page).to have_content(I18n.t('devise.sessions.signed_in'))
+    sign_in_with(user)
     visit edit_game_roster_path(id: roster.id, game:)
 
     within("#roster_#{roster.id}") { click_link I18n.t('rosters.edit.remove_player') }
@@ -61,11 +53,7 @@ RSpec.describe 'Roster edit', :js do
     player = create(:player, :without_scores, game:, name: 'Ash Ketchum')
     create(:external_score, player:, score: 5)
 
-    visit new_user_session_path
-    fill_in 'user_email', with: user.email
-    fill_in 'user_password', with: 'testtest'
-    click_button I18n.t('devise.sessions.sign_in')
-    expect(page).to have_content(I18n.t('devise.sessions.signed_in'))
+    sign_in_with(user)
     visit edit_game_roster_path(id: roster.id, game:)
 
     within('#player_table') { click_link I18n.t('rosters.edit.add_player') }
