@@ -83,4 +83,29 @@ RSpec.describe 'User profile', :js do
       within('tr', text: 'Lifetime highscore') { expect(page).to have_css('td', exact_text: '30.0') }
     end
   end
+
+  context "when a signed-in user views another user's profile" do
+    it "shows the other user's username, highscore, and roster, but hides their email" do
+      game = create(:game)
+      tournament = create(:tournament, game:, name: 'Winter Regionals')
+      draft = create(:salary_draft, tournament:)
+      viewer = create(:user, password: 'testtest')
+      profile_user = create(:user)
+      participation = create(:participation, user: profile_user, draft:, status: 'completed')
+      player = create(:player, :without_scores, game:, name: 'Ash Ketchum')
+      score_roster(participation:, score: 10, player:)
+
+      sign_in_with(viewer)
+      visit game_user_path(id: profile_user.id, game:)
+
+      within('tr', text: 'Username') { expect(page).to have_css('td', exact_text: profile_user.username) }
+      within('tr', text: 'Lifetime highscore') { expect(page).to have_css('td', exact_text: '10.0') }
+      within('tr', text: tournament.name) do
+        expect(page).to have_content(player.name)
+        expect(page).to have_css('td', exact_text: '10.0')
+        expect(page).to have_css('td.text-center', exact_text: '10.0')
+      end
+      expect(page).to have_no_content(profile_user.email)
+    end
+  end
 end
