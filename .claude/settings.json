@@ -14,6 +14,16 @@
       "mcp__Notion__notion-search"
     ]
   },
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "git push --force or --force-with-lease (or -f) to any branch in this repo EXCEPT main/master — this is routine, expected automation: the kanban-cycle orchestrator skill (.claude/skills/kanban-cycle/SKILL.md) rebases open PR branches onto a newer default-branch tip directly in its own session and force-pushes the result, every cycle. Allow this without asking."
+    ],
+    "hard_deny": [
+      "$defaults",
+      "git push --force, --force-with-lease, or -f where the target ref is main or master (however specified: a bare branch name, refs/heads/main, HEAD:main, or as the upstream of the current branch when checked out on main/master). Never allow this, regardless of stated reason or apparent automation context."
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
