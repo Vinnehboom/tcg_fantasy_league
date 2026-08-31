@@ -53,4 +53,34 @@ RSpec.describe 'User profile', :js do
       end
     end
   end
+
+  context 'when a participation is not completed' do
+    let(:game) { create(:game) }
+    let(:tournament) { create(:tournament, game:, name: 'Winter Regionals') }
+    let(:user) { create(:user, password: 'testtest') }
+    let(:completed) { create(:participation, user:, draft: create(:salary_draft, tournament:), status: 'completed') }
+    let(:other_tournament) { create(:tournament, game:, name: 'Spring Invitational') }
+    let(:submitted_draft) { create(:salary_draft, tournament: other_tournament) }
+    let(:submitted) { create(:participation, user:, draft: submitted_draft, status: 'submitted') }
+
+    before do
+      score_roster(participation: completed, score: 25)
+      score_roster(participation: submitted, score: 5)
+    end
+
+    it 'excludes a roster from the list when its participation is not completed' do
+      sign_in_with(user)
+      visit game_user_path(id: user.id, game:)
+
+      expect(page).to have_css('tr', text: tournament.name)
+      expect(page).to have_no_content(other_tournament.name)
+    end
+
+    it "still counts a not-completed participation's score toward the highscore" do
+      sign_in_with(user)
+      visit game_user_path(id: user.id, game:)
+
+      within('tr', text: 'Lifetime highscore') { expect(page).to have_css('td', exact_text: '30.0') }
+    end
+  end
 end
