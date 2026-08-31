@@ -177,9 +177,13 @@ yourself — the successor owns that, and doing it early strands the Routines.
   repo-scoped, so every one dies with the predecessor. A successor that
   re-points its Routines but forgets this runs its cycles correctly and
   still goes deaf to CI failures and review comments between them.
-- **The trigger count must not change** across a handoff. This project runs
-  four daily cycles; a handoff that leaves three is a silent regression.
-  Count before and after.
+- **The trigger count must not change** across a handoff. This project
+  currently runs two daily cycles (08:00 and 17:30 BST) — confirmed via
+  `list_triggers` at generation 4's handoff, correcting an earlier "four
+  daily cycles" claim here that didn't match reality. Whatever the count
+  actually is when you check, a handoff that leaves fewer is a silent
+  regression. Count before and after — read it from `list_triggers`, don't
+  assume a number written here.
 - **One orchestrator at a time.** This replaces the session, it does not add
   one. Two live orchestrators would both triage the same PRs and dispatch
   duplicate agents onto the same branches.
