@@ -104,8 +104,20 @@ automation — via `/ticket-pipeline` — opened), CI status, review state,
 and mergeability.
 
 **Stacked PRs** are any whose base branch is not the repo's default branch
-(i.e. based on another PR's branch rather than `main`). Count them —
-that's `stacked_count`, capped at `max_stacked_prs`.
+(i.e. based on another PR's branch rather than `main`). Count them among
+ticket-linked PRs only (see step 4) — that's `stacked_count`, capped at
+`max_stacked_prs`.
+
+**Maintenance PRs don't count toward either cap (standing instruction,
+2026-08-31).** A PR whose body does NOT link a Notion ticket card — an
+automation-maintenance change to `.claude/skills/`, `.claude/settings.json`,
+or similar repo/automation config, opened by this orchestrator itself, not
+by `/ticket-pipeline` for a tracked ticket — is exempt from `max_open_prs`
+and `max_stacked_prs`. These PRs still need Vinnie's review/merge like any
+other, and still get listed in the rundown, but they don't consume the
+ticket-pipeline's PR budget: that budget exists to bound ticket-dispatch
+concurrency (review load, the shared-Postgres-test-DB risk under "Dispatch
+mechanics"), and a markdown/config-only PR carries none of that risk.
 
 **First review given** on a PR means the user (the repo owner) has
 submitted at least one review (any state — comment, approve, or changes
@@ -246,16 +258,21 @@ active agent:
 Each dispatched PR gets its own agent, so up to `max_open_prs` of these
 can be running in parallel — that cap is exactly what keeps this bounded.
 
-For open PRs that do NOT link a Notion ticket (opened by hand, not by this
-automation): leave them alone — don't push to someone else's branch — but
-list them in the rundown since they still count against the PR cap.
+For open PRs that do NOT link a Notion ticket (opened by hand, or a
+maintenance PR opened by this orchestrator itself): leave them alone —
+don't push to someone else's branch — but list them in the rundown. They
+do not count against `max_open_prs` or `max_stacked_prs` (see step 4).
 
 ## 4. Compute room for new work
 
 ```
-open_count    = all open PRs on the repo
-stacked_count = open PRs whose base isn't the default branch
+open_count    = open PRs that link a Notion ticket card (step 2's fingerprint check)
+stacked_count = ticket-linked open PRs whose base isn't the default branch
 ```
+
+A maintenance PR (no linked Notion card — a `.claude/skills/` or config
+change this orchestrator opened) counts toward neither number, however
+many are open at once.
 
 - If `open_count >= max_open_prs`: no new ticket this cycle — PR triage
   (step 3) is the whole cycle. Say so in the summary.
@@ -537,9 +554,10 @@ this one end-of-cycle rundown and push, not announced separately.
 
 - PR triage always comes before starting new work — never skip straight to
   step 5 because step 3 found nothing urgent-looking; check first.
-- Never exceed `max_open_prs` or `max_stacked_prs` (currently 3 and 2 —
-  i.e. at most 2 PRs may ever be stacked on each other at once), and never
-  stack a new PR on one the user hasn't reviewed at least once yet — these
+- Never exceed `max_open_prs` or `max_stacked_prs` (currently 2 and 2 —
+  i.e. at most 2 PRs may ever be stacked on each other at once) — both
+  caps count ticket-linked PRs only, never maintenance PRs (step 4) — and
+  never stack a new PR on one the user hasn't reviewed at least once yet — these
   are hard caps, not targets to approach.
 - Only one ticket in the pre-Checkpoint-2 state at a time (step 1).
 - Never dispatch a second agent onto a PR/ticket that already has one
