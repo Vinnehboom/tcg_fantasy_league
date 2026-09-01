@@ -2,6 +2,8 @@ class Season < ApplicationRecord
 
   belongs_to :game
   has_one :setting, as: :settingable, dependent: :destroy
+  has_many :player_seasons, dependent: :destroy
+  has_many :players, through: :player_seasons
 
   validates :label, presence: true
   validates :start_date, presence: true

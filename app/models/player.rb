@@ -8,6 +8,8 @@ class Player < ApplicationRecord
   has_many :external_scores, dependent: :destroy
   has_many :results, dependent: :destroy
   has_many :external_requests, as: :requestable, dependent: :nullify
+  has_many :player_seasons, dependent: :destroy
+  has_many :seasons, through: :player_seasons
   accepts_nested_attributes_for :external_scores
 
   def current_score

@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Season do
   it { is_expected.to belong_to(:game) }
+  it { is_expected.to have_many(:players).through(:player_seasons) }
   it { is_expected.to validate_presence_of(:label) }
   it { is_expected.to validate_presence_of(:start_date) }
 
