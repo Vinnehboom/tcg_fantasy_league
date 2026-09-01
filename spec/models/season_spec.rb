@@ -107,5 +107,28 @@ RSpec.describe Season do
 
       it { is_expected.to be_valid }
     end
+
+    context 'when a new open season overlaps an earlier closed season' do
+      let(:start_date) { Date.new(2026, 6, 1) }
+      let(:end_date) { nil }
+
+      it { is_expected.not_to be_valid }
+    end
+
+    context 'when a new closed season overlaps an existing open season' do
+      before { create(:season, game:, start_date: Date.new(2027, 1, 1), end_date: nil) }
+
+      let(:start_date) { Date.new(2026, 12, 1) }
+      let(:end_date) { Date.new(2027, 6, 30) }
+
+      it { is_expected.not_to be_valid }
+    end
+
+    context 'when a new open season starts after every existing season ends' do
+      let(:start_date) { Date.new(2026, 9, 1) }
+      let(:end_date) { nil }
+
+      it { is_expected.to be_valid }
+    end
   end
 end

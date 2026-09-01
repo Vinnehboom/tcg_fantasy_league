@@ -21,9 +21,11 @@ class Season < ApplicationRecord
   end
 
   def no_overlapping_range_for_game
-    return if game_id.blank? || start_date.blank? || end_date.blank?
+    return if game_id.blank? || start_date.blank?
 
-    overlapping = Season.where(game_id:).where.not(id:).where(start_date: ..end_date).where(end_date: start_date..)
+    candidates = Season.where(game_id:).where.not(id:)
+    candidates = candidates.where(start_date: ..end_date) if end_date.present?
+    overlapping = candidates.where(end_date: start_date..).or(candidates.where(end_date: nil))
     errors.add(:start_date, :overlapping_season) if overlapping.exists?
   end
 
