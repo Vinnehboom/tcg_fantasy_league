@@ -53,3 +53,6 @@
 
 # Harness-managed scratch checkouts for isolated background-agent dispatches.
 /.claude/worktrees/
+
+# Personal permission overrides, not shared with the team.
+/.claude/settings.local.json
