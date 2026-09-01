@@ -4,7 +4,6 @@ RSpec.describe Season do
   it { is_expected.to belong_to(:game) }
   it { is_expected.to validate_presence_of(:label) }
   it { is_expected.to validate_presence_of(:start_date) }
-  it { is_expected.to validate_presence_of(:end_date) }
 
   describe 'date range validation' do
     subject(:season) { build(:season, game:, start_date:, end_date:) }
@@ -21,6 +20,14 @@ RSpec.describe Season do
       let(:end_date) { start_date - 1.day }
 
       it { is_expected.not_to be_valid }
+    end
+
+    context 'when there is no end date' do
+      let(:end_date) { nil }
+
+      it 'is valid, since a null end date represents an open season' do
+        expect(season).to be_valid
+      end
     end
   end
 
