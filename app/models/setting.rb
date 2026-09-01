@@ -14,6 +14,10 @@ class Setting < ApplicationRecord
   # Carry-forward-only: the nearest *prior* season of the same game, never a
   # later one. A past season's settings must be a direct lookup, not a
   # reconstruction from override history, so this only ever looks backward.
+  # An open season (null end_date) never satisfies the WHERE clause's `<`
+  # below, so it can never be a candidate here; NULLS LAST is belt-and-braces
+  # against that WHERE clause ever widening (Postgres sorts NULL first on a
+  # DESC order by default).
   def self.nearest_prior(season)
     joins(:season)
       .where(season: { game_id: season.game_id, end_date: ...season.start_date })
