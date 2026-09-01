@@ -6,9 +6,23 @@ RSpec.describe Player do
   it { is_expected.to have_many(:external_scores) }
   it { is_expected.to have_many(:results) }
   it { is_expected.to have_many(:external_requests).dependent(:nullify) }
+  it { is_expected.to have_many(:player_seasons).dependent(:destroy) }
   it { is_expected.to have_many(:seasons).through(:player_seasons) }
 
   it { is_expected.to belong_to(:game) }
+
+  describe '#seasons' do
+    subject(:seasons) { player.reload.seasons }
+
+    let(:player) { create(:player) }
+    let(:season) { create(:season) }
+
+    before { create(:player_season, player:, season:) }
+
+    it 'includes a season the player has joined through player_seasons' do
+      expect(seasons).to include(season)
+    end
+  end
 
   describe '#current_score' do
     let(:player) { create(:player) }
