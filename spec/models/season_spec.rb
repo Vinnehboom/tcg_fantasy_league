@@ -31,6 +31,52 @@ RSpec.describe Season do
     end
   end
 
+  describe '.covering' do
+    subject(:covering) { described_class.covering(date) }
+
+    let(:game) { create(:game) }
+
+    context 'when the date falls inside a closed season' do
+      let(:closed_season) do
+        create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: Date.new(2026, 8, 31))
+      end
+      let(:date) { Date.new(2026, 1, 15) }
+
+      before { closed_season }
+
+      it { is_expected.to contain_exactly(closed_season) }
+    end
+
+    context 'when the date is after every closed season and none is open' do
+      let(:closed_season) do
+        create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: Date.new(2026, 8, 31))
+      end
+      let(:date) { Date.new(2030, 1, 1) }
+
+      before { closed_season }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when the date is far in the future but covered by an open season' do
+      let(:open_season) { create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: nil) }
+      let(:date) { Date.new(2099, 1, 1) }
+
+      before { open_season }
+
+      it { is_expected.to contain_exactly(open_season) }
+    end
+
+    context "when the date is before an open season's own start date" do
+      let(:open_season) { create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: nil) }
+      let(:date) { Date.new(2025, 8, 31) }
+
+      before { open_season }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
   describe 'overlap validation' do
     subject(:new_season) { build(:season, game:, start_date:, end_date:) }
 

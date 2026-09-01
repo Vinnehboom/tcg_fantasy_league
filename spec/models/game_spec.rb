@@ -47,8 +47,10 @@ RSpec.describe Game do
     subject(:current) { game.current_season(on: date) }
 
     let(:game) { create(:game) }
+    let(:season_start) { Date.new(2025, 9, 1) }
+    let(:season_end) { Date.new(2026, 8, 31) }
 
-    before { create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: Date.new(2026, 8, 31)) }
+    before { create(:season, game:, start_date: season_start, end_date: season_end) }
 
     context 'when a season covers the given date' do
       let(:date) { Date.new(2026, 1, 15) }
@@ -62,9 +64,21 @@ RSpec.describe Game do
       it { is_expected.to be_nil }
     end
 
+    context 'when an open season covers the given date' do
+      before { create(:season, game:, label: 'open', start_date: Date.new(2026, 9, 1), end_date: nil) }
+
+      let(:date) { Date.new(2099, 1, 1) }
+
+      it { is_expected.to have_attributes(label: 'open') }
+    end
+
     context 'when no date is given' do
       subject(:current) { game.current_season }
 
+      # Anchored to today, not a fixed range, so this does not expire like a
+      # hardcoded date range eventually would (it did, on 2026-09-01).
+      let(:season_start) { 1.year.ago.to_date }
+      let(:season_end) { 1.year.from_now.to_date }
       let(:date) { Date.current }
 
       it { is_expected.to have_attributes(label: '2026') }
