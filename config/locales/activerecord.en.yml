@@ -28,6 +28,9 @@ en:
       setting:
         one: Setting
         other: Settings
+      player_season:
+        one: Player season
+        other: Player seasons
     attributes:
       user:
         email: Email
@@ -98,6 +101,11 @@ en:
         game: Game
         settings: Settings
         settingable: Settingable
+      player_season:
+        player: Player
+        player_id: Player
+        season: Season
+        season_id: Season
     enums:
       external_request:
         kind:
