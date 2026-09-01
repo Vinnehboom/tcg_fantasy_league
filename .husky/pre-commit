@@ -15,7 +15,7 @@ fi
 if [ -n "$ruby_files" ]; then
   echo "pre-commit: running rubocop on staged Ruby files"
   # shellcheck disable=SC2086
-  bundle exec rubocop $ruby_files || exit 1
+  bundle exec rubocop --force-exclusion $ruby_files || exit 1
 fi
 
 specs=""
