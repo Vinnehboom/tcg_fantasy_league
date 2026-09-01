@@ -8,7 +8,9 @@ class Season < ApplicationRecord
   validate :end_date_after_start_date
   validate :no_overlapping_range_for_game
 
-  scope :covering, ->(date) { where(start_date: ..date).where(end_date: date..) }
+  scope :covering, lambda { |date|
+    where(start_date: ..date).where(end_date: date..).or(where(start_date: ..date, end_date: nil))
+  }
 
   private
 
