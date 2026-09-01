@@ -17,7 +17,7 @@ class Setting < ApplicationRecord
   def self.nearest_prior(season)
     joins(:season)
       .where(season: { game_id: season.game_id, end_date: ...season.start_date })
-      .order('season.end_date DESC')
+      .order('season.end_date DESC NULLS LAST')
       .first
   end
   private_class_method :nearest_prior
