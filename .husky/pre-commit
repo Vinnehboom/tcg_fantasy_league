@@ -14,6 +14,11 @@ fi
 
 if [ -n "$ruby_files" ]; then
   echo "pre-commit: running rubocop on staged Ruby files"
+  # --force-exclusion: rubocop only applies .rubocop.yml's AllCops Exclude
+  # patterns (db/schema.rb, db/migrate/*.rb, config/**/*.rb, ...) to files it
+  # discovers itself, not to paths given explicitly on the command line. Every
+  # migration commit stages db/schema.rb, so without this flag rubocop reports
+  # hundreds of offenses against an intentionally-excluded generated file.
   # shellcheck disable=SC2086
   bundle exec rubocop --force-exclusion $ruby_files || exit 1
 fi
