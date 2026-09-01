@@ -2,9 +2,23 @@ require 'rails_helper'
 
 RSpec.describe Season do
   it { is_expected.to belong_to(:game) }
+  it { is_expected.to have_many(:player_seasons).dependent(:destroy) }
   it { is_expected.to have_many(:players).through(:player_seasons) }
   it { is_expected.to validate_presence_of(:label) }
   it { is_expected.to validate_presence_of(:start_date) }
+
+  describe '#players' do
+    subject(:players) { season.reload.players }
+
+    let(:player) { create(:player) }
+    let(:season) { create(:season) }
+
+    before { create(:player_season, player:, season:) }
+
+    it 'includes a player joined to the season through player_seasons' do
+      expect(players).to include(player)
+    end
+  end
 
   describe 'date range validation' do
     subject(:season) { build(:season, game:, start_date:, end_date:) }
