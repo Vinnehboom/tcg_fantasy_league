@@ -76,7 +76,7 @@ RSpec.describe Setting do
       it { is_expected.to be_nil }
     end
 
-    context 'when the looked-up season is itself open and has no row of its own' do
+    context 'when the looked-up season is itself open, though every candidate season stays closed' do
       let(:open_season) { create(:season, game:, label: 'open', start_date: Date.new(2026, 9, 1), end_date: nil) }
       let(:lookup_season) { open_season }
       let(:nearest_prior_setting) { create(:setting, season: late_season) }

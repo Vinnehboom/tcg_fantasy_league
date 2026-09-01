@@ -130,5 +130,23 @@ RSpec.describe Season do
 
       it { is_expected.to be_valid }
     end
+
+    context 'when a second, later-starting open season is added to the same game' do
+      before { create(:season, game:, start_date: Date.new(2026, 9, 1), end_date: nil) }
+
+      let(:start_date) { Date.new(2027, 1, 1) }
+      let(:end_date) { nil }
+
+      it { is_expected.not_to be_valid }
+    end
+
+    context 'when a second, earlier-starting open season is added to the same game' do
+      before { create(:season, game:, start_date: Date.new(2027, 1, 1), end_date: nil) }
+
+      let(:start_date) { Date.new(2026, 9, 1) }
+      let(:end_date) { nil }
+
+      it { is_expected.not_to be_valid }
+    end
   end
 end
