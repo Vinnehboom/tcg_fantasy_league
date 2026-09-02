@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_02_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_02_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,6 +58,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_02_100000) do
     t.index ["draft_id"], name: "index_participations_on_draft_id"
     t.index ["user_id", "draft_id"], name: "index_participations_on_user_id_and_draft_id", unique: true
     t.index ["user_id"], name: "index_participations_on_user_id"
+  end
+
+  create_table "player_season_modifiers", force: :cascade do |t|
+    t.bigint "player_season_id", null: false
+    t.bigint "score_modifier_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_season_id", "score_modifier_id"], name: "idx_on_player_season_id_score_modifier_id_9f0b2d8e66", unique: true
+    t.index ["player_season_id"], name: "index_player_season_modifiers_on_player_season_id"
+    t.index ["score_modifier_id"], name: "index_player_season_modifiers_on_score_modifier_id"
   end
 
   create_table "player_seasons", force: :cascade do |t|
@@ -196,6 +206,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_02_100000) do
   add_foreign_key "external_scores", "player_seasons"
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
+  add_foreign_key "player_season_modifiers", "player_seasons"
+  add_foreign_key "player_season_modifiers", "score_modifiers"
   add_foreign_key "player_seasons", "players"
   add_foreign_key "player_seasons", "seasons"
   add_foreign_key "players", "games"
