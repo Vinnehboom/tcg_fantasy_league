@@ -44,10 +44,10 @@ RSpec.describe RostersController do
       it 'does not show players the user cannot afford anymore' do
         participation.draft.update(price_cap:)
         azul = create(:player, game:, country: 'US')
-        azul.external_scores.destroy_all
+        azul.player_seasons.destroy_all
         create(:external_score, player: azul, score: score1)
         tord = create(:player, game:, country: 'NO')
-        tord.external_scores.destroy_all
+        tord.player_seasons.destroy_all
         create(:external_score, player: tord, score: score2)
         roster.players << azul
         roster.reload
@@ -61,8 +61,8 @@ RSpec.describe RostersController do
       create(:player, game:, country: 'US')
       player3 = create(:player, game:, country: 'CZ')
       player4 = create(:player, game:, country: 'ES')
-      player3.external_scores.destroy_all
-      player4.external_scores.destroy_all
+      player3.player_seasons.destroy_all
+      player4.player_seasons.destroy_all
       create(:external_score, player: player4, score: 1000)
       create(:external_score, player: player3, score: 200)
       get :edit, params: { id: roster.id, game: game.id }
@@ -71,8 +71,8 @@ RSpec.describe RostersController do
 
     it 'applies the cost to all available players' do
       player1, player2 = create_list(:player, 2, :without_scores, game:)
-      player1.external_scores.create(score: 50)
-      player2.external_scores.create(score: 200)
+      create(:external_score, player: player1, score: 50)
+      create(:external_score, player: player2, score: 200)
       get :edit, params: { id: roster.id, game: game.id }
       expect(assigns(:players).map(&:cost)).to include(10.0, 25.0)
     end
