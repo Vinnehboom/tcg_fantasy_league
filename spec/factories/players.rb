@@ -17,7 +17,6 @@ FactoryBot.define do
     trait :without_scores do
       after(:build) do |player, _context|
         player.player_seasons = []
-        player.external_scores = []
       end
     end
   end
