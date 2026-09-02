@@ -33,22 +33,24 @@ None outstanding from this generation.
   tip first (done directly by the orchestrator session per the
   classifier-blocks-dispatched-rebase rule, not by a dispatched agent).
 
-- **C-26's Phase 3 (Reviewer) dispatch was still running at handoff time
-  and will NOT survive into this session.** Dispatched subagents are
-  children of the predecessor session and are lost at handoff, per the
-  `/handoff` skill's own guardrail. Before redispatching a fresh reviewer,
-  check `.claude/worktrees/agent-abe706e1aab8476e1/docs/pipeline-cache/C-26/review-round-1.md`
-  (the reviewer's worktree, if it still exists) — if a completed review is
-  sitting there, resume from it (relay findings to the developer's
-  worktree, `agent-aa6e030661dcff910`, running branch `c-26-score-modifier-sti`)
-  rather than redoing the review from scratch. If the worktree or file is
-  gone, redispatch a fresh reviewer per the usual mechanics, diffing
-  `c-26-score-modifier-sti` against `c-25-external-score-player-season`
-  (not `main`, since C-26 is stacked).
+- **C-26's Phase 3 (Reviewer) dispatch actually completed before handoff
+  finished — the PR is already open.** The dispatch (`abe706e1aab8476e1`)
+  returned APPROVE, 0 BLOCKING, 6 NON-BLOCKING before the predecessor
+  archived. The predecessor opened PR #83 (`c-26-score-modifier-sti` into
+  `c-25-external-score-player-season`, stacked on #81 per Vinnie's
+  decision), posted the six non-blocking findings as review comments, ran
+  the Gatekeeper branch-currency check (branch was already fully current
+  against C-25's tip — no rebase needed), marked it ready for review, and
+  set the Notion card to Review. Nothing left to do here — this bullet
+  exists only so the next cycle doesn't mistake #83 for something still in
+  flight.
 
 - **PR #81 (C-25) is ready for review, CI green, no rebase needed as of
   handoff** — a normal state, noted only so the next cycle doesn't waste a
   check confirming what's already settled.
+
+- **PR #83 (C-26) is ready for review, stacked on #81 — merge #81 first.**
+  Same reasoning as above; recorded so the stacking order isn't missed.
 
 ## Pending automation work
 
