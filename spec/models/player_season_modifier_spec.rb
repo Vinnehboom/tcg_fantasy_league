@@ -10,11 +10,11 @@ RSpec.describe PlayerSeasonModifier do
     let(:player_season) { create(:player_season) }
     let(:score_modifier) { create(:multiplier) }
 
-    context 'when the player_season does not have this modifier yet' do
+    context 'when the player does not have this modifier for the season yet' do
       it { is_expected.to be_truthy }
     end
 
-    context 'when the player_season already has a different modifier' do
+    context 'when the player already has a different modifier for the season' do
       before do
         create(:player_season_modifier, player_season:, score_modifier: create(:bonus))
       end
@@ -22,7 +22,7 @@ RSpec.describe PlayerSeasonModifier do
       it { is_expected.to be_truthy }
     end
 
-    context 'when a different player_season already has this modifier' do
+    context 'when a different player already has this modifier for their season' do
       before do
         create(:player_season_modifier, player_season: create(:player_season), score_modifier:)
       end
@@ -30,7 +30,7 @@ RSpec.describe PlayerSeasonModifier do
       it { is_expected.to be_truthy }
     end
 
-    context 'when the player_season already has this exact modifier' do
+    context 'when the player already has this exact modifier for the season' do
       before do
         create(:player_season_modifier, player_season:, score_modifier:)
       end
