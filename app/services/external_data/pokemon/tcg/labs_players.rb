@@ -17,7 +17,7 @@ module ExternalData
         end
 
         def call
-          response = client.get_json(path: RANKINGS_PATH, query: { season: season.to_i, division: DIVISION })
+          response = client.get_json(path: RANKINGS_PATH, query: { season: season.label.to_i, division: DIVISION })
           parse_players(response)
         end
 

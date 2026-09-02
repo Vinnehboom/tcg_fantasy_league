@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
+  let(:season) { create(:season, label: '2026') }
+
   def stub_response(code: 200, body: '{}')
     Struct.new(:code, :body, :headers, keyword_init: true).new(code:, body:, headers: {})
   end
@@ -29,27 +31,27 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
       it 'maps the entry to an ExternalData::Player with the mew external_id format' do
-        player = described_class.call(season: 2026).first
+        player = described_class.call(season:).first
 
         expect(player.external_id).to eq('/players/1')
       end
 
       it 'maps points to external_points' do
-        player = described_class.call(season: 2026).first
+        player = described_class.call(season:).first
 
         expect(player.external_points).to eq(1675)
       end
 
       it 'maps name and country directly' do
-        player = described_class.call(season: 2026).first
+        player = described_class.call(season:).first
 
         expect(player).to have_attributes(name: 'Test Player One', country: 'US')
       end
 
-      it 'stamps the entry with the season it was fetched for' do
-        player = described_class.call(season: 2026).first
+      it 'stamps the entry with the Season row it was fetched for' do
+        player = described_class.call(season:).first
 
-        expect(player.season).to eq(2026)
+        expect(player.season).to eq(season)
       end
     end
 
@@ -60,13 +62,13 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'maps every entry to its own ExternalData::Player' do
-        players = described_class.call(season: 2026)
+        players = described_class.call(season:)
 
         expect(players.length).to eq(2)
       end
 
       it 'preserves each entry\'s own attributes independently' do
-        players = described_class.call(season: 2026)
+        players = described_class.call(season:)
 
         expect(players).to contain_exactly(
           have_attributes(external_id: '/players/1', name: 'Test Player One', country: 'US', external_points: 1675),
@@ -79,7 +81,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       it 'uses the injected client instead of building its own' do
         client = instance_double(ExternalData::JsonApiClient, get_json: JSON.parse(rankings_body))
 
-        described_class.call(season: 2026, client:)
+        described_class.call(season:, client:)
 
         expect(client).to have_received(:get_json).with(
           path: described_class::RANKINGS_PATH,
@@ -91,8 +93,8 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
     context 'when composing the request' do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
-      it 'requests the mew rankings endpoint with the given season and a fixed division' do
-        described_class.call(season: 2026)
+      it 'requests the mew rankings endpoint with the season label and a fixed division' do
+        described_class.call(season:)
 
         expect(HTTParty).to have_received(:get).with(
           'https://mew.limitlesstcg.com/labs/data/tcg/rankings',
@@ -100,12 +102,12 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
         )
       end
 
-      it 'coerces a string season to an integer for the query' do
-        described_class.call(season: '2026')
+      it 'converts the season row\'s label to an integer for the query' do
+        described_class.call(season: create(:season, label: '2024'))
 
         expect(HTTParty).to have_received(:get).with(
           'https://mew.limitlesstcg.com/labs/data/tcg/rankings',
-          hash_including(query: { season: 2026, division: 'MA' })
+          hash_including(query: { season: 2024, division: 'MA' })
         )
       end
     end
@@ -117,7 +119,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'skips the incomplete entry without raising' do
-        expect(described_class.call(season: 2026).length).to eq(1)
+        expect(described_class.call(season:).length).to eq(1)
       end
     end
 
@@ -128,7 +130,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       end
 
       it 'skips the incomplete entry without raising' do
-        expect(described_class.call(season: 2026).length).to eq(1)
+        expect(described_class.call(season:).length).to eq(1)
       end
     end
 
@@ -136,7 +138,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
       it 'maps the entry without raising' do
-        expect { described_class.call(season: 2026) }.not_to raise_error
+        expect { described_class.call(season:) }.not_to raise_error
       end
     end
 
@@ -144,7 +146,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body(message: []))) }
 
       it 'returns an empty array' do
-        expect(described_class.call(season: 2026)).to eq([])
+        expect(described_class.call(season:)).to eq([])
       end
     end
 
@@ -152,18 +154,19 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
       before { allow(HTTParty).to receive(:get).and_return(stub_response(body: { ok: false }.to_json)) }
 
       it 'returns an empty array' do
-        expect(described_class.call(season: 2026)).to eq([])
+        expect(described_class.call(season:)).to eq([])
       end
     end
   end
 
   describe 'a mapped player, once persisted' do
     let(:game) { create(:game, base_uri: 'https://limitlesstcg.com') }
+    let(:season) { create(:season, game:, label: '2026') }
 
     before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
     it 'still resolves the correct external_url' do
-      player = described_class.call(season: 2026).first
+      player = described_class.call(season:).first
       player.game_id = game.id
 
       player.save!

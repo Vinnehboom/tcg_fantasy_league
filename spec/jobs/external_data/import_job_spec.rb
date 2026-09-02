@@ -6,9 +6,12 @@ module ExternalData
     let(:game) { create(:game, base_uri: 'https://example.com') }
 
     def player_fixtures(count)
+      season = game.seasons.first || create(:season, game:)
+
       Array.new(count) do |i|
         ExternalData::Player.new(
-          attributes: { name: "Player #{i}", country: 'US', external_id: "/players/#{i}", external_points: '100' }
+          attributes: { name: "Player #{i}", country: 'US', external_id: "/players/#{i}", external_points: '100',
+                        season: }
         )
       end
     end

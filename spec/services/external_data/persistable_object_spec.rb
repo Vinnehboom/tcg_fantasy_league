@@ -10,11 +10,13 @@ module ExternalData
     end
 
     describe '#save!' do
+      let(:season) { game.seasons.first || create(:season, game:) }
       let(:attributes) do
         {
           name: 'New player',
           country: 'BE',
-          external_points: 20
+          external_points: 20,
+          season:
         }
       end
 
