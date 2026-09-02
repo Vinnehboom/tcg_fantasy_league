@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_01_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_02_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -35,12 +35,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_01_120000) do
   end
 
   create_table "external_scores", force: :cascade do |t|
-    t.bigint "player_id", null: false
     t.integer "score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "season"
-    t.index ["player_id"], name: "index_external_scores_on_player_id"
+    t.bigint "player_season_id", null: false
+    t.index ["player_season_id"], name: "index_external_scores_on_player_season_id"
   end
 
   create_table "games", id: :string, force: :cascade do |t|
@@ -186,7 +185,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_01_120000) do
   end
 
   add_foreign_key "external_requests", "games"
-  add_foreign_key "external_scores", "players"
+  add_foreign_key "external_scores", "player_seasons"
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
   add_foreign_key "participations", "users"
   add_foreign_key "player_seasons", "players"

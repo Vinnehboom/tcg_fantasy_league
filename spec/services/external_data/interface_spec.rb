@@ -10,12 +10,13 @@ RSpec.describe ExternalData::Interface do
   end
 
   describe 'players' do
+    let(:season) { create(:season, game:) }
     let(:players) do
       [
-        { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791' },
-        { name: 'Efrain Herman', country: 'MQ', external_id: '/players/6', external_points: '399' },
-        { name: 'Guadalupe Ernser', country: 'MF', external_id: '/players/7', external_points: '460' },
-        { name: 'Janyce Gusikowski V', country: 'DO', external_id: '/players/8', external_points: '163' }
+        { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791', season: },
+        { name: 'Efrain Herman', country: 'MQ', external_id: '/players/6', external_points: '399', season: },
+        { name: 'Guadalupe Ernser', country: 'MF', external_id: '/players/7', external_points: '460', season: },
+        { name: 'Janyce Gusikowski V', country: 'DO', external_id: '/players/8', external_points: '163', season: }
       ].map { |attributes| ExternalData::Player.new(attributes:) }
     end
 

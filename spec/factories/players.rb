@@ -7,11 +7,16 @@ FactoryBot.define do
     end
     game
     after(:build) do |player, _context|
-      player.external_scores << build(:external_score, player:)
+      season = player.game.persisted? ? player.game.seasons.first : nil
+      season ||= build(:season, game: player.game)
+      player_season = build(:player_season, player:, season:)
+      player.player_seasons << player_season
+      player_season.external_scores << build(:external_score, player_season:)
     end
 
     trait :without_scores do
       after(:build) do |player, _context|
+        player.player_seasons = []
         player.external_scores = []
       end
     end
