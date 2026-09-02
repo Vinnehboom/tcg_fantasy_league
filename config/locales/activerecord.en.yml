@@ -31,6 +31,9 @@ en:
       player_season:
         one: Player season
         other: Player seasons
+      score_modifier:
+        one: Score modifier
+        other: Score modifiers
     attributes:
       user:
         email: Email
@@ -106,6 +109,9 @@ en:
         player_id: Player
         season: Season
         season_id: Season
+      score_modifier:
+        name: Name
+        value: Value
     enums:
       external_request:
         kind:
