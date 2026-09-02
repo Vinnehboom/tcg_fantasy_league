@@ -56,29 +56,31 @@ RSpec.describe RostersController do
       end
     end
 
-    it 'does not show a player whose latest score is over the cap' do
-      participation.draft.update(price_cap: 40)
-      drafted = create(:player, :without_scores, game:)
-      create(:external_score, player: drafted, score: 200)
-      tord = create(:player, :without_scores, game:)
-      create(:external_score, player: tord, score: 50, created_at: 2.days.ago)
-      create(:external_score, player: tord, score: 300, created_at: 1.day.ago)
-      roster.players << drafted
-      roster.reload
+    context 'when a player has several scores' do
+      let(:tord) { create(:player, :without_scores, game:) }
 
-      get :edit, params: { id: roster.id, game: game.id }
+      before do
+        create(:external_score, player: tord, score: 50, created_at: 2.days.ago)
+        create(:external_score, player: tord, score: 300, created_at: 1.day.ago)
+      end
 
-      expect(assigns(:players)).not_to include(tord)
-    end
+      it 'does not show the player when their latest score is over the cap' do
+        participation.draft.update(price_cap: 40)
+        drafted = create(:player, :without_scores, game:)
+        create(:external_score, player: drafted, score: 200)
+        roster.players << drafted
+        roster.reload
 
-    it 'shows a player with several scores one time only' do
-      tord = create(:player, :without_scores, game:)
-      create(:external_score, player: tord, score: 50, created_at: 2.days.ago)
-      create(:external_score, player: tord, score: 300, created_at: 1.day.ago)
+        get :edit, params: { id: roster.id, game: game.id }
 
-      get :edit, params: { id: roster.id, game: game.id }
+        expect(assigns(:players)).not_to include(tord)
+      end
 
-      expect(assigns(:players).to_a.count(tord)).to eq(1)
+      it 'shows the player one time only' do
+        get :edit, params: { id: roster.id, game: game.id }
+
+        expect(assigns(:players).to_a.count(tord)).to eq(1)
+      end
     end
 
     it 'sorts the player by highest score within their region' do

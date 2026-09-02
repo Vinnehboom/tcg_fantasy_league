@@ -4,8 +4,10 @@ class ExternalScore < ApplicationRecord
   has_one :player, through: :player_season
 
   # external_scores has no player_id column, so the ranking subquery joins
-  # player_seasons to partition by player. It carries score and created_at
-  # itself, so the rn = 1 filter keeps one row for each player.
+  # player_seasons to partition by player.
+  # The rows are projections meant for a join, not usable ExternalScore
+  # records: they carry no id, so reading any unselected attribute or
+  # association raises ActiveModel::MissingAttributeError.
   scope :latest_per_player, lambda {
     select('ranked_scores.player_id, ranked_scores.score, ranked_scores.created_at')
       .from(<<~SQL.squish)
