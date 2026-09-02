@@ -21,7 +21,7 @@ RSpec.describe ExternalScore do
     end
 
     it 'returns the most recent score of the player' do
-      expect(rows.first.score).to eq(30)
+      expect(rows.find { |row| row.player_id == player.id }.score).to eq(30)
     end
 
     context 'when a second player also holds a score' do
@@ -42,7 +42,7 @@ RSpec.describe ExternalScore do
       end
 
       it 'keeps the score that was recorded last' do
-        expect(rows.first.score).to eq(40)
+        expect(rows.find { |row| row.player_id == player.id }.score).to eq(40)
       end
     end
   end
