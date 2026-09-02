@@ -2,9 +2,9 @@ module Players
 
   class SeasonStats
 
-    def initialize(game:, season_label:)
+    def initialize(game:, season:)
       @game = game
-      @season_label = season_label
+      @season = season
     end
 
     def average
@@ -25,7 +25,7 @@ module Players
 
     private
 
-    attr_reader :game, :season_label
+    attr_reader :game, :season
 
     def scores
       @scores ||= newest_scores_per_player
@@ -36,9 +36,9 @@ module Players
     # taking every row: that keeps import cadence from bending the
     # distribution, and therefore every price.
     def newest_scores_per_player
-      ExternalScore.joins(:player)
-                   .where(players: { game_id: game.id }, season: season_label)
-                   .order(:created_at, :id).pluck(:player_id, :score).to_h.values
+      ExternalScore.joins(player_season: :player)
+                   .where(players: { game_id: game.id }, player_seasons: { season_id: season.id })
+                   .order(:created_at, :id).pluck('players.id', 'external_scores.score').to_h.values
     end
 
   end
