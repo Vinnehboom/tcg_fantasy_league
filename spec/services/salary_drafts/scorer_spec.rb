@@ -11,7 +11,7 @@ module SalaryDrafts
 
     before do
       roster.players << players
-      players.each { |player| player.external_scores.destroy_all }
+      players.each { |player| player.player_seasons.destroy_all }
     end
 
     it 'updates the participation score with the points gained by all roster players since the tournament started' do

@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Player do
   it { is_expected.to validate_presence_of(:name) }
   it { is_expected.to validate_presence_of(:external_id) }
-  it { is_expected.to have_many(:external_scores) }
+  it { is_expected.to have_many(:external_scores).through(:player_seasons) }
   it { is_expected.to have_many(:results) }
   it { is_expected.to have_many(:external_requests).dependent(:nullify) }
   it { is_expected.to have_many(:player_seasons).dependent(:destroy) }
@@ -37,11 +37,17 @@ RSpec.describe Player do
 
   describe '#latest_score' do
     let(:player) { create(:player, :without_scores) }
+    let(:season_one) do
+      create(:season, game: player.game, label: 'S1', start_date: 2.years.ago, end_date: 13.months.ago)
+    end
+    let(:season_two) { create(:season, game: player.game, label: 'S2', start_date: 1.year.ago, end_date: nil) }
+    let(:player_season_one) { create(:player_season, player:, season: season_one) }
+    let(:player_season_two) { create(:player_season, player:, season: season_two) }
 
     context 'when no season is given' do
       it 'returns the most recent score regardless of season' do
-        create(:external_score, player:, score: 10, season: 'S1', created_at: 2.days.ago)
-        latest = create(:external_score, player:, score: 20, season: 'S2', created_at: 1.day.ago)
+        create(:external_score, player_season: player_season_one, score: 10, created_at: 2.days.ago)
+        latest = create(:external_score, player_season: player_season_two, score: 20, created_at: 1.day.ago)
 
         expect(player.reload.latest_score).to eq(latest.score)
       end
@@ -49,51 +55,52 @@ RSpec.describe Player do
 
     context 'when a season is given' do
       it 'returns the most recent score within that season' do
-        create(:external_score, player:, score: 10, season: 'S1', created_at: 2.days.ago)
-        latest = create(:external_score, player:, score: 20, season: 'S1', created_at: 1.day.ago)
-        create(:external_score, player:, score: 99, season: 'S2', created_at: Time.current)
+        create(:external_score, player_season: player_season_one, score: 10, created_at: 2.days.ago)
+        latest = create(:external_score, player_season: player_season_one, score: 20, created_at: 1.day.ago)
+        create(:external_score, player_season: player_season_two, score: 99, created_at: Time.current)
 
-        expect(player.reload.latest_score(season: 'S1')).to eq(latest.score)
+        expect(player.reload.latest_score(season: season_one)).to eq(latest.score)
       end
 
       it 'returns nil when the player has no score in that season' do
-        create(:external_score, player:, score: 10, season: 'S1')
+        create(:external_score, player_season: player_season_one, score: 10)
 
-        expect(player.reload.latest_score(season: 'S2')).to be_nil
+        expect(player.reload.latest_score(season: season_two)).to be_nil
       end
     end
   end
 
   describe '#record_score!' do
     let(:player) { create(:player, :without_scores) }
+    let(:season) { create(:season, game: player.game) }
 
     context 'when the player has no score yet' do
       it 'creates a snapshot' do
-        expect { player.record_score!(score: 100) }.to change(player.external_scores, :count).from(0).to(1)
+        expect { player.record_score!(score: 100, season:) }.to change(player.external_scores, :count).from(0).to(1)
       end
     end
 
     context 'when the new value differs from the most recent score' do
-      before { create(:external_score, player:, score: 100) }
+      before { player.record_score!(score: 100, season:) }
 
       it 'appends a new snapshot' do
-        expect { player.record_score!(score: 150) }.to change(player.external_scores, :count).from(1).to(2)
+        expect { player.record_score!(score: 150, season:) }.to change(player.external_scores, :count).from(1).to(2)
       end
     end
 
     context 'when the new value matches the most recent score' do
-      before { create(:external_score, player:, score: 100) }
+      before { player.record_score!(score: 100, season:) }
 
       it 'does not append a new snapshot' do
-        expect { player.record_score!(score: 100) }.not_to change(player.external_scores, :count)
+        expect { player.record_score!(score: 100, season:) }.not_to change(player.external_scores, :count)
       end
     end
 
     context 'when the new value matches but arrives as a different type' do
-      before { create(:external_score, player:, score: 100) }
+      before { player.record_score!(score: 100, season:) }
 
       it 'still recognizes it as unchanged' do
-        expect { player.record_score!(score: '100') }.not_to change(player.external_scores, :count)
+        expect { player.record_score!(score: '100', season:) }.not_to change(player.external_scores, :count)
       end
     end
   end
@@ -152,7 +159,7 @@ RSpec.describe Player do
     end
 
     it 'works with dates where the player did not have a score' do
-      player.external_scores.destroy_all
+      player.player_seasons.destroy_all
       travel 5.days
       create(:external_score, player:, score: 40).score
       player.reload
