@@ -12,7 +12,7 @@ module ExternalData
         end
 
         def players
-          ExternalData::Pokemon::Tcg::LabsPlayers.call(season: current_season.label)
+          ExternalData::Pokemon::Tcg::LabsPlayers.call(season: current_season)
         end
 
         def upcoming_tournaments

@@ -8,16 +8,19 @@ module ExternalData
       subject(:job) { described_class.new }
 
       describe 'when a PTCG game row exists' do
+        let(:season) do
+          game = create(:game, id: 'PTCG')
+          create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date, label: '2026')
+        end
         let(:player) do
           ExternalData::Player.new(
             attributes: { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791',
-                          season: '2026' }
+                          season: }
           )
         end
 
         before do
-          game = create(:game, id: 'PTCG')
-          create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date, label: '2026')
+          season
           allow(ExternalData::Pokemon::Tcg::LabsPlayers).to receive(:call).and_return([player])
         end
 
@@ -30,7 +33,7 @@ module ExternalData
         it 'tags the imported player\'s score with the current season' do
           job.perform_now
 
-          expect(::Player.last.external_scores.last.season).to eq('2026')
+          expect(::Player.last.external_scores.last.player_season.season).to eq(season)
         end
 
         it 'records the fetch against the players kind' do

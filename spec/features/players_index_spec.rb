@@ -5,9 +5,9 @@ RSpec.describe 'Players index', :js do
 
   it 'lists players sorted by score, highest first' do
     low_scorer = create(:player, game:, name: 'Low Scorer')
-    low_scorer.external_scores.create!(score: 100)
+    create(:external_score, player: low_scorer, score: 100)
     high_scorer = create(:player, game:, name: 'High Scorer')
-    high_scorer.external_scores.create!(score: 900)
+    create(:external_score, player: high_scorer, score: 900)
 
     visit game_players_path(game:)
 

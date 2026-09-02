@@ -15,15 +15,19 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
     end
 
     context 'when a season covers the current date' do
-      before do
+      let(:current_season) do
         create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date, label: '2026')
+      end
+
+      before do
+        current_season
         allow(ExternalData::Pokemon::Tcg::LabsPlayers).to receive(:call).and_return([player])
       end
 
-      it 'delegates to LabsPlayers with the current season label' do
+      it 'delegates to LabsPlayers with the current season row' do
         adapter.players
 
-        expect(ExternalData::Pokemon::Tcg::LabsPlayers).to have_received(:call).with(season: '2026')
+        expect(ExternalData::Pokemon::Tcg::LabsPlayers).to have_received(:call).with(season: current_season)
       end
 
       it 'returns the fetched players' do
@@ -41,7 +45,7 @@ RSpec.describe ExternalData::Pokemon::Tcg::Adapter do
       it 'fetches with the injected season instead of resolving the current one' do
         described_class.new(game:, season: past_season).players
 
-        expect(ExternalData::Pokemon::Tcg::LabsPlayers).to have_received(:call).with(season: '2024')
+        expect(ExternalData::Pokemon::Tcg::LabsPlayers).to have_received(:call).with(season: past_season)
       end
     end
 
