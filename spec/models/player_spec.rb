@@ -28,11 +28,12 @@ RSpec.describe Player do
     subject(:external_scores) { player.reload.external_scores }
 
     let(:player) { create(:player, :without_scores) }
-    let(:player_season) { create(:player_season, player:) }
+    let(:player_season) { create(:player_season, player:, season: create(:season, game: player.game)) }
     let(:external_score) { create(:external_score, player_season:) }
 
+    before { external_score }
+
     it 'includes a score reached through the player\'s player_seasons' do
-      external_score
       expect(external_scores).to include(external_score)
     end
   end
@@ -91,6 +92,12 @@ RSpec.describe Player do
       it 'creates a snapshot' do
         expect { player.record_score!(score: 100, season:) }.to change(player.external_scores, :count).from(0).to(1)
       end
+
+      it 'lands the score on the given season' do
+        player.record_score!(score: 100, season:)
+
+        expect(player.reload.latest_score(season:)).to eq(100)
+      end
     end
 
     context 'when the new value differs from the most recent score' do
@@ -114,6 +121,30 @@ RSpec.describe Player do
 
       it 'still recognizes it as unchanged' do
         expect { player.record_score!(score: '100', season:) }.not_to change(player.external_scores, :count)
+      end
+    end
+
+    context 'when called for a different season with the same score as the last one' do
+      let(:other_season) do
+        create(:season, game: player.game, start_date: 2.years.ago, end_date: 13.months.ago)
+      end
+
+      before { player.record_score!(score: 100, season: other_season) }
+
+      it 'still joins the player to the new season' do
+        expect { player.record_score!(score: 100, season:) }.to change { player.reload.seasons.count }.from(1).to(2)
+      end
+
+      it 'still creates a snapshot for the new season' do
+        expect { player.record_score!(score: 100, season:) }.to change(player.external_scores, :count).from(1).to(2)
+      end
+    end
+
+    context 'when called twice for the same season' do
+      it 'reuses the existing player_season instead of creating a second one' do
+        player.record_score!(score: 100, season:)
+
+        expect { player.record_score!(score: 150, season:) }.not_to(change { player.reload.player_seasons.count })
       end
     end
   end

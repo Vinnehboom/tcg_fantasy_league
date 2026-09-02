@@ -17,14 +17,14 @@ class Player < ApplicationRecord
 
   def latest_score(season: nil)
     scores = external_scores
-    scores = scores.joins(:player_season).where(player_seasons: { season_id: season.id }) if season.present?
+    scores = scores.where(player_seasons: { season_id: season.id }) if season.present?
     scores.order('created_at desc').first&.score
   end
 
   def record_score!(score:, season:)
-    return if Integer(score) == current_score
-
     player_season = player_seasons.find_or_create_by!(season:)
+    return if Integer(score) == latest_score(season:)
+
     player_season.external_scores.create!(score:)
   end
 

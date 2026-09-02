@@ -161,7 +161,6 @@ RSpec.describe ExternalData::Pokemon::Tcg::LabsPlayers do
 
   describe 'a mapped player, once persisted' do
     let(:game) { create(:game, base_uri: 'https://limitlesstcg.com') }
-    let(:season) { create(:season, game:, label: '2026') }
 
     before { allow(HTTParty).to receive(:get).and_return(stub_response(body: rankings_body)) }
 
