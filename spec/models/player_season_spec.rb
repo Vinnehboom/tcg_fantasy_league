@@ -15,7 +15,7 @@ RSpec.describe PlayerSeason do
 
     before { create(:player_season_modifier, player_season:, score_modifier:) }
 
-    it 'includes a modifier attached through player_season_modifiers' do
+    it 'includes a modifier attached to the player season' do
       expect(score_modifiers).to include(score_modifier)
     end
   end
