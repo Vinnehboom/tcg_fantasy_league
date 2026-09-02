@@ -24,6 +24,19 @@ RSpec.describe Player do
     end
   end
 
+  describe '#external_scores' do
+    subject(:external_scores) { player.reload.external_scores }
+
+    let(:player) { create(:player, :without_scores) }
+    let(:player_season) { create(:player_season, player:) }
+    let(:external_score) { create(:external_score, player_season:) }
+
+    it 'includes a score reached through the player\'s player_seasons' do
+      external_score
+      expect(external_scores).to include(external_score)
+    end
+  end
+
   describe '#current_score' do
     let(:player) { create(:player) }
 
