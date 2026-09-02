@@ -14,7 +14,7 @@ RSpec.describe ScoreModifier do
 
     before { create(:player_season_modifier, player_season:, score_modifier:) }
 
-    it 'includes a player_season attached through player_season_modifiers' do
+    it 'includes a player_season attached to the modifier' do
       expect(player_seasons).to include(player_season)
     end
   end
@@ -22,10 +22,24 @@ RSpec.describe ScoreModifier do
   describe '#apply' do
     subject(:apply) { score_modifier.apply(10) }
 
-    let(:score_modifier) { build(:score_modifier) }
+    context 'when called on the base class' do
+      let(:score_modifier) { build(:score_modifier) }
 
-    it 'raises NotImplementedError on the base class' do
-      expect { apply }.to raise_error(NotImplementedError)
+      it 'raises NotImplementedError' do
+        expect { apply }.to raise_error(NotImplementedError)
+      end
+    end
+  end
+
+  describe 'the :any_subtype factory trait' do
+    subject(:score_modifier) { create(:score_modifier, :any_subtype) }
+
+    it 'persists' do
+      expect(score_modifier).to be_persisted
+    end
+
+    it 'builds a concrete subtype' do
+      expect(score_modifier.class).to be_in([Multiplier, Bonus])
     end
   end
 end

@@ -10,5 +10,13 @@ FactoryBot.define do
     factory :bonus, class: 'Bonus' do
       value { 5 }
     end
+
+    # The bare base factory can't be persisted: `type` is `null: false` and
+    # Rails only auto-populates it for STI subclasses, not the base class
+    # itself. Use this trait when a spec needs a persisted modifier but
+    # doesn't care which concrete subtype it gets.
+    trait :any_subtype do
+      initialize_with { [Multiplier, Bonus].sample.new(name:, value:) }
+    end
   end
 end
