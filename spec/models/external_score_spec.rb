@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ExternalScore do
   it { is_expected.to belong_to(:player_season) }
+  it { is_expected.to have_one(:player).through(:player_season) }
 
   describe 'score validation' do
     subject(:save) { build(:external_score, player:, score:).save }

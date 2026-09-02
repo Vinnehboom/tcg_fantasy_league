@@ -24,17 +24,29 @@ RSpec.describe Player do
     end
   end
 
-  describe '#external_scores' do
-    subject(:external_scores) { player.reload.external_scores }
+  describe 'the :without_scores factory trait' do
+    context 'when the game has no season yet' do
+      it 'has no player_seasons' do
+        player = create(:player, :without_scores)
 
-    let(:player) { create(:player, :without_scores) }
-    let(:player_season) { create(:player_season, player:, season: create(:season, game: player.game)) }
-    let(:external_score) { create(:external_score, player_season:) }
+        expect(player.player_seasons).to be_empty
+      end
+    end
 
-    before { external_score }
+    context 'when the game already has a season' do
+      let(:game) { create(:game) }
+      let(:season) { create(:season, game:) }
+      let(:player) { create(:player, :without_scores, game:) }
 
-    it 'includes a score reached through the player\'s player_seasons' do
-      expect(external_scores).to include(external_score)
+      before { season }
+
+      it 'joins the existing season' do
+        expect(player.reload.seasons).to eq([season])
+      end
+
+      it 'has no score' do
+        expect(player.external_scores).to be_empty
+      end
     end
   end
 
