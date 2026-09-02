@@ -13,7 +13,14 @@
       "mcp__github__list_pull_requests",
       "mcp__Notion__notion-search",
       "mcp__Notion__notion-update-page",
-      "mcp__Notion__notion-create-pages"
+      "mcp__Notion__notion-create-pages",
+      "mcp__Notion__notion-create-comment",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-query-data-sources",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-create-comment"
     ]
   },
   "autoMode": {
