@@ -56,6 +56,31 @@ RSpec.describe RostersController do
       end
     end
 
+    it 'does not show a player whose latest score is over the cap' do
+      participation.draft.update(price_cap: 40)
+      drafted = create(:player, :without_scores, game:)
+      create(:external_score, player: drafted, score: 200)
+      tord = create(:player, :without_scores, game:)
+      create(:external_score, player: tord, score: 50, created_at: 2.days.ago)
+      create(:external_score, player: tord, score: 300, created_at: 1.day.ago)
+      roster.players << drafted
+      roster.reload
+
+      get :edit, params: { id: roster.id, game: game.id }
+
+      expect(assigns(:players)).not_to include(tord)
+    end
+
+    it 'shows a player with several scores one time only' do
+      tord = create(:player, :without_scores, game:)
+      create(:external_score, player: tord, score: 50, created_at: 2.days.ago)
+      create(:external_score, player: tord, score: 300, created_at: 1.day.ago)
+
+      get :edit, params: { id: roster.id, game: game.id }
+
+      expect(assigns(:players).to_a.count(tord)).to eq(1)
+    end
+
     it 'sorts the player by highest score within their region' do
       participation.draft.tournament.update(country: 'DE')
       create(:player, game:, country: 'US')
