@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe PlayerSeason do
   it { is_expected.to belong_to(:player) }
   it { is_expected.to belong_to(:season) }
+  it { is_expected.to have_many(:external_scores).dependent(:destroy) }
 
   describe 'uniqueness' do
     subject { build(:player_season, player:, season:).save }
