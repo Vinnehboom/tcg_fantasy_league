@@ -88,7 +88,6 @@ class RostersController < ScopedGameController # rubocop:disable Metrics/ClassLe
   def filter_players
     max_score = @roster.reload.draft.score_for(cost: @roster.remaining_cost)
     @players = Player
-               .left_joins(:external_scores)
                .joins("LEFT JOIN (#{latest_scores_by_player.to_sql}) latest_scores ON latest_scores.player_id = players.id") # rubocop:disable Layout/LineLength
                .where.not(id: @roster.player_ids)
     unless @roster.remaining_cost == @roster.draft.price_cap
@@ -102,21 +101,26 @@ class RostersController < ScopedGameController # rubocop:disable Metrics/ClassLe
   end
 
   # external_scores has no player_id column, so the "latest row per player" join
-  # brings player_seasons into both the outer select and the ranking subquery.
+  # brings player_seasons into the ranking subquery. The subquery carries the
+  # score and the timestamp itself, so the rn = 1 filter keeps one row per
+  # player instead of pairing every score with that player's rank-1 row.
   def latest_scores_by_player
     ExternalScore
-      .select('player_seasons.player_id, external_scores.score, external_scores.created_at')
+      .select('ranked_scores.player_id, ranked_scores.score, ranked_scores.created_at')
       .from(<<~SQL.squish)
-        external_scores
-        JOIN player_seasons ON player_seasons.id = external_scores.player_season_id,
         (
           SELECT player_seasons.player_id,
-                 ROW_NUMBER() OVER (PARTITION BY player_seasons.player_id ORDER BY external_scores.created_at DESC) AS rn
+                 external_scores.score,
+                 external_scores.created_at,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY player_seasons.player_id
+                   ORDER BY external_scores.created_at DESC, external_scores.id DESC
+                 ) AS rn
           FROM external_scores
           JOIN player_seasons ON player_seasons.id = external_scores.player_season_id
         ) ranked_scores
       SQL
-      .where('player_seasons.player_id = ranked_scores.player_id AND ranked_scores.rn = 1')
+      .where(ranked_scores: { rn: 1 })
   end
 
   def group_players_by_region(players:)
