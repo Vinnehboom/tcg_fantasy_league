@@ -4,6 +4,21 @@ RSpec.describe PlayerSeason do
   it { is_expected.to belong_to(:player) }
   it { is_expected.to belong_to(:season) }
   it { is_expected.to have_many(:external_scores).dependent(:destroy) }
+  it { is_expected.to have_many(:player_season_modifiers).dependent(:destroy) }
+  it { is_expected.to have_many(:score_modifiers).through(:player_season_modifiers) }
+
+  describe '#score_modifiers' do
+    subject(:score_modifiers) { player_season.reload.score_modifiers }
+
+    let(:player_season) { create(:player_season) }
+    let(:score_modifier) { create(:multiplier) }
+
+    before { create(:player_season_modifier, player_season:, score_modifier:) }
+
+    it 'includes a modifier attached through player_season_modifiers' do
+      expect(score_modifiers).to include(score_modifier)
+    end
+  end
 
   describe 'uniqueness' do
     subject { build(:player_season, player:, season:).save }
