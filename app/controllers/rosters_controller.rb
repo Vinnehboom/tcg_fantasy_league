@@ -1,6 +1,4 @@
-# The extra player_seasons join level (C-25) pushed this over Metrics/ClassLength
-# by a handful of lines; the actions and private helpers are otherwise unchanged.
-class RostersController < ScopedGameController # rubocop:disable Metrics/ClassLength
+class RostersController < ScopedGameController
 
   before_action :authenticate_user!
 
@@ -88,7 +86,7 @@ class RostersController < ScopedGameController # rubocop:disable Metrics/ClassLe
   def filter_players
     max_score = @roster.reload.draft.score_for(cost: @roster.remaining_cost)
     @players = Player
-               .joins("LEFT JOIN (#{latest_scores_by_player.to_sql}) latest_scores ON latest_scores.player_id = players.id") # rubocop:disable Layout/LineLength
+               .joins(latest_scores_join)
                .where.not(id: @roster.player_ids)
     unless @roster.remaining_cost == @roster.draft.price_cap
       @players = @players.where(latest_scores: { score: ...max_score.round })
@@ -100,27 +98,8 @@ class RostersController < ScopedGameController # rubocop:disable Metrics/ClassLe
     @players.each { |player| player.cost = @roster.draft.cost_for(player:) }
   end
 
-  # external_scores has no player_id column, so the "latest row per player" join
-  # brings player_seasons into the ranking subquery. The subquery carries the
-  # score and the timestamp itself, so the rn = 1 filter keeps one row per
-  # player instead of pairing every score with that player's rank-1 row.
-  def latest_scores_by_player
-    ExternalScore
-      .select('ranked_scores.player_id, ranked_scores.score, ranked_scores.created_at')
-      .from(<<~SQL.squish)
-        (
-          SELECT player_seasons.player_id,
-                 external_scores.score,
-                 external_scores.created_at,
-                 ROW_NUMBER() OVER (
-                   PARTITION BY player_seasons.player_id
-                   ORDER BY external_scores.created_at DESC, external_scores.id DESC
-                 ) AS rn
-          FROM external_scores
-          JOIN player_seasons ON player_seasons.id = external_scores.player_season_id
-        ) ranked_scores
-      SQL
-      .where(ranked_scores: { rn: 1 })
+  def latest_scores_join
+    "LEFT JOIN (#{ExternalScore.latest_per_player.to_sql}) latest_scores ON latest_scores.player_id = players.id"
   end
 
   def group_players_by_region(players:)
