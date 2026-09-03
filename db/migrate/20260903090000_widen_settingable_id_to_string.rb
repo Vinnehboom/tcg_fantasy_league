@@ -9,8 +9,13 @@ class WidenSettingableIdToString < ActiveRecord::Migration[7.1]
     change_column :settings, :settingable_id, :string, using: 'settingable_id::text'
   end
 
+  # Not safely reversible once a Game-owned row exists — a Game id
+  # ('PTCG') has no bigint representation to cast back to, unlike the
+  # forward cast above, which always has a valid text representation to
+  # widen into. Declare that honestly instead of a `down` that silently
+  # corrupts or drops data the moment a Game-owned Setting exists.
   def down
-    change_column :settings, :settingable_id, :bigint, using: 'settingable_id::bigint'
+    raise ActiveRecord::IrreversibleMigration
   end
 
 end
