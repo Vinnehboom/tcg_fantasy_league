@@ -96,6 +96,17 @@ module Scoring
           expect { points_for }.to raise_error(Scoring::MissingFieldSizeError)
         end
       end
+
+      context 'when configured size classes have no band covering a smaller field_size' do
+        subject(:strategy) { described_class.new(size_classes: [{ minimum_field_size: 500, multiplier: 2 }]) }
+
+        let(:placement) { 1 }
+        let(:field_size) { 100 }
+
+        it 'falls back to the lowest configured band instead of raising' do
+          expect(points_for).to eq(200) # base_score 100 * the only (lowest) band's multiplier 2
+        end
+      end
     end
 
     describe '.for' do

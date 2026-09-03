@@ -20,9 +20,12 @@ module Scoring
 
     # A list of size-class lower bounds, not a fixed S/M/L/XL enum, so a
     # future band (an XS below the smallest row, an XXL above the largest)
-    # can be added by inserting a row rather than editing existing ones
-    # (Checkpoint 1, Q3). Each field_size gets the multiplier of the
-    # highest band whose minimum it clears.
+    # can be added by inserting a row rather than editing existing ones.
+    # Each field_size gets the multiplier of the highest band whose
+    # minimum it clears — or, if a configured list has no band starting at
+    # 0, the lowest band it has (see #multiplier below), so a field_size
+    # under every configured minimum still scores something sane instead
+    # of raising.
     DEFAULT_SIZE_CLASSES = [
       { minimum_field_size: 0, multiplier: 1 },    # S
       { minimum_field_size: 500, multiplier: 2 },  # M
@@ -32,10 +35,9 @@ module Scoring
 
     # Composition root: resolves tunables from data instead of hardcoding
     # them here, in the order season's own Setting -> the season's game's
-    # default Setting -> these class's own code constants (Checkpoint 2
-    # sign-off, D5 as corrected for the Game-owned-default-row design).
-    # Merge is per-key, not whole-row — a season row that only overrides
-    # e.g. base_points still falls through to the game default (or code
+    # default Setting -> these class's own code constants. Merge is
+    # per-key, not whole-row — a season row that only overrides e.g.
+    # base_points still falls through to the game default (or code
     # constants) for decay/size_classes, rather than losing them entirely.
     def self.for(season:)
       raise MissingSeasonError if season.nil?
@@ -91,8 +93,8 @@ module Scoring
     # True when no season Setting (the season's own row, or one carried
     # forward from a nearest prior season) supplied any scoring config —
     # i.e. values came from the game's default Setting, code constants, or
-    # both. C-7 only exposes the flag; there's no admin Settings/Seasons UI
-    # yet to hang a banner on (D9).
+    # both. Only exposes the flag; there's no admin Settings/Seasons UI yet
+    # to hang a banner on.
     def using_default_config?
       @using_default_config
     end
@@ -105,9 +107,9 @@ module Scoring
     end
 
     # Duck-typed: `result` need only respond to `placement` and
-    # `tournament.field_size` (field_size lives on Tournament, not Result —
-    # Checkpoint 1 correction #2). Whole-number points: base_score is
-    # already a rounded Integer, and every multiplier is an Integer too.
+    # `tournament.field_size` (field_size lives on Tournament, not Result).
+    # Whole-number points: base_score is already a rounded Integer, and
+    # every multiplier is an Integer too.
     def points_for(result:)
       field_size = result.tournament.field_size
 
@@ -118,11 +120,15 @@ module Scoring
 
     attr_reader :base_points, :decay, :size_classes
 
+    # Falls back to the lowest configured band when field_size is under
+    # every configured minimum (e.g. a configured list starting at 500
+    # with no explicit 0-minimum row) — the alternative, raising, would
+    # turn a perfectly normal small-field tournament into a 500 error.
     def multiplier(field_size)
-      size_classes
-        .select { |band| band[:minimum_field_size] <= field_size }
-        .max_by { |band| band[:minimum_field_size] }
-        .fetch(:multiplier)
+      band = size_classes.select { |b| b[:minimum_field_size] <= field_size }
+                         .max_by { |b| b[:minimum_field_size] }
+      band ||= size_classes.min_by { |b| b[:minimum_field_size] }
+      band.fetch(:multiplier)
     end
 
     # Placement has no numericality validation yet (C-12), so 0/negatives
@@ -131,18 +137,23 @@ module Scoring
       smallest_power_of_two_at_least(placement.to_i.clamp(1..))
     end
 
+    # tier is always an exact power of 2 (it only ever comes from
+    # smallest_power_of_two_at_least below), so its bit length gives the
+    # exponent directly — exact, and avoids float log2's imprecision.
     def level(tier)
-      Math.log2(tier).round
+      tier.bit_length - 1
     end
 
     def max_tier(field_size)
       smallest_power_of_two_at_least((field_size / 2.0).ceil)
     end
 
+    # Exact integer bit-twiddling instead of float Math.log2, which isn't
+    # guaranteed precise right at a power of 2.
     def smallest_power_of_two_at_least(number)
       return 1 if number <= 1
 
-      2**Math.log2(number).ceil
+      1 << (number - 1).bit_length
     end
 
   end
