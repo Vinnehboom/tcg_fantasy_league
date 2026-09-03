@@ -7,7 +7,23 @@ RSpec.describe Game do
   it { is_expected.to have_many(:players) }
   it { is_expected.to have_many(:tournaments) }
   it { is_expected.to have_many(:external_requests).dependent(:restrict_with_error) }
-  it { is_expected.to have_one(:default_setting).dependent(:destroy) }
+  it { is_expected.to have_one(:default_setting).class_name('Setting').dependent(:destroy) }
+
+  describe '#default_setting' do
+    it 'resolves the Setting owned by this game (via the polymorphic settingable association)' do
+      game = create(:game)
+      setting = create(:setting, :for_game, settingable: game)
+
+      expect(game.default_setting).to eq(setting)
+    end
+
+    it "does not resolve a different game's Setting" do
+      game = create(:game)
+      create(:setting, :for_game, settingable: create(:game))
+
+      expect(game.default_setting).to be_nil
+    end
+  end
 
   describe '#destroy' do
     subject(:destroy) { game.destroy }
@@ -94,6 +110,15 @@ RSpec.describe Game do
 
         expect(second).to equal(first)
       end
+    end
+  end
+
+  describe '#current_season, with only an internal (default) season on record' do
+    it 'does not treat the internal season as the current one' do
+      game = create(:game)
+      Season.default_for(game:)
+
+      expect(game.current_season).to be_nil
     end
   end
 end

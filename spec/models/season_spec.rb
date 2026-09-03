@@ -78,6 +78,23 @@ RSpec.describe Season do
         expect { default_for }.not_to change(game.seasons, :count)
       end
     end
+
+    it 'marks the created season internal' do
+      default_for
+
+      expect(game.seasons.sole.internal).to be(true)
+    end
+
+    context 'when a real season is added after the default one exists' do
+      before { default_for }
+
+      it 'does not reject the real season as overlapping the open-ended default' do
+        real_season = build(:season, game:, label: '2026', start_date: Date.new(2025, 9, 1),
+                                     end_date: Date.new(2026, 8, 31))
+
+        expect(real_season).to be_valid
+      end
+    end
   end
 
   describe '.covering' do
