@@ -9,10 +9,23 @@ module Scoring
   # 3rd-4th share T4, 5th-8th share T8, etc — the smallest power of 2 at
   # least as big as the placement), and a tier's base score decays
   # geometrically the deeper it is, bounded below at 1 regardless of how
-  # deep tiers go. A tournament's max_tier (from its field_size) caps how
-  # deep any placement can score, so a big event's deepest bracket doesn't
-  # score infinitely small — everyone past it floors out at the same
-  # base_score as the deepest real bracket.
+  # deep tiers go. Each size class's own max_tier_field_size caps how deep
+  # any placement in that class can score, so the class's deepest bracket
+  # doesn't score infinitely small — everyone past it floors out at the
+  # same base_score as that bracket.
+  #
+  # max_tier is a property of the size CLASS, not of a tournament's raw
+  # field_size, deliberately: an earlier version derived it straight from
+  # field_size, which made base_score strictly non-increasing as
+  # field_size grew (every extra entrant deepens the bracket structure a
+  # touch more), while the multiplier only jumps at the handful of class
+  # boundaries — two step functions moving on different schedules, so the
+  # multiplier didn't reliably cover base_score's drop between them.
+  # Concretely: 2nd place in a 2-player field scored 100, a 4-player field
+  # scored 65, same size class either way. Pinning max_tier per class
+  # instead makes base_score flat across an entire class for a fixed
+  # placement, leaving only the (already monotonic) multiplier to vary
+  # between classes.
   class Strategy
 
     DEFAULT_BASE_POINTS = 100
@@ -21,16 +34,27 @@ module Scoring
     # A list of size-class lower bounds, not a fixed S/M/L/XL enum, so a
     # future band (an XS below the smallest row, an XXL above the largest)
     # can be added by inserting a row rather than editing existing ones.
-    # Each field_size gets the multiplier of the highest band whose
-    # minimum it clears — or, if a configured list has no band starting at
-    # 0, the lowest band it has (see #multiplier below), so a field_size
-    # under every configured minimum still scores something sane instead
-    # of raising.
+    # Each field_size gets the multiplier (and max_tier_field_size — see
+    # the class comment above) of the highest band whose minimum it
+    # clears — or, if a configured list has no band starting at 0, the
+    # lowest band it has (see #band_for below), so a field_size under
+    # every configured minimum still scores something sane instead of
+    # raising.
+    #
+    # max_tier_field_size is chosen so each class's max_tier is at most
+    # one bracket-level deeper than the previous class's — with a 2x
+    # multiplier jump between every class and 0.65 decay per level, one
+    # extra level of decay (a ~1.54x drop) is always covered by that 2x,
+    # so points_for is guaranteed non-decreasing in field_size for a fixed
+    # placement (see the monotonicity spec). It does NOT track each
+    # class's own field_size range one-for-one — XL's value is pinned to
+    # 3000 specifically to keep the ticket's worked example unchanged; the
+    # others are chosen backward from XL to keep every step to one level.
     DEFAULT_SIZE_CLASSES = [
-      { minimum_field_size: 0, multiplier: 1 },    # S
-      { minimum_field_size: 500, multiplier: 2 },  # M
-      { minimum_field_size: 1500, multiplier: 4 }, # L
-      { minimum_field_size: 3000, multiplier: 8 }  # XL
+      { minimum_field_size: 0, multiplier: 1, max_tier_field_size: 499 },     # S
+      { minimum_field_size: 500, multiplier: 2, max_tier_field_size: 999 },   # M
+      { minimum_field_size: 1500, multiplier: 4, max_tier_field_size: 1999 }, # L
+      { minimum_field_size: 3000, multiplier: 8, max_tier_field_size: 3000 } # XL
     ].freeze
 
     # Composition root: resolves tunables from data instead of hardcoding
@@ -77,7 +101,10 @@ module Scoring
       value.filter_map do |band|
         minimum_field_size = coerce_integer(band['minimum_field_size'], default: nil)
         multiplier = coerce_integer(band['multiplier'], default: nil)
-        { minimum_field_size:, multiplier: } if minimum_field_size && multiplier
+        max_tier_field_size = coerce_integer(band['max_tier_field_size'], default: nil)
+        next unless minimum_field_size && multiplier && max_tier_field_size
+
+        { minimum_field_size:, multiplier:, max_tier_field_size: }
       end.presence || DEFAULT_SIZE_CLASSES
     end
     private_class_method :coerce_size_classes
@@ -120,15 +147,8 @@ module Scoring
 
     attr_reader :base_points, :decay, :size_classes
 
-    # Falls back to the lowest configured band when field_size is under
-    # every configured minimum (e.g. a configured list starting at 500
-    # with no explicit 0-minimum row) — the alternative, raising, would
-    # turn a perfectly normal small-field tournament into a 500 error.
     def multiplier(field_size)
-      band = size_classes.select { |b| b[:minimum_field_size] <= field_size }
-                         .max_by { |b| b[:minimum_field_size] }
-      band ||= size_classes.min_by { |b| b[:minimum_field_size] }
-      band.fetch(:multiplier)
+      band_for(field_size).fetch(:multiplier)
     end
 
     # Placement has no numericality validation yet (C-12), so 0/negatives
@@ -144,8 +164,23 @@ module Scoring
       tier.bit_length - 1
     end
 
+    # Derived from the field_size's size CLASS, not the raw field_size —
+    # see the class comment above for why. Two tournaments in the same
+    # class always share the same max_tier, regardless of their own exact
+    # field_size.
     def max_tier(field_size)
-      smallest_power_of_two_at_least((field_size / 2.0).ceil)
+      reference_field_size = band_for(field_size).fetch(:max_tier_field_size)
+      smallest_power_of_two_at_least((reference_field_size / 2.0).ceil)
+    end
+
+    # Falls back to the lowest configured band when field_size is under
+    # every configured minimum (e.g. a configured list starting at 500
+    # with no explicit 0-minimum row) — the alternative, raising, would
+    # turn a perfectly normal small-field tournament into a 500 error.
+    def band_for(field_size)
+      band = size_classes.select { |b| b[:minimum_field_size] <= field_size }
+                         .max_by { |b| b[:minimum_field_size] }
+      band || size_classes.min_by { |b| b[:minimum_field_size] }
     end
 
     # Exact integer bit-twiddling instead of float Math.log2, which isn't

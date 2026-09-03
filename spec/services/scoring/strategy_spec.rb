@@ -98,7 +98,9 @@ module Scoring
       end
 
       context 'when configured size classes have no band covering a smaller field_size' do
-        subject(:strategy) { described_class.new(size_classes: [{ minimum_field_size: 500, multiplier: 2 }]) }
+        subject(:strategy) do
+          described_class.new(size_classes: [{ minimum_field_size: 500, multiplier: 2, max_tier_field_size: 999 }])
+        end
 
         let(:placement) { 1 }
         let(:field_size) { 100 }
@@ -106,6 +108,36 @@ module Scoring
         it 'falls back to the lowest configured band instead of raising' do
           expect(points_for).to eq(200) # base_score 100 * the only (lowest) band's multiplier 2
         end
+      end
+    end
+
+    describe 'monotonicity in field_size (the ticket done-criterion, as a general property)' do
+      # A wide spread crossing every size-class boundary (499/500,
+      # 1499/1500, 2999/3000) and a range of placements from 1st to deep
+      # in a large field — not just the one field_size the worked example
+      # pins. Regression coverage for the bug the reviewer found: a fixed
+      # placement scoring FEWER points in a larger field, because an
+      # earlier version derived max_tier from raw field_size instead of
+      # from the size class.
+      let(:field_sizes) do
+        [1, 2, 4, 8, 50, 100, 499, 500, 501, 999, 1000, 1400, 1499,
+         1500, 1501, 2000, 2999, 3000, 3001, 5000, 10_000, 50_000]
+      end
+      let(:placements) { [1, 2, 3, 4, 8, 16, 64, 100, 512, 600, 1000, 1024, 2500, 3000] }
+
+      it 'never awards fewer points for a larger field at the same placement, for any placement in the spread' do
+        violations = placements.filter_map do |placement|
+          points_by_field_size = field_sizes.map do |field_size|
+            result = result_fixture.new(placement, tournament_fixture.new(field_size))
+            strategy.points_for(result:)
+          end
+
+          next if points_by_field_size == points_by_field_size.sort
+
+          "placement #{placement}: #{field_sizes.zip(points_by_field_size)}"
+        end
+
+        expect(violations).to be_empty
       end
     end
 
@@ -196,7 +228,9 @@ module Scoring
       context 'when the settings payload overrides size_classes' do
         before do
           create(:setting, season:, settings: {
-            'scoring' => { 'size_classes' => [{ 'minimum_field_size' => 0, 'multiplier' => 99 }] }
+            'scoring' => {
+              'size_classes' => [{ 'minimum_field_size' => 0, 'multiplier' => 99, 'max_tier_field_size' => 3000 }]
+            }
           })
         end
 
