@@ -1,18 +1,7 @@
 class Season < ApplicationRecord
 
-  # A default season stands in for a game with no seasons at all — either a
-  # genuinely seasonless game (Riftbound) or a game not yet configured with
-  # real ones — so scoring always has a covering Season to read config from.
-  # 1970 is not meaningful on its own; it's just a start date early enough
-  # that this season covers every real date the app will ever see.
-  #
-  # The `internal` column marks a row as this kind of backstop rather than
-  # a real, user-facing season: it's excluded from Game#current_season (so
-  # a seasonless game's players still get no `?season=` query param on
-  # their external URL) and from the overlap check above (so it never
-  # blocks a real season from being added later). Everywhere else — a
-  # covering-date lookup for scoring config, for instance — it behaves
-  # exactly like any other season.
+  # Backstop season for a game with none yet. `internal` marks it as not a
+  # real, user-facing season.
   DEFAULT_SEASON_LABEL = 'default'.freeze
   DEFAULT_SEASON_START_DATE = Date.new(1970, 1, 1)
 
@@ -30,12 +19,7 @@ class Season < ApplicationRecord
     where(start_date: ..date).where(end_date: date..).or(where(start_date: ..date, end_date: nil))
   }
 
-  # Idempotent: only creates a row when the game has no seasons of its own
-  # yet (default or otherwise). Called from db/seeds.rb only — never from
-  # the scoring path itself, which must raise on a genuinely missing season
-  # rather than silently create one mid-request. Marked `internal: true` so
-  # it never counts as a real, user-facing season — see the `internal`
-  # column's own comment below for why that distinction matters.
+  # No-ops if the game already has a season. Called from db/seeds.rb only.
   def self.default_for(game:)
     return if game.seasons.exists?
 
@@ -50,11 +34,7 @@ class Season < ApplicationRecord
     errors.add(:end_date, :before_start_date)
   end
 
-  # An internal (default) season never blocks a real one from being added
-  # later — it's a scoring-config backstop, not a claim on the calendar.
-  # Without this exclusion, the very first real season anyone tries to add
-  # to a game that already got a default row would be permanently rejected
-  # as overlapping (the default row spans 1970 -> forever).
+  # Internal (backstop) seasons don't count toward the overlap check.
   def no_overlapping_range_for_game
     return if game_id.blank? || start_date.blank?
 

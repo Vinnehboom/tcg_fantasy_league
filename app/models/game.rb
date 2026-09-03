@@ -30,14 +30,7 @@ class Game < ApplicationRecord
     salary_drafts.upcoming
   end
 
-  # Excludes internal (default/backstop) seasons — this is "the season a
-  # user would recognize," not "a season to read scoring config from."
-  # Without the exclusion, a genuinely seasonless game (Riftbound) with
-  # only its internal default row would start showing a spurious
-  # `?season=default` on every player's external URL the moment that row
-  # exists, and a game with both a real season and its now-superseded
-  # internal row would raise (two candidates instead of one) rather than
-  # resolving to the real one.
+  # Excludes internal (backstop) seasons — only a real, user-facing season counts.
   def current_season(on: Date.current)
     @current_season_by_date ||= {}
     return @current_season_by_date[on] if @current_season_by_date.key?(on)
