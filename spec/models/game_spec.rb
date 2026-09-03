@@ -7,6 +7,7 @@ RSpec.describe Game do
   it { is_expected.to have_many(:players) }
   it { is_expected.to have_many(:tournaments) }
   it { is_expected.to have_many(:external_requests).dependent(:restrict_with_error) }
+  it { is_expected.to have_one(:default_setting).dependent(:destroy) }
 
   describe '#destroy' do
     subject(:destroy) { game.destroy }
