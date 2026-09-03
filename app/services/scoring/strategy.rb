@@ -18,9 +18,22 @@ module Scoring
     DEFAULT_BASE_POINTS = 100
     DEFAULT_DECAY = 0.65
 
-    def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY)
+    # A list of size-class lower bounds, not a fixed S/M/L/XL enum, so a
+    # future band (an XS below the smallest row, an XXL above the largest)
+    # can be added by inserting a row rather than editing existing ones
+    # (Checkpoint 1, Q3). Each field_size gets the multiplier of the
+    # highest band whose minimum it clears.
+    DEFAULT_SIZE_CLASSES = [
+      { minimum_field_size: 0, multiplier: 1 },    # S
+      { minimum_field_size: 500, multiplier: 2 },  # M
+      { minimum_field_size: 1500, multiplier: 4 }, # L
+      { minimum_field_size: 3000, multiplier: 8 }  # XL
+    ].freeze
+
+    def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY, size_classes: DEFAULT_SIZE_CLASSES)
       @base_points = base_points
       @decay = decay
+      @size_classes = size_classes
     end
 
     def base_score(placement:, field_size:)
@@ -30,9 +43,26 @@ module Scoring
       [1, (base_points * (decay**level(capped_tier))).round].max
     end
 
+    # Duck-typed: `result` need only respond to `placement` and
+    # `tournament.field_size` (field_size lives on Tournament, not Result —
+    # Checkpoint 1 correction #2). Whole-number points: base_score is
+    # already a rounded Integer, and every multiplier is an Integer too.
+    def points_for(result:)
+      field_size = result.tournament.field_size
+
+      base_score(placement: result.placement, field_size:) * multiplier(field_size)
+    end
+
     private
 
-    attr_reader :base_points, :decay
+    attr_reader :base_points, :decay, :size_classes
+
+    def multiplier(field_size)
+      size_classes
+        .select { |band| band[:minimum_field_size] <= field_size }
+        .max_by { |band| band[:minimum_field_size] }
+        .fetch(:multiplier)
+    end
 
     # Placement has no numericality validation yet (C-12), so 0/negatives
     # are storable today — clamp instead of trusting the raw value.
