@@ -2,19 +2,11 @@ class Setting < ApplicationRecord
 
   include Settingable
 
-  # `optional: true` because this reflection matches on settingable_id alone
-  # (Rails has no way to also filter it by settingable_type), so a Game-owned
-  # row would otherwise fail Rails' automatic "must exist" check against a
-  # season it was never meant to have. A Season-owned row still can't get
-  # away with a bogus settingable_id: it resolves through the very same
-  # column, so the polymorphic `belongs_to :settingable` above (required)
-  # already fails it — no separate presence check needed here.
+  # optional: true since a Game-owned row also sets settingable_id and would
+  # otherwise fail Rails' "must exist" check.
   belongs_to :season, foreign_key: :settingable_id, inverse_of: :setting, optional: true
 
-  # Only meaningful for a Season-owned row — for a Game-owned row this
-  # resolves through `season` (see above), which is nil for that row, so
-  # `game` comes back nil too even though `settingable` is the game itself.
-  # Read `settingable` directly when the row might be Game-owned.
+  # nil for a Game-owned row (no `season`) — read `settingable` directly for that case.
   has_one :game, through: :season
 
   before_validation :assign_settingable_type
@@ -31,14 +23,8 @@ class Setting < ApplicationRecord
   # against that WHERE clause ever widening (Postgres sorts NULL first on a
   # DESC order by default).
   #
-  # Looks up the candidate Season first, rather than joining Setting straight
-  # to Season on settingable_id, because settingable_id is a shared string
-  # column (it also holds Game ids since the settingable_id-widening
-  # migration) — a direct join would need a bigint cast applied to every
-  # settings row, including Game-owned ones whose id isn't numeric at all.
-  # Filtering to Season-typed rows inside the subquery's own WHERE, before
-  # that subquery's SELECT casts settingable_id, keeps the cast scoped to
-  # rows it can actually apply to.
+  # Looks up Season first — a direct join on settingable_id would need a
+  # bigint cast, which fails on Game-owned rows (non-numeric id).
   def self.nearest_prior(season)
     season_setting_ids = where(settingable_type: 'Season').select(Arel.sql('settingable_id::bigint'))
     candidate_season = Season.where(id: season_setting_ids)
@@ -51,13 +37,8 @@ class Setting < ApplicationRecord
 
   private
 
-  # `season=`/`season:` (the public interface kept for Season-owned callers)
-  # only sets settingable_id, not settingable_type, so this fills in the
-  # other half of the polymorphic pair for that path. A row built through
-  # the generic `settingable=` writer (e.g. a Game-owned default row)
-  # already has both halves set correctly by Rails' own polymorphic
-  # assignment — `||=` leaves that alone instead of clobbering it back to
-  # Season.
+  # Fills in settingable_type for the season=/season: writer. ||= so a
+  # Game-owned row's own value isn't clobbered.
   def assign_settingable_type
     self.settingable_type ||= 'Season'
   end

@@ -8,7 +8,5 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# Backstop every existing game with a default season, so scoring always has
-# a covering Season to read config from (see Season.default_for). A no-op
-# for a game that already has seasons of its own.
+# Backstop every game with a default season (see Season.default_for).
 Game.find_each { |game| Season.default_for(game:) }

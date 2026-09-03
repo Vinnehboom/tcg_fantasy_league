@@ -1,55 +1,22 @@
 module Scoring
 
-  # Turns a Result's placement into points. Held and queried across many
-  # results for a season, so this is a plain PORO (not an
-  # initialize+#call service) per the style guide's carve-out for a
-  # long-lived calculator.
+  # Turns a Result's placement into points: a tier from the placement
+  # (bracketed to powers of 2), then geometric decay by tier depth, capped
+  # by the tournament's size class. PORO per the style guide's carve-out
+  # for a long-lived, queried-many-times calculator.
   #
-  # Placements are bracketed into tiers (1st and 2nd are their own tiers;
-  # 3rd-4th share T4, 5th-8th share T8, etc — the smallest power of 2 at
-  # least as big as the placement), and a tier's base score decays
-  # geometrically the deeper it is, bounded below at 1 regardless of how
-  # deep tiers go. Each size class's own max_tier_field_size caps how deep
-  # any placement in that class can score, so the class's deepest bracket
-  # doesn't score infinitely small — everyone past it floors out at the
-  # same base_score as that bracket.
-  #
-  # max_tier is a property of the size CLASS, not of a tournament's raw
-  # field_size, deliberately: an earlier version derived it straight from
-  # field_size, which made base_score strictly non-increasing as
-  # field_size grew (every extra entrant deepens the bracket structure a
-  # touch more), while the multiplier only jumps at the handful of class
-  # boundaries — two step functions moving on different schedules, so the
-  # multiplier didn't reliably cover base_score's drop between them.
-  # Concretely: 2nd place in a 2-player field scored 100, a 4-player field
-  # scored 65, same size class either way. Pinning max_tier per class
-  # instead makes base_score flat across an entire class for a fixed
-  # placement, leaving only the (already monotonic) multiplier to vary
-  # between classes.
+  # max_tier depends on the size class, not the raw field_size, so points
+  # never decrease as field_size grows for a fixed placement (see the
+  # monotonicity spec).
   class Strategy
 
     DEFAULT_BASE_POINTS = 100
     DEFAULT_DECAY = 0.65
 
-    # A list of size-class lower bounds, not a fixed S/M/L/XL enum, so a
-    # future band (an XS below the smallest row, an XXL above the largest)
-    # can be added by inserting a row rather than editing existing ones.
-    # Each field_size gets the multiplier (and max_tier_field_size — see
-    # the class comment above) of the highest band whose minimum it
-    # clears — or, if a configured list has no band starting at 0, the
-    # lowest band it has (see #band_for below), so a field_size under
-    # every configured minimum still scores something sane instead of
-    # raising.
-    #
-    # max_tier_field_size is chosen so each class's max_tier is at most
-    # one bracket-level deeper than the previous class's — with a 2x
-    # multiplier jump between every class and 0.65 decay per level, one
-    # extra level of decay (a ~1.54x drop) is always covered by that 2x,
-    # so points_for is guaranteed non-decreasing in field_size for a fixed
-    # placement (see the monotonicity spec). It does NOT track each
-    # class's own field_size range one-for-one — XL's value is pinned to
-    # 3000 specifically to keep the ticket's worked example unchanged; the
-    # others are chosen backward from XL to keep every step to one level.
+    # Size-class bands, not a fixed enum, so a new band can be inserted
+    # without editing existing ones. max_tier_field_size values are chosen
+    # so points never decrease as field_size grows (see the monotonicity
+    # spec); XL is pinned to 3000 to match the ticket's worked example.
     DEFAULT_SIZE_CLASSES = [
       { minimum_field_size: 0, multiplier: 1, max_tier_field_size: 499 },     # S
       { minimum_field_size: 500, multiplier: 2, max_tier_field_size: 999 },   # M
@@ -57,12 +24,8 @@ module Scoring
       { minimum_field_size: 3000, multiplier: 8, max_tier_field_size: 3000 } # XL
     ].freeze
 
-    # Composition root: resolves tunables from data instead of hardcoding
-    # them here, in the order season's own Setting -> the season's game's
-    # default Setting -> these class's own code constants. Merge is
-    # per-key, not whole-row — a season row that only overrides e.g.
-    # base_points still falls through to the game default (or code
-    # constants) for decay/size_classes, rather than losing them entirely.
+    # Resolves tunables from Setting: season's own row, then the game's
+    # default, then code constants — merged per-key, not whole-row.
     def self.for(season:)
       raise MissingSeasonError if season.nil?
 
@@ -117,11 +80,8 @@ module Scoring
       @using_default_config = using_default_config
     end
 
-    # True when no season Setting (the season's own row, or one carried
-    # forward from a nearest prior season) supplied any scoring config —
-    # i.e. values came from the game's default Setting, code constants, or
-    # both. Only exposes the flag; there's no admin Settings/Seasons UI yet
-    # to hang a banner on.
+    # True when no season Setting supplied scoring config (values came from
+    # the game default or code constants instead).
     def using_default_config?
       @using_default_config
     end
@@ -164,19 +124,14 @@ module Scoring
       tier.bit_length - 1
     end
 
-    # Derived from the field_size's size CLASS, not the raw field_size —
-    # see the class comment above for why. Two tournaments in the same
-    # class always share the same max_tier, regardless of their own exact
-    # field_size.
+    # Depends on field_size's size class, not the raw field_size — see class comment.
     def max_tier(field_size)
       reference_field_size = band_for(field_size).fetch(:max_tier_field_size)
       smallest_power_of_two_at_least((reference_field_size / 2.0).ceil)
     end
 
-    # Falls back to the lowest configured band when field_size is under
-    # every configured minimum (e.g. a configured list starting at 500
-    # with no explicit 0-minimum row) — the alternative, raising, would
-    # turn a perfectly normal small-field tournament into a 500 error.
+    # Falls back to the lowest band if field_size is under every configured
+    # minimum, rather than raising on a valid small tournament.
     def band_for(field_size)
       band = size_classes.select { |b| b[:minimum_field_size] <= field_size }
                          .max_by { |b| b[:minimum_field_size] }
