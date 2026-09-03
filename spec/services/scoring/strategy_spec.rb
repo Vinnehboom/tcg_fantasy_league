@@ -97,6 +97,106 @@ module Scoring
         end
       end
     end
+
+    describe '.for' do
+      subject(:strategy_for) { described_class.for(season:) }
+
+      let(:game) { create(:game) }
+      let(:season) { create(:season, game:) }
+
+      context 'when season is nil' do
+        let(:season) { nil }
+
+        it 'raises MissingSeasonError' do
+          expect { strategy_for }.to raise_error(Scoring::MissingSeasonError)
+        end
+      end
+
+      context 'when neither the season nor its game has a Setting row' do
+        it 'falls back to the code default base_points' do
+          expect(strategy_for.base_score(placement: 1, field_size: 3000)).to eq(100)
+        end
+
+        it 'reports it is using default config' do
+          expect(strategy_for.using_default_config?).to be(true)
+        end
+      end
+
+      context "when only the season's game has a default Setting" do
+        before do
+          create(:setting, :for_game, settingable: game,
+                                      settings: { 'scoring' => { 'base_points' => 200, 'decay' => 0.5 } })
+        end
+
+        it "uses the game's default values" do
+          expect(strategy_for.base_score(placement: 2, field_size: 3000)).to eq(100) # 200 * 0.5**1
+        end
+
+        it 'reports it is using default config' do
+          expect(strategy_for.using_default_config?).to be(true)
+        end
+      end
+
+      context 'when the season has its own Setting row' do
+        before do
+          create(:setting, season:, settings: { 'scoring' => { 'base_points' => 200, 'decay' => 0.5 } })
+        end
+
+        it "uses the season's own values" do
+          expect(strategy_for.base_score(placement: 2, field_size: 3000)).to eq(100) # 200 * 0.5**1
+        end
+
+        it 'reports it is not using default config' do
+          expect(strategy_for.using_default_config?).to be(false)
+        end
+      end
+
+      context 'when the season overrides only one key, per-key merging with the game default' do
+        before do
+          create(:setting, :for_game, settingable: game,
+                                      settings: { 'scoring' => { 'base_points' => 200, 'decay' => 0.5 } })
+          create(:setting, season:, settings: { 'scoring' => { 'base_points' => 300 } })
+        end
+
+        it "uses the season's override for the key it specifies" do
+          strategy = strategy_for
+
+          expect(strategy.base_score(placement: 1, field_size: 3000)).to eq(300)
+        end
+
+        it "falls through to the game default for a key the season doesn't specify" do
+          strategy = strategy_for
+
+          # base_points 300, decay 0.5 (from the game default, not code's 0.65)
+          expect(strategy.base_score(placement: 2, field_size: 3000)).to eq(150)
+        end
+      end
+
+      context 'when the settings payload holds values that fail to coerce' do
+        before do
+          create(:setting, season:, settings: { 'scoring' => { 'base_points' => 'not-a-number' } })
+        end
+
+        it 'falls back to the code default for the unparseable key' do
+          expect(strategy_for.base_score(placement: 1, field_size: 3000)).to eq(100)
+        end
+      end
+
+      context 'when the settings payload overrides size_classes' do
+        before do
+          create(:setting, season:, settings: {
+            'scoring' => { 'size_classes' => [{ 'minimum_field_size' => 0, 'multiplier' => 99 }] }
+          })
+        end
+
+        it 'uses the overridden size classes' do
+          field_size = 3000
+          result = result_fixture.new(1, tournament_fixture.new(field_size))
+
+          expect(strategy_for.points_for(result:)).to eq(9900) # base_score 100 * multiplier 99
+        end
+      end
+    end
   end
 
 end
