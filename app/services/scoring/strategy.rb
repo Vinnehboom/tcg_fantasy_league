@@ -30,10 +30,71 @@ module Scoring
       { minimum_field_size: 3000, multiplier: 8 }  # XL
     ].freeze
 
-    def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY, size_classes: DEFAULT_SIZE_CLASSES)
+    # Composition root: resolves tunables from data instead of hardcoding
+    # them here, in the order season's own Setting -> the season's game's
+    # default Setting -> these class's own code constants (Checkpoint 2
+    # sign-off, D5 as corrected for the Game-owned-default-row design).
+    # Merge is per-key, not whole-row — a season row that only overrides
+    # e.g. base_points still falls through to the game default (or code
+    # constants) for decay/size_classes, rather than losing them entirely.
+    def self.for(season:)
+      raise MissingSeasonError if season.nil?
+
+      own_config = scoring_config(Setting.for(season:))
+      merged = scoring_config(season.game.default_setting).merge(own_config)
+
+      new(
+        base_points: coerce_integer(merged['base_points'], default: DEFAULT_BASE_POINTS),
+        decay: coerce_float(merged['decay'], default: DEFAULT_DECAY),
+        size_classes: coerce_size_classes(merged['size_classes']),
+        using_default_config: own_config.blank?
+      )
+    end
+
+    def self.scoring_config(setting)
+      setting&.settings&.dig('scoring') || {}
+    end
+    private_class_method :scoring_config
+
+    def self.coerce_integer(value, default:)
+      Integer(value, exception: false) || default
+    end
+    private_class_method :coerce_integer
+
+    def self.coerce_float(value, default:)
+      Float(value, exception: false) || default
+    end
+    private_class_method :coerce_float
+
+    # Coerces each band independently and drops any that don't parse,
+    # rather than discarding the whole list for one bad row. Falls back to
+    # the code default list only when nothing usable survives.
+    def self.coerce_size_classes(value)
+      return DEFAULT_SIZE_CLASSES if value.blank?
+
+      value.filter_map do |band|
+        minimum_field_size = coerce_integer(band['minimum_field_size'], default: nil)
+        multiplier = coerce_integer(band['multiplier'], default: nil)
+        { minimum_field_size:, multiplier: } if minimum_field_size && multiplier
+      end.presence || DEFAULT_SIZE_CLASSES
+    end
+    private_class_method :coerce_size_classes
+
+    def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY, size_classes: DEFAULT_SIZE_CLASSES,
+                   using_default_config: true)
       @base_points = base_points
       @decay = decay
       @size_classes = size_classes
+      @using_default_config = using_default_config
+    end
+
+    # True when no season Setting (the season's own row, or one carried
+    # forward from a nearest prior season) supplied any scoring config —
+    # i.e. values came from the game's default Setting, code constants, or
+    # both. C-7 only exposes the flag; there's no admin Settings/Seasons UI
+    # yet to hang a banner on (D9).
+    def using_default_config?
+      @using_default_config
     end
 
     def base_score(placement:, field_size:)
