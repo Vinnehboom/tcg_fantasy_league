@@ -5,13 +5,17 @@ class Setting < ApplicationRecord
   # `optional: true` because this reflection matches on settingable_id alone
   # (Rails has no way to also filter it by settingable_type), so a Game-owned
   # row would otherwise fail Rails' automatic "must exist" check against a
-  # season it was never meant to have. The real requirement — a Season-owned
-  # row must resolve to a real Season — is enforced explicitly below, scoped
-  # to that case only.
+  # season it was never meant to have. A Season-owned row still can't get
+  # away with a bogus settingable_id: it resolves through the very same
+  # column, so the polymorphic `belongs_to :settingable` above (required)
+  # already fails it — no separate presence check needed here.
   belongs_to :season, foreign_key: :settingable_id, inverse_of: :setting, optional: true
-  has_one :game, through: :season
 
-  validates :season, presence: true, if: -> { settingable_type == 'Season' }
+  # Only meaningful for a Season-owned row — for a Game-owned row this
+  # resolves through `season` (see above), which is nil for that row, so
+  # `game` comes back nil too even though `settingable` is the game itself.
+  # Read `settingable` directly when the row might be Game-owned.
+  has_one :game, through: :season
 
   before_validation :assign_settingable_type
 
