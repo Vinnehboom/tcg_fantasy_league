@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Setting do
-  # `season`'s own presence requirement is conditional on settingable_type
-  # (see 'ownership' below), so the generic belong_to/optional one-liner
-  # doesn't fit — it only knows unconditional required-or-optional.
   it { is_expected.to belong_to(:settingable) }
+  it { is_expected.to belong_to(:season).optional }
   it { is_expected.to have_one(:game).through(:season) }
   it { is_expected.to validate_presence_of(:settings) }
 
@@ -54,6 +52,10 @@ RSpec.describe Setting do
 
       it 'is valid without a backing Season row' do
         expect(setting).to be_valid
+      end
+
+      it 'returns nil, not the owning game, from #game (it only resolves through Season)' do
+        expect(setting.game).to be_nil
       end
     end
   end
@@ -143,6 +145,21 @@ RSpec.describe Setting do
 
       it 'never falls back to another game\'s row' do
         expect(looked_up_setting).to be_nil
+      end
+    end
+
+    context "when the game also has its own Game-owned default Setting (not a Season's)" do
+      let(:lookup_season) { late_season }
+      let(:nearest_prior_setting) { create(:setting, season: mid_season) }
+
+      before do
+        create(:setting, :for_game, settingable: game)
+        create(:setting, season: early_season)
+        nearest_prior_setting
+      end
+
+      it 'still carries forward the nearest prior SEASON row, unaffected by the Game-owned one' do
+        expect(looked_up_setting).to eq(nearest_prior_setting)
       end
     end
   end
