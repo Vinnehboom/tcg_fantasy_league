@@ -7,5 +7,12 @@
   "max_stacked_prs": 2,
   "orchestrator_cost_ceiling_usd": 50,
   "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Fixed to main at generation 4's handoff (2026-08-31), 3 generations after this was first flagged wrong — main now carries the current skill files (verified via git ls-tree before making this change). If this ever needs to point elsewhere again, that's a regression to investigate, not a new normal.",
-  "orchestrator_branch": "main"
+  "orchestrator_branch": "main",
+  "_comment_maintenance_automerge_paths": "Vinnie's standing instruction, 2026-09-03: a maintenance PR (no linked Notion ticket) whose entire diff falls within these paths may merge on green CI alone, without waiting for his review/lgtm first — see kanban-cycle SKILL.md step 3. Deliberately narrow: the orchestrator's own skill/config files only, never app code, migrations, or anything that changes runtime behavior. Widening this list is a decision for Vinnie to make explicitly, not one for a cycle to infer.",
+  "maintenance_automerge_paths": [
+    ".claude/skills/**",
+    ".claude/settings.json",
+    ".claude/kanban-cycle.json",
+    "docs/orchestrator-handoff.md"
+  ]
 }

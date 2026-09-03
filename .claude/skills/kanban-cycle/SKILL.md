@@ -113,11 +113,15 @@ ticket-linked PRs only (see step 4) — that's `stacked_count`, capped at
 automation-maintenance change to `.claude/skills/`, `.claude/settings.json`,
 or similar repo/automation config, opened by this orchestrator itself, not
 by `/ticket-pipeline` for a tracked ticket — is exempt from `max_open_prs`
-and `max_stacked_prs`. These PRs still need Vinnie's review/merge like any
-other, and still get listed in the rundown, but they don't consume the
-ticket-pipeline's PR budget: that budget exists to bound ticket-dispatch
-concurrency (review load, the shared-Postgres-test-DB risk under "Dispatch
-mechanics"), and a markdown/config-only PR carries none of that risk.
+and `max_stacked_prs`. They still get listed in the rundown, but they don't
+consume the ticket-pipeline's PR budget: that budget exists to bound
+ticket-dispatch concurrency (review load, the shared-Postgres-test-DB risk
+under "Dispatch mechanics"), and a markdown/config-only PR carries none of
+that risk. **Whether a maintenance PR still needs Vinnie's review before
+merge depends on its files** — see step 3's whitelisted-auto-merge case: a
+maintenance PR whose entire diff sits inside `maintenance_automerge_paths`
+merges on green CI alone; one that touches anything outside that list
+still needs his review/merge like a ticket-linked PR.
 
 **First review given** on a PR means the user (the repo owner) has
 submitted at least one review (any state — comment, approve, or changes
@@ -258,10 +262,36 @@ active agent:
 Each dispatched PR gets its own agent, so up to `max_open_prs` of these
 can be running in parallel — that cap is exactly what keeps this bounded.
 
-For open PRs that do NOT link a Notion ticket (opened by hand, or a
-maintenance PR opened by this orchestrator itself): leave them alone —
-don't push to someone else's branch — but list them in the rundown. They
-do not count against `max_open_prs` or `max_stacked_prs` (see step 4).
+For open PRs that do NOT link a Notion ticket, first check whether this is
+a maintenance PR *this orchestrator itself opened* (never for a PR opened
+by hand — see below) and whether it qualifies for whitelisted auto-merge:
+
+- **Maintenance PR, entire diff inside `maintenance_automerge_paths`, CI
+  green** → merge it automatically, no lgtm needed. Standing instruction,
+  2026-09-03, given explicitly by Vinnie after being asked which PRs may
+  skip his review — deliberately narrow to the orchestrator's own
+  skill/config files (`.claude/skills/**`, `.claude/settings.json`,
+  `.claude/kanban-cycle.json`, `docs/orchestrator-handoff.md` as of this
+  writing; the live list is `maintenance_automerge_paths` in
+  `.claude/kanban-cycle.json`, don't hardcode it here). Check eligibility
+  with `pull_request_read` (`get_files`) and match every changed path
+  against the whitelist — **one file outside it disqualifies the whole
+  PR**, fall through to "leave it alone" below, don't merge the parts that
+  do match. This never applies to a PR with a linked Notion ticket (that
+  always goes through the lgtm-gated case above, whatever files it
+  touches) and never to a PR opened by hand (Vinnie's own). Mark ready for
+  review if still draft, merge with `merge_method: "rebase"` (no merge
+  commit, same as every other merge in this skill), then run the same
+  rebase-cascade-onto-new-tip step the lgtm-merge case does for every
+  other open PR — a maintenance merge moves the default branch forward
+  exactly like a ticket merge does. There's no Notion card to flip for a
+  maintenance PR. Note the merge in the rundown (step 7) like any other
+  state change.
+- **Anything else without a linked ticket** (a maintenance PR outside the
+  whitelist, or a PR opened by hand) → leave it alone, don't push to
+  someone else's branch, but list it in the rundown.
+
+Neither case counts against `max_open_prs` or `max_stacked_prs` (see step 4).
 
 ## 4. Compute room for new work
 
@@ -587,8 +617,12 @@ this one end-of-cycle rundown and push, not announced separately.
   under "Dispatch mechanics" before ever running specs directly in this
   session while a dispatch is active.
 - No merge commits, ever — rebase only, same as `/ticket-pipeline`.
-- Don't touch a PR that doesn't link a Notion ticket card — it isn't this
-  automation's to drive.
+- Don't touch a PR that doesn't link a Notion ticket card, with exactly one
+  exception: merging it per step 3's whitelisted-auto-merge case, when its
+  entire diff sits inside `maintenance_automerge_paths` and CI is green.
+  Never widen that whitelist, and never apply the exception to a
+  ticket-linked PR or an outside-the-whitelist maintenance PR — those still
+  need Vinnie's review.
 - Never trust local `HEAD` at face value — verify it against
   `origin/<branch>` first (see "Trusting local git state" under
   "Dispatch mechanics").
