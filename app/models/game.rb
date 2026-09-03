@@ -16,15 +16,16 @@ class Game < ApplicationRecord
   register :ptcg, id: 'PTCG', adapter: PTCG_ADAPTER, results_verifier: PTCG_RESULTS_VERIFIER,
                   results_import_job: ExternalData::ImportResultsJob
 
-  validates :name, presence: true
-  validates :base_uri, presence: true
-
   has_many :players, dependent: :nullify
   has_many :tournaments, dependent: :nullify
   has_many :salary_drafts, through: :tournaments
   has_many :external_requests, dependent: :restrict_with_error
   has_many :seasons, dependent: :destroy
   has_many :settings, through: :seasons
+  has_one :default_setting, as: :settingable, class_name: 'Setting', dependent: :destroy
+
+  validates :name, presence: true
+  validates :base_uri, presence: true
 
   def upcoming_drafts
     salary_drafts.upcoming

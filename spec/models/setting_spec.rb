@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe Setting do
+  # `season`'s own presence requirement is conditional on settingable_type
+  # (see 'ownership' below), so the generic belong_to/optional one-liner
+  # doesn't fit — it only knows unconditional required-or-optional.
   it { is_expected.to belong_to(:settingable) }
-  it { is_expected.to belong_to(:season) }
   it { is_expected.to have_one(:game).through(:season) }
   it { is_expected.to validate_presence_of(:settings) }
 
@@ -15,6 +17,44 @@ RSpec.describe Setting do
 
     it 'rejects a second row for the same season' do
       expect(new_setting).not_to be_valid
+    end
+  end
+
+  describe 'ownership' do
+    context 'when built for a Season via the season= writer' do
+      subject(:setting) { build(:setting, season: create(:season)) }
+
+      before { setting.valid? }
+
+      it 'infers the settingable_type as Season' do
+        expect(setting.settingable_type).to eq('Season')
+      end
+    end
+
+    context 'when a Season-owned row points at a season id with no matching row' do
+      subject(:setting) { build(:setting, season: create(:season)).tap { |s| s.settingable_id = 0 } }
+
+      it 'is invalid' do
+        expect(setting).not_to be_valid
+      end
+    end
+
+    context 'when built for a Game via the settingable= writer' do
+      subject(:setting) { build(:setting, :for_game) }
+
+      before { setting.valid? }
+
+      it 'keeps the settingable_type as Game, not the Season default' do
+        expect(setting.settingable_type).to eq('Game')
+      end
+    end
+
+    context 'when owned by a Game' do
+      subject(:setting) { build(:setting, :for_game) }
+
+      it 'is valid without a backing Season row' do
+        expect(setting).to be_valid
+      end
     end
   end
 
