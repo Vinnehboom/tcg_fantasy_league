@@ -19,7 +19,8 @@ RSpec.describe GameRegistry do
 
   describe '.register' do
     before do
-      record_class.register(:widget, id: 'WIDGET', results_verifier: ->(id) { id }, results_import_job: String)
+      record_class.register(:widget, id: 'WIDGET', adapter: ->(game:) { "adapter for #{game.id}" },
+                                     results_verifier: ->(id) { id }, results_import_job: String)
     end
 
     describe 'the generated scope' do
@@ -54,6 +55,26 @@ RSpec.describe GameRegistry do
 
         it 'returns nil' do
           expect(job_class).to be_nil
+        end
+      end
+    end
+
+    describe '#adapter' do
+      subject(:adapter) { record.adapter }
+
+      context 'when the row matches a registered id' do
+        let(:record) { record_class.create!(id: 'WIDGET', name: 'Widget', base_uri: 'https://example.com') }
+
+        it 'builds the collaborator registered for that id, passing itself as game' do
+          expect(adapter).to eq('adapter for WIDGET')
+        end
+      end
+
+      context 'when the row has an unregistered id' do
+        let(:record) { record_class.create!(id: 'OTHER', name: 'Other', base_uri: 'https://example.com') }
+
+        it 'returns nil' do
+          expect(adapter).to be_nil
         end
       end
     end
