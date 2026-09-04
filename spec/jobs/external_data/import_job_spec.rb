@@ -20,11 +20,9 @@ module ExternalData
       Struct.new(:players, :upcoming_tournaments, keyword_init: true).new(players:, upcoming_tournaments: [])
     end
 
-    def build_job_class(game:, adapter:, kind: :players, &fetch)
+    def build_job_class(kind: :players, &fetch)
       fetch ||= ->(interface) { interface.update_players }
       Class.new(described_class) do
-        define_method(:game) { game }
-        define_method(:adapter) { adapter }
         define_method(:kind) { kind }
         define_method(:fetch) { |interface| fetch.call(interface) }
       end
@@ -32,14 +30,6 @@ module ExternalData
 
     describe 'abstract hooks' do
       subject(:job) { described_class.new }
-
-      it 'raises when #game is not overridden' do
-        expect { job.send(:game) }.to raise_error('#game not implemented')
-      end
-
-      it 'raises when #live_adapter is not overridden' do
-        expect { job.send(:live_adapter) }.to raise_error('#live_adapter not implemented')
-      end
 
       it 'raises when #kind is not overridden' do
         expect { job.send(:kind) }.to raise_error('#kind not implemented')
@@ -50,44 +40,96 @@ module ExternalData
       end
     end
 
+    describe '#game' do
+      let(:job_class) { build_job_class }
+
+      it 'finds the Game row for the given game_id' do
+        job_class.perform_now(game_id: game.id, adapter: fake_adapter(players: []))
+
+        expect(ExternalRequest.last.game).to eq(game)
+      end
+
+      it 'raises a semantic error instead of a bare RecordNotFound for an unknown game_id' do
+        message = "#{job_class.name}: no Game row with id 'MISSING' — seed it before running this job."
+
+        expect do
+          job_class.perform_now(game_id: 'MISSING', adapter: fake_adapter(players: []))
+        end.to raise_error(RuntimeError, message)
+      end
+    end
+
+    describe '#adapter' do
+      let(:job_class) { build_job_class }
+
+      it 'uses the injected adapter instead of the game\'s own registered one' do
+        adapter = fake_adapter(players: player_fixtures(2))
+
+        expect { job_class.perform_now(game_id: game.id, adapter:) }.to change(::Player, :count).by(2)
+      end
+
+      it "falls back to the game's own registered adapter when none is injected" do
+        adapter = fake_adapter(players: player_fixtures(1))
+        allow(::Game).to receive(:find).with(game.id).and_return(game)
+        allow(game).to receive(:adapter).and_return(adapter)
+
+        expect { job_class.perform_now(game_id: game.id) }.to change(::Player, :count).by(1)
+      end
+
+      # An injected adapter is a plain object, not a GlobalID — ActiveJob
+      # cannot serialize it for a real queue backend, so this form only
+      # works with #perform_now (see ImportJob#perform's own comment).
+      it 'cannot be carried through #perform_later, since it is not serializable' do
+        adapter = fake_adapter(players: [])
+
+        expect { job_class.perform_later(game_id: game.id, adapter:) }
+          .to raise_error(ActiveJob::SerializationError)
+      end
+
+      it '#perform_later works with game_id: alone' do
+        expect { job_class.perform_later(game_id: game.id) }.not_to raise_error
+      end
+    end
+
     describe '#perform' do
       let(:players) { player_fixtures(3) }
-      let(:job_class) { build_job_class(game:, adapter: fake_adapter(players:)) }
+      let(:job_class) { build_job_class }
+      let(:adapter) { fake_adapter(players:) }
+      let(:perform_import) { -> { job_class.perform_now(game_id: game.id, adapter:) } }
 
       subject(:job) { job_class.new }
 
       it_behaves_like 'an external data import job'
 
       it 'processes every record in the batch' do
-        expect { job.perform_now }.to change(::Player, :count).by(3)
+        expect { perform_import.call }.to change(::Player, :count).by(3)
       end
 
       it 'records how many records were processed on the ExternalRequest row' do
-        job.perform_now
+        perform_import.call
 
         expect(ExternalRequest.last.records_processed).to eq(3)
       end
 
       it 'records the fetch against the given kind' do
-        job.perform_now
+        perform_import.call
 
         expect(ExternalRequest.last.kind).to eq('players')
       end
 
       it 'records the fetch against the given game' do
-        job.perform_now
+        perform_import.call
 
         expect(ExternalRequest.last.game).to eq(game)
       end
 
       it 'records the fetch source as the game base uri' do
-        job.perform_now
+        perform_import.call
 
         expect(ExternalRequest.last.source_url).to eq('https://example.com')
       end
 
       it 'leaves requestable nil, since a batch import is not about one record' do
-        job.perform_now
+        perform_import.call
 
         expect(ExternalRequest.last.requestable).to be_nil
       end
@@ -96,13 +138,13 @@ module ExternalData
         let(:tournament) { create(:tournament) }
         let(:job_class) do
           record = tournament
-          Class.new(build_job_class(game:, adapter: fake_adapter(players:))) do
+          Class.new(build_job_class) do
             define_method(:requestable) { record }
           end
         end
 
         it 'links the ExternalRequest to the record the job ran for' do
-          job.perform_now
+          perform_import.call
 
           expect(ExternalRequest.last.requestable).to eq(tournament)
         end
@@ -110,47 +152,45 @@ module ExternalData
 
       describe 'when run a second time with the same batch' do
         it 'does not duplicate the persisted records' do
-          job.perform_now
+          perform_import.call
 
-          expect { job_class.new.perform_now }.not_to change(::Player, :count)
+          expect { job_class.perform_now(game_id: game.id, adapter:) }.not_to change(::Player, :count)
         end
 
         it 'still records a second ExternalRequest row for the second run' do
-          job.perform_now
+          perform_import.call
 
-          expect { job_class.new.perform_now }.to change(ExternalRequest, :count).by(1)
+          expect { job_class.perform_now(game_id: game.id, adapter:) }.to change(ExternalRequest, :count).by(1)
         end
       end
 
       describe 'when the fetch raises' do
-        let(:job_class) do
-          build_job_class(game:, adapter: nil) { raise ArgumentError, 'boom' }
-        end
+        let(:job_class) { build_job_class { raise ArgumentError, 'boom' } }
+        let(:adapter) { nil }
 
         it 'records the request as a failure' do
-          suppress(StandardError) { job.perform_now }
+          suppress(StandardError) { perform_import.call }
 
           expect(ExternalRequest.last.status).to eq('failure')
         end
 
         it 're-raises the error to the caller' do
-          expect { job.perform_now }.to raise_error(ArgumentError, 'boom')
+          expect { perform_import.call }.to raise_error(ArgumentError, 'boom')
         end
       end
     end
 
     describe 'retry behavior' do
-      subject(:job) { job_class.new }
+      let(:job_class) { build_job_class { raise error } }
+      let(:perform_import) { -> { job_class.perform_now(game_id: game.id, adapter: nil) } }
 
-      let(:job_class) do
-        build_job_class(game:, adapter: nil) { raise error }
-      end
+      subject(:job) { job_class.new }
 
       context 'when the fetch times out' do
         let(:error) { ExternalData::JsonApiClient::TimeoutError.new(url: 'https://example.com') }
 
         it 'is retried instead of propagating the error' do
-          expect { job.perform_now }.not_to raise_error
+          expect { perform_import.call }.not_to raise_error
         end
       end
 
@@ -158,7 +198,7 @@ module ExternalData
         let(:error) { ExternalData::JsonApiClient::RateLimitError.new(status: 429, url: 'https://example.com') }
 
         it 'is retried instead of propagating the error' do
-          expect { job.perform_now }.not_to raise_error
+          expect { perform_import.call }.not_to raise_error
         end
       end
 
@@ -166,7 +206,7 @@ module ExternalData
         let(:error) { ExternalData::JsonApiClient::HttpError.new(status: 500, url: 'https://example.com') }
 
         it 'propagates the error instead of retrying' do
-          expect { job.perform_now }.to raise_error(ExternalData::JsonApiClient::HttpError)
+          expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::HttpError)
         end
       end
     end

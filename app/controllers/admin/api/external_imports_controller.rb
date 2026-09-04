@@ -5,8 +5,8 @@ module Admin
     class ExternalImportsController < Admin::ApplicationController
 
       IMPORT_JOBS = {
-        %w[PTCG players] => ExternalData::Ptcg::ImportPlayersJob,
-        %w[PTCG tournaments] => ExternalData::Ptcg::ImportTournamentsJob
+        %w[PTCG players] => ExternalData::ImportPlayersJob,
+        %w[PTCG tournaments] => ExternalData::ImportTournamentsJob
       }.freeze
 
       def create
@@ -15,7 +15,7 @@ module Admin
 
         job_class = IMPORT_JOBS[[params[:game_id], params[:kind]]]
         if job_class
-          job_class.perform_later
+          job_class.perform_later(game_id: params[:game_id])
           head :ok
         else
           head :unprocessable_entity

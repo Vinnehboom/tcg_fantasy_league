@@ -30,8 +30,9 @@ module Demo
     def seed_game(entry)
       game = ensure_game(entry)
       ensure_season(game:, entry:)
-      import_players(game:, entry:)
-      import_tournaments(game:, entry:)
+      adapter = synthetic_adapter(game:, entry:)
+      import_players(game:, adapter:)
+      import_tournaments(game:, adapter:)
     end
 
     def ensure_game(entry)
@@ -44,12 +45,21 @@ module Demo
         ::Season.create!(game:, label: entry.season_label, start_date: 1.year.ago.to_date, end_date: nil)
     end
 
-    def import_players(game:, entry:)
-      ExternalData::Synthetic::ImportPlayersJob.perform_now(game_id: game.id, seed: SEED, shape: entry.shape)
+    # The generic import jobs (ExternalData::ImportJob) take an injected
+    # adapter directly (perform_now only — see its own docs), instead of
+    # the seed/shape kwargs the old per-source synthetic jobs took. Built
+    # once per game and shared by both imports, so both draw from the same
+    # player pool.
+    def synthetic_adapter(game:, entry:)
+      ExternalData::Synthetic::Adapter.new(game:, seed: SEED, shape: entry.shape)
     end
 
-    def import_tournaments(game:, entry:)
-      ExternalData::Synthetic::ImportTournamentsJob.perform_now(game_id: game.id, seed: SEED, shape: entry.shape)
+    def import_players(game:, adapter:)
+      ExternalData::ImportPlayersJob.perform_now(game_id: game.id, adapter:)
+    end
+
+    def import_tournaments(game:, adapter:)
+      ExternalData::ImportTournamentsJob.perform_now(game_id: game.id, adapter:)
     end
 
   end
