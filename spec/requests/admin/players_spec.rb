@@ -11,8 +11,12 @@ module Admin
       sign_in admin
     end
 
-    def attach_select_html(player_season)
-      response.body[%r{<select[^>]*player_season_modifier_score_modifier_id_#{player_season.id}[^>]*>.*?</select>}m]
+    def rendered_page
+      Capybara.string(response.body)
+    end
+
+    def attach_select(player_season)
+      rendered_page.find(:select, "player_season_modifier_score_modifier_id_#{player_season.id}")
     end
 
     describe '#index' do
@@ -53,6 +57,18 @@ module Admin
         end
       end
 
+      context 'when the game param names a game that does not exist' do
+        it 'falls back to the alphabetically first game' do
+          player_a = create(:player, game: game_a, name: 'Ash Ketchum')
+          player_b = create(:player, game: game_b, name: 'Misty Waterflower')
+
+          get admin_players_path(game: 'ZZZZ')
+
+          expect(response.body).to include(player_a.name)
+          expect(response.body).not_to include(player_b.name)
+        end
+      end
+
       context 'when loading the per-game tab list' do
         it 'shows a tab for every game' do
           game_a
@@ -70,8 +86,8 @@ module Admin
 
           get admin_players_path(game: game_b.id)
 
-          expect(response.body).to match(%r{<a[^>]*class="nav-link active"[^>]*>#{Regexp.escape(game_b.name)}</a>})
-          expect(response.body).not_to match(%r{<a[^>]*class="nav-link active"[^>]*>#{Regexp.escape(game_a.name)}</a>})
+          expect(rendered_page).to have_css('a.nav-link.active', exact_text: game_b.name)
+          expect(rendered_page).to have_no_css('a.nav-link.active', exact_text: game_a.name)
         end
       end
     end
@@ -93,6 +109,7 @@ module Admin
 
       context 'when the player has more than one season' do
         it 'gives each season its own attach-form field ids' do
+          create(:multiplier)
           player = create(:player)
           other_season = create(:season, game: player.game, label: '2025',
                                          start_date: Date.new(2024, 9, 1), end_date: Date.new(2025, 8, 31))
@@ -120,13 +137,14 @@ module Admin
 
         it "leaves it off that season's attach options, since attaching it again would fail" do
           score_modifier = create(:multiplier, name: 'hot streak')
+          create(:bonus, name: 'winner') # something else stays available, so the select still renders
           player = create(:player)
           player_season = player.player_seasons.first
           create(:player_season_modifier, player_season:, score_modifier:)
 
           get admin_player_path(player)
 
-          expect(attach_select_html(player_season)).not_to include('hot streak')
+          expect(attach_select(player_season)).to have_no_css('option', text: 'hot streak')
         end
 
         it "still offers it on a season that doesn't have it yet" do
@@ -140,7 +158,22 @@ module Admin
 
           get admin_player_path(player)
 
-          expect(attach_select_html(bare_player_season)).to include('hot streak')
+          expect(attach_select(bare_player_season)).to have_css('option', text: 'hot streak')
+        end
+
+        context 'when the season already has every kept score modifier' do
+          it 'shows a message instead of an empty attach form' do
+            only_score_modifier = create(:multiplier, name: 'hot streak')
+            player = create(:player)
+            player_season = player.player_seasons.first
+            create(:player_season_modifier, player_season:, score_modifier: only_score_modifier)
+
+            get admin_player_path(player)
+
+            expect(response.body).to include('This season already has every score modifier there is.')
+            expect(rendered_page).to have_no_css('select',
+                                                 id: "player_season_modifier_score_modifier_id_#{player_season.id}")
+          end
         end
       end
 
@@ -156,28 +189,6 @@ module Admin
 
           expect(response).to have_http_status(:ok)
           expect(response.body).to include('legend')
-        end
-      end
-
-      context "when an attached modifier can't resolve to any score modifier at all" do
-        it 'renders the page instead of raising, skipping that row' do
-          player = create(:player)
-          player_season = player.player_seasons.first
-          create(:player_season_modifier, player_season:)
-          # rubocop:disable RSpec/AnyInstance -- the row's PlayerSeasonModifier
-          # is instantiated inside the request by the controller's own query,
-          # not by this example, and a real dangling score_modifier_id can't
-          # be built through the model layer (the join has a foreign key on
-          # score_modifiers). Stubbing every instance is the only way to
-          # exercise the view's nil guard for this DB-enforced-unreachable
-          # but still-defended-against case.
-          allow_any_instance_of(PlayerSeasonModifier)
-            .to receive(:score_modifier).and_return(nil)
-          # rubocop:enable RSpec/AnyInstance
-
-          get admin_player_path(player)
-
-          expect(response).to have_http_status(:ok)
         end
       end
     end

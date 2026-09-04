@@ -15,7 +15,6 @@
         <tbody>
           <% player_season.player_season_modifiers.each do |player_season_modifier| %>
             <% score_modifier = player_season_modifier.score_modifier %>
-            <% next if score_modifier.nil? %>
             <tr>
               <td>
                 <%= score_modifier.name %>
@@ -40,16 +39,21 @@
       <p><%= t('.no_modifiers') %></p>
     <% end %>
 
-    <%= form_with url: admin_player_season_modifiers_path, method: :post, scope: :player_season_modifier,
-                  class: 'd-flex gap-2 align-items-center' do |f| %>
-      <%= f.hidden_field :player_season_id, value: player_season.id,
-                          id: "player_season_modifier_player_season_id_#{player_season.id}" %>
-      <%= f.select :score_modifier_id,
-                   player_season.available_score_modifiers.map { |score_modifier| [score_modifier.name, score_modifier.id] },
-                   { include_blank: true },
-                   class: 'form-select', style: 'width: 20rem;', required: true,
-                   id: "player_season_modifier_score_modifier_id_#{player_season.id}" %>
-      <%= f.submit t('.attach'), class: 'btn btn-sm btn-primary' %>
+    <% available = player_season.available_score_modifiers(@kept_score_modifiers) %>
+    <% if available.any? %>
+      <%= form_with url: admin_player_season_modifiers_path, method: :post, scope: :player_season_modifier,
+                    class: 'd-flex gap-2 align-items-center' do |f| %>
+        <%= f.hidden_field :player_season_id, value: player_season.id,
+                            id: "player_season_modifier_player_season_id_#{player_season.id}" %>
+        <%= f.select :score_modifier_id,
+                     available.map { |score_modifier| [score_modifier.name, score_modifier.id] },
+                     { include_blank: true },
+                     class: 'form-select', style: 'width: 20rem;', required: true,
+                     id: "player_season_modifier_score_modifier_id_#{player_season.id}" %>
+        <%= f.submit t('.attach'), class: 'btn btn-sm btn-primary' %>
+      <% end %>
+    <% else %>
+      <p><%= t('.no_modifiers_available') %></p>
     <% end %>
   </div>
 <% end %>
