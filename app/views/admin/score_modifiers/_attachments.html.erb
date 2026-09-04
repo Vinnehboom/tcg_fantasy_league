@@ -17,9 +17,9 @@
           <td>
             <% if policy(player_season_modifier).destroy? %>
               <div data-controller="score-modifier-attachment"
-                   data-score-modifier-attachment-url-value="<%= admin_player_season_modifier_path(player_season_modifier) %>"
+                   data-score-modifier-attachment-url-value="<%= admin_api_player_season_modifier_path(player_season_modifier) %>"
                    data-score-modifier-attachment-confirm-value="<%= t('.confirm_detach') %>"
-                   data-score-modifier-attachment-generic-error-value="<%= t('admin.score_modifiers.player_season_modifiers.destroy.failed') %>">
+                   data-score-modifier-attachment-generic-error-value="<%= t('admin.api.player_season_modifiers.destroy.failed') %>">
                 <button type="button" class="btn btn-sm btn-danger" data-action="score-modifier-attachment#detach">
                   <%= t('.detach') %>
                 </button>

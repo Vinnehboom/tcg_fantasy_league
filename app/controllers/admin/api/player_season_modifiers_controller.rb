@@ -1,6 +1,6 @@
 module Admin
 
-  module ScoreModifiers
+  module Api
 
     class PlayerSeasonModifiersController < Admin::ApplicationController
 
