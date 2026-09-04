@@ -2,10 +2,8 @@ class Game < ApplicationRecord
 
   include GameRegistry
 
-  # The verifier runs synchronously inside an admin web request (a Puma
-  # thread), so it uses a tight timeout and no retries instead of
-  # RetryPolicy's background-job-oriented defaults, which could otherwise
-  # block a web worker for 30-60s+.
+  # Runs synchronously inside an admin web request, so a tight timeout and
+  # no retries — RetryPolicy's defaults could block a web worker for 30-60s+.
   PTCG_RESULTS_VERIFIER = lambda do |tournament_id|
     ExternalData::Pokemon::Tcg::LabsTournament.call(
       tournament_id:,

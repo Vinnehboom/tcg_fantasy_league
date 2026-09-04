@@ -2,12 +2,9 @@ module ExternalData
 
   module Synthetic
 
-    # Stands in for a game's real results_verifier lambda (H-9), so that
-    # confirming a results_source_id in local development makes no real HTTP
-    # call either — not just the imports. Game-agnostic and deterministic:
-    # the same results_source_id always answers with the same count, derived
-    # from a Zlib.crc32 digest of the id, never String#hash (randomized per
-    # process).
+    # Deterministic: the same results_source_id always answers with the
+    # same count, derived from a Zlib.crc32 digest of the id, never
+    # String#hash (randomized per process).
     class ResultsVerifier
 
       def initialize

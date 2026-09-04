@@ -75,9 +75,6 @@ module ExternalData
         expect { job_class.perform_now(game_id: game.id) }.to change(::Player, :count).by(1)
       end
 
-      # An injected adapter is a plain object, not a GlobalID — ActiveJob
-      # cannot serialize it for a real queue backend, so this form only
-      # works with #perform_now (see ImportJob#perform's own comment).
       it 'cannot be carried through #perform_later, since it is not serializable' do
         adapter = fake_adapter(players: [])
 

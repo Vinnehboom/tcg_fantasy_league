@@ -101,7 +101,7 @@ module ExternalData
         expect { perform_import.call }.to change(::Result, :count)
       end
 
-      it 'names only players the players import already created, per the same seed and shape (Decisions D8)' do
+      it 'names only players the players import already created, per the same seed and shape' do
         expect { perform_import.call }.not_to change(::Player, :count)
       end
 

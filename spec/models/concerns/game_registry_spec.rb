@@ -1,9 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe GameRegistry do
-  # A second, independent includer, backed by the same table shape as Game.
-  # Proves the behavior below comes from the concern itself, not something
-  # only Game happens to do.
   let(:record_class) do
     Class.new(ApplicationRecord) do
       self.table_name = 'games'

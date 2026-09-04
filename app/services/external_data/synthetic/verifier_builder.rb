@@ -2,17 +2,9 @@ module ExternalData
 
   module Synthetic
 
-    # The real collaborator config/environments/development.rb points
-    # verifier_builder at (H-9 review round 1, B3, NB17): plain and directly
-    # testable, instead of a lambda literal a spec could only ever
-    # duplicate.
-    #
-    # It swaps in the synthetic verifier only for a game that actually has
-    # one registered. A game with none (Riftbound today) stays honestly
-    # unavailable, the same as test, staging and production — the point of
-    # the stub is no real HTTP call, not a working verifier where one was
-    # never promised. Checking the registered verifier's presence is not
-    # itself an HTTP call: only calling the verifier it returns would be.
+    # Swaps in the synthetic verifier only for a game that actually has one
+    # registered, so an unregistered game stays unavailable rather than
+    # getting a stub for a verifier that was never promised.
     class VerifierBuilder
 
       def call(**, &registered_verifier)

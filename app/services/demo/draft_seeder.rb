@@ -1,13 +1,5 @@
 module Demo
 
-  # The demo's app-domain half (H-9): a SalaryDraft on every tournament,
-  # demo and admin users H-8 can sign in as, and a handful of participants
-  # with rosters — completed (and scored, through the real scorer) on a past
-  # tournament's draft, still in progress on an upcoming one.
-  #
-  # Every FactoryBot call here is guarded by a lookup first: FactoryBot's
-  # create is not idempotent on its own, so a second call must find the
-  # existing row instead of making a new one.
   class DraftSeeder < ApplicationService
 
     include ProductionGuard
@@ -43,11 +35,6 @@ module Demo
                                                            password: ADMIN_PASSWORD)
     end
 
-    # demo is always one of the seeded participants — not a bystander account
-    # — so signing in as demo (what the README instructs) shows a populated
-    # participations page and a real roster, on both a past and an upcoming
-    # draft. It goes first, so it is the one that gets the submitted (not
-    # merely created) participation on an upcoming draft.
     def participants
       @participants ||= [demo_user] + Array.new(PARTICIPANT_COUNT - 1) { |index| ensure_participant(index) }
     end

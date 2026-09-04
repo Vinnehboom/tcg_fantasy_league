@@ -78,25 +78,14 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
 
-  # No live HTTP call from local development (H-9): every ExternalData
-  # import uses the synthetic adapter instead of the real one. The real
-  # adapter (the block Game#adapter passes in — see GameRegistry) is
-  # therefore never invoked here, so it is never constructed either.
-  #
-  # The real behavior lives in ExternalData::Synthetic::AdapterBuilder, a
-  # plain, directly testable class (app/services/external_data/synthetic) —
-  # not written out here, so this assignment stays the only untested line
-  # (development itself cannot be booted in this sandbox: no
-  # development.key). The reference has to be inside a lambda, evaluated
-  # only when actually called: this file loads before the autoloader is set
-  # up, so a bare top-level ExternalData::Synthetic::AdapterBuilder.new here
-  # would raise NameError on every boot, in every environment.
+  # Wrapped in a lambda, not called at the top level: this file loads
+  # before the autoloader is set up, so a bare top-level
+  # ExternalData::Synthetic::AdapterBuilder reference would raise
+  # NameError on every boot.
   config.x.external_data.adapter_builder = lambda do |game:, &registered_adapter|
     ExternalData::Synthetic::AdapterBuilder.new.call(game:, &registered_adapter)
   end
 
-  # Same idea for the admin "verify tournament id" flow, via
-  # ExternalData::Synthetic::VerifierBuilder.
   config.x.external_data.verifier_builder = lambda do |game:, &registered_verifier|
     ExternalData::Synthetic::VerifierBuilder.new.call(game:, &registered_verifier)
   end

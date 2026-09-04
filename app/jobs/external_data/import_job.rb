@@ -4,22 +4,15 @@ module ExternalData
 
     queue_as :imports
 
-    # Job-level backstop, layered on top of (not replacing) JsonApiClient's own per-request
-    # RetryPolicy: a request-level retry smooths a brief blip within one fetch, this re-enqueues
-    # the whole job once that budget is exhausted, covering a sustained outage or rate-limit
-    # window longer than one request's own retries can absorb. Scoped to the same retryable set
-    # RetryPolicy already uses (timeouts + 429, not 5xx) so the two layers don't contradict.
+    # A job-level backstop on top of JsonApiClient's own per-request
+    # RetryPolicy, scoped to the same retryable errors so the two don't
+    # contradict.
     retry_on ExternalData::JsonApiClient::TimeoutError,
              ExternalData::JsonApiClient::RateLimitError,
              wait: :polynomially_longer, attempts: ExternalData::RetryPolicy.new.max_attempts
 
-    # An injected +adapter+ is a plain object, not an ActiveRecord-backed
-    # GlobalID, so it cannot survive ActiveJob's argument serialization —
-    # this form only works with #perform_now. Demo::Seeder and Demo::History
-    # call it that way, injecting a synthetic adapter directly. Anything
-    # queued with #perform_later (the admin-triggered imports, the cron
-    # schedule) must pass game_id: only and let #adapter resolve the game's
-    # own registered adapter.
+    # An injected adapter cannot survive ActiveJob serialization, so this
+    # only works with #perform_now; #perform_later must pass game_id: only.
     def perform(game_id:, adapter: nil)
       @game_id = game_id
       @adapter = adapter

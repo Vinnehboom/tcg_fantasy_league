@@ -1,8 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Demo::ProductionGuard do
-  # A throwaway includer, to prove the behavior comes from the module
-  # itself, not something only one Demo:: class happens to do.
   let(:includer_class) do
     Class.new do
       include Demo::ProductionGuard

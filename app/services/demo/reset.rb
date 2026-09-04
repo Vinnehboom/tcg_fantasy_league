@@ -1,20 +1,7 @@
 module Demo
 
-  # Truncates every application table (H-9, Decisions D10) — a sharper tool
-  # than anything else in this repo, kept only because the historical slice
-  # freezes its dates and needs an occasional way back to a clean, current
-  # dataset. Nothing drops, no migration re-runs, and the schema stays
-  # untouched: connection.truncate_tables already excludes schema_migrations
-  # and ar_internal_metadata on its own. Sequences are not reset, so ids
-  # keep climbing across a reseed — callers must never hardcode one.
-  #
-  # Bounded five ways: an environment allow-list (not a deny-list, so a new
-  # environment is refused by default); a check that the connected database
-  # is actually the expected one for that environment, in case DATABASE_URL
-  # points RAILS_ENV=development at some other database; an explicit
-  # confirmation; this class's own production guard, independent of
-  # Demo::Seeder's and the synthetic adapter's; and nothing but the
-  # demo:reseed rake task calls it.
+  # Truncates every application table. Sequences are not reset, so ids keep
+  # climbing across a reseed — callers must never hardcode one.
   class Reset < ApplicationService
 
     ALLOWED_ENVIRONMENTS = %w[development test].freeze
@@ -41,11 +28,8 @@ module Demo
       raise "#{self.class.name} only runs in #{ALLOWED_ENVIRONMENTS.join(' or ')}, not '#{Rails.env}'"
     end
 
-    # Rails.env alone only says what config/environments file loaded — a
-    # DATABASE_URL override still wins over config/database.yml underneath
-    # it, so a RAILS_ENV=development process can be connected to any
-    # database at all. This checks the actual connection, independent of
-    # what Rails.env claims.
+    # DATABASE_URL can point RAILS_ENV=development at any database, so this
+    # checks the actual connection instead of trusting Rails.env alone.
     def raise_outside_expected_database!
       return if expected_database_names.include?(connected_database_name)
 
