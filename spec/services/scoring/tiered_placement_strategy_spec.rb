@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Scoring
 
-  RSpec.describe Strategy do
+  RSpec.describe TieredPlacementStrategy do
     subject(:strategy) { described_class.new }
 
     # Duck-typed fixtures for #points_for's `result:` argument — a local
