@@ -15,12 +15,15 @@
           <td><%= player_season_modifier.player_season.player.name %></td>
           <td><%= player_season_modifier.player_season.season.label %></td>
           <td>
-            <%= link_to admin_score_modifier_player_season_modifier_path(@score_modifier, player_season_modifier),
-                        data: { 'turbo-method': :delete,
-                                'turbo-confirm': t('.confirm_detach') },
-                        class: 'btn btn-sm btn-danger' do %>
-              <%= t('.detach') %>
-            <% end %>
+            <div data-controller="score-modifier-attachment"
+                 data-score-modifier-attachment-url-value="<%= admin_score_modifier_player_season_modifier_path(@score_modifier, player_season_modifier) %>"
+                 data-score-modifier-attachment-confirm-value="<%= t('.confirm_detach') %>"
+                 data-score-modifier-attachment-generic-error-value="<%= t('admin.score_modifiers.player_season_modifiers.destroy.failed') %>">
+              <button type="button" class="btn btn-sm btn-danger" data-action="score-modifier-attachment#detach">
+                <%= t('.detach') %>
+              </button>
+              <div data-score-modifier-attachment-target="error" class="text-danger small mt-1" hidden></div>
+            </div>
           </td>
         </tr>
       <% end %>

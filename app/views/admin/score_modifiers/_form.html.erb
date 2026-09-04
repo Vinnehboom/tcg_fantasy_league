@@ -2,7 +2,9 @@
   <%= simple_form_for @score_modifier, as: :score_modifier, url: url do |f| %>
     <%= f.input :type, collection: ScoreModifier.subclasses, label_method: ->(type) { type.model_name.human },
                        value_method: :name, include_blank: false %>
-    <%= f.input :name, collection: ScoreModifier.names.values, include_blank: false %>
+    <%= f.input :name, collection: ScoreModifier.names.values,
+                       label_method: ->(name) { score_modifier_name_label(name) }, value_method: :itself,
+                       include_blank: false %>
     <%= f.input :value %>
 
     <%= f.button :submit, class: "btn btn-success ms-auto" %>

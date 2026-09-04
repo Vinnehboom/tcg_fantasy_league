@@ -19,7 +19,7 @@
     <tbody>
       <% @score_modifiers.each do |score_modifier| %>
         <tr>
-          <td><%= link_to score_modifier.name, admin_score_modifier_path(score_modifier) %></td>
+          <td><%= link_to score_modifier_name_label(score_modifier.name), admin_score_modifier_path(score_modifier) %></td>
           <td><%= score_modifier.model_name.human %></td>
           <td><%= score_modifier.value %></td>
           <td>

@@ -1,4 +1,4 @@
-<h2 class="mb-3"><%= @score_modifier.name %></h2>
+<h2 class="mb-3"><%= score_modifier_name_label(@score_modifier.name) %></h2>
 
 <div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
   <% if policy(@score_modifier).edit? %>
@@ -22,7 +22,7 @@
   </tr>
   <tr>
     <td class="fw-bold"><%= t('activerecord.attributes.score_modifier.name') %></td>
-    <td><%= @score_modifier.name %></td>
+    <td><%= score_modifier_name_label(@score_modifier.name) %></td>
   </tr>
   <tr>
     <td class="fw-bold"><%= t('activerecord.attributes.score_modifier.value') %></td>
