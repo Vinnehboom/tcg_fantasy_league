@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Admin::PlayersHelper do
   describe '#available_score_modifiers' do
-    subject(:available_score_modifiers) { helper.available_score_modifiers(player_season) }
+    subject(:available_score_modifiers) { helper.available_score_modifiers(player_season:) }
 
     let(:player_season) { create(:player_season) }
     let(:attached) { create(:multiplier, name: 'hot streak') }
@@ -27,6 +27,16 @@ RSpec.describe Admin::PlayersHelper do
 
       it 'excludes it too' do
         expect(available_score_modifiers).not_to include(discarded)
+      end
+    end
+
+    context 'when given an explicit pool, as the view actually calls it' do
+      subject(:available_score_modifiers) do
+        helper.available_score_modifiers(player_season:, kept_score_modifiers: [attached, unattached])
+      end
+
+      it 'filters that pool instead of querying for one' do
+        expect(available_score_modifiers).to contain_exactly(unattached)
       end
     end
   end
