@@ -83,4 +83,8 @@ Rails.application.configure do
   # adapter (the block ImportJob#adapter passes in) is therefore never
   # invoked here, so it is never constructed either.
   config.x.external_data.adapter_builder = ->(game:) { ExternalData::Synthetic::Adapter.new(game:) }
+
+  # Same idea for the admin "verify tournament id" flow: the registered
+  # verifier (e.g. Game::PTCG_RESULTS_VERIFIER) is never invoked here either.
+  config.x.external_data.verifier_builder = ->(**) { ExternalData::Synthetic::ResultsVerifier.new }
 end
