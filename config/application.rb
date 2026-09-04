@@ -16,13 +16,15 @@ module TcgFantasyDraft
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w(assets tasks))
 
-    # Composition root for ExternalData::ImportJob#adapter (H-9). A lambda,
-    # not a class name — no constantize, no id-keyed registry. This default
-    # always uses the real collaborator; an environment file can swap in a
-    # different one (see config/environments/development.rb). The block a
-    # caller passes in (the real adapter) is evaluated lazily, so a builder
-    # that never calls it never constructs the real thing.
+    # Composition roots for ExternalData collaborators (H-9). Each is a
+    # lambda, not a class name — no constantize, no id-keyed registry. Both
+    # defaults always use the real collaborator; an environment file can
+    # swap either in for a different one (see
+    # config/environments/development.rb). The block a caller passes in (the
+    # real collaborator) is evaluated lazily, so a builder that never calls
+    # it never constructs the real thing.
     config.x.external_data.adapter_builder = ->(**, &live_adapter) { live_adapter.call }
+    config.x.external_data.verifier_builder = ->(**, &registered_verifier) { registered_verifier.call }
 
     # Configuration for the application, engines, and railties goes here.
     #
