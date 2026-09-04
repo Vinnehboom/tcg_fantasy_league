@@ -57,13 +57,13 @@ module Admin
     private
 
     def score_modifier_params
-      params.require(:score_modifier).permit(:name, :value).merge(type: requested_type)
+      params.require(:score_modifier).permit(:name, :value).merge(type: requested_type&.name)
     end
 
     # Coerces against the closed family so an unknown type fails validation, not ActiveRecord::SubclassNotFound.
     def requested_type
       type = params.dig(:score_modifier, :type)
-      type if ScoreModifier.subclasses.any? { |modifier_type| modifier_type.name == type }
+      ScoreModifier.subclasses.find { |modifier_type| modifier_type.name == type }
     end
 
     # ScoreModifier.find instantiates a record as its CURRENT STI subtype, so
@@ -73,9 +73,9 @@ module Admin
     # Multiplier's greater-than-0 check) actually run before save.
     def retyped_for_update(score_modifier)
       target_type = requested_type
-      return score_modifier if target_type.nil? || score_modifier.instance_of?(target_type.constantize)
+      return score_modifier if target_type.nil? || score_modifier.instance_of?(target_type)
 
-      score_modifier.becomes!(target_type.constantize)
+      score_modifier.becomes!(target_type)
     end
 
   end

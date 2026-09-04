@@ -85,7 +85,7 @@ module Admin
       let(:player_season_modifier) { create(:player_season_modifier, player_season:, score_modifier:) }
 
       it 'takes the modifier away from the player for that season' do
-        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+        delete admin_player_season_modifier_path(player_season_modifier)
 
         expect(score_modifier.reload.player_seasons).not_to include(player_season)
       end
@@ -93,14 +93,14 @@ module Admin
       it 'responds with the removed attachment as JSON' do
         removed_id = player_season_modifier.id
 
-        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+        delete admin_player_season_modifier_path(player_season_modifier)
 
         expect(response).to have_http_status(:ok)
         expect(response.parsed_body['id']).to eq(removed_id)
       end
 
       it 'leaves the player and the season in place' do
-        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+        delete admin_player_season_modifier_path(player_season_modifier)
 
         expect(PlayerSeason.find_by(id: player_season.id)).to eq(player_season)
       end
@@ -109,13 +109,13 @@ module Admin
         before { score_modifier.discard }
 
         it 'still takes it away from the player for that season' do
-          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+          delete admin_player_season_modifier_path(player_season_modifier)
 
           expect(score_modifier.reload.player_seasons).not_to include(player_season)
         end
 
         it 'still responds with :ok, not 404' do
-          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+          delete admin_player_season_modifier_path(player_season_modifier)
 
           expect(response).to have_http_status(:ok)
         end

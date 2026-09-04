@@ -17,11 +17,8 @@ Rails.application.routes.draw do
     resources :external_requests, only: %i[index show]
     resources :games, only: %i[index show], constraints: { id: %r{[^/]+} }
     resources :tournaments, only: %i[index show update]
-    resources :score_modifiers do
-      resources :player_season_modifiers, only: %i[destroy],
-                                          controller: 'score_modifiers/player_season_modifiers'
-    end
-    resources :player_season_modifiers, only: %i[create],
+    resources :score_modifiers
+    resources :player_season_modifiers, only: %i[create destroy],
                                         controller: 'score_modifiers/player_season_modifiers'
 
     namespace :api do
