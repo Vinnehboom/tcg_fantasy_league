@@ -10,9 +10,9 @@ module ExternalData
     # It swaps in the synthetic verifier only for a game that actually has
     # one registered. A game with none (Riftbound today) stays honestly
     # unavailable, the same as test, staging and production — the point of
-    # the stub is no live HTTP call, not a working verifier where one was
+    # the stub is no real HTTP call, not a working verifier where one was
     # never promised. Checking the registered verifier's presence is not
-    # itself a live call: only calling the verifier it returns would be.
+    # itself an HTTP call: only calling the verifier it returns would be.
     class VerifierBuilder
 
       def call(**, &registered_verifier)

@@ -4,7 +4,7 @@ module ExternalData
 
     # A game-agnostic adapter that makes no HTTP request. It answers the same
     # four methods as ExternalData::Pokemon::Tcg::Adapter, with plausible,
-    # seed-reproducible data instead of a live fetch — see H-9. Nothing here
+    # seed-reproducible data instead of a real HTTP fetch — see H-9. Nothing here
     # names a specific game: the caller injects the score shape (see Shape)
     # and the seed. The default shape's curve is Demo::Curves::LADDER — the
     # adapter itself does not care where a curve lambda comes from.
