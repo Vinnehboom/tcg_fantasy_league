@@ -16,7 +16,7 @@ module Demo
     include ProductionGuard
 
     CHECKPOINT_DAYS_AGO = [120, 75, 45, 15].freeze
-    PAST_TOURNAMENT_DAYS_AGO = [90, 60, 30].freeze
+    PAST_TOURNAMENT_INTERVAL_DAYS = 30
     PAST_TOURNAMENT_COUNTRIES = %w[US GB JP DE FR].freeze
     HISTORY_HORIZON_DAYS = 150.0
 
@@ -31,16 +31,16 @@ module Demo
       game = ::Game.find(entry.id)
       return if already_seeded?(game)
 
-      backdate_scores(game, entry)
-      tournaments = create_past_tournaments(game, entry)
-      import_results(tournaments, entry)
+      backdate_scores(game:, entry:)
+      tournaments = create_past_tournaments(game:, entry:)
+      import_results(tournaments:, entry:)
     end
 
     def already_seeded?(game)
       ::Tournament.exists?(game_id: game.id, external_id: past_external_id(1))
     end
 
-    def backdate_scores(game, entry)
+    def backdate_scores(game:, entry:)
       game.players.find_each { |player| backdate_player(game:, player:, entry:) }
     end
 
@@ -61,10 +61,17 @@ module Demo
       )
     end
 
-    def create_past_tournaments(game, entry)
-      PAST_TOURNAMENT_DAYS_AGO.each_with_index.map do |days_ago, index|
+    def create_past_tournaments(game:, entry:)
+      past_tournament_days_ago(entry.past_tournament_count).each_with_index.map do |days_ago, index|
         create_past_tournament(game:, entry:, days_ago:, index:)
       end
+    end
+
+    # entry.past_tournament_count of 3 gives [90, 60, 30] — the most recent
+    # tournament always PAST_TOURNAMENT_INTERVAL_DAYS days ago, spaced apart
+    # by that same interval.
+    def past_tournament_days_ago(count)
+      count.downto(1).map { |position| position * PAST_TOURNAMENT_INTERVAL_DAYS }
     end
 
     def create_past_tournament(game:, entry:, days_ago:, index:)
@@ -81,7 +88,7 @@ module Demo
       "/tournaments/past-#{position}"
     end
 
-    def import_results(tournaments, entry)
+    def import_results(tournaments:, entry:)
       tournaments.each do |tournament|
         ExternalData::Synthetic::ImportResultsJob.perform_now(
           tournament_id: tournament.id, seed: Demo::Seeder::SEED, shape: entry.shape

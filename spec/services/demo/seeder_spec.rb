@@ -40,10 +40,12 @@ RSpec.describe Demo::Seeder do
       expect(Tournament.pluck(:starting_date)).to all(be >= 7.days.from_now.to_date)
     end
 
-    it 'is idempotent: a second call adds no Game, Season or Player rows' do
+    it 'is idempotent: a second call adds no Game, Season, Player or ExternalScore rows' do
       described_class.call
 
-      expect { described_class.call }.not_to(change { [Game.count, Season.count, Player.count] })
+      expect do
+        described_class.call
+      end.not_to(change { [Game.count, Season.count, Player.count, ExternalScore.count] })
     end
 
     it 'refreshes upcoming tournament dates on a second call, since they are offsets from today' do
