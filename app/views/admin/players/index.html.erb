@@ -1,0 +1,23 @@
+<%= render partial: "tabs", locals: { games: @games, game: @game } %>
+<% if @players.any? %>
+  <table class="table table-dark table-striped rounded-2 overflow-hidden">
+    <thead>
+      <tr>
+        <th><%= t('activerecord.attributes.player.name') %></th>
+        <th><%= t('activerecord.attributes.player.country') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @players.each do |player| %>
+        <tr>
+          <td><%= link_to player.name, admin_player_path(player) %></td>
+          <td><%= player.country %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @players %>
+<% else %>
+  <p><%= t('.no_players') %></p>
+<% end %>

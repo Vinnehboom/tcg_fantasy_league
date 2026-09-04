@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     resources :external_requests, only: %i[index show]
     resources :games, only: %i[index show], constraints: { id: %r{[^/]+} }
     resources :tournaments, only: %i[index show update]
+    resources :players, only: %i[index show]
     resources :score_modifiers
 
     namespace :api do
