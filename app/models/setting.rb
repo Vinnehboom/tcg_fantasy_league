@@ -6,9 +6,6 @@ class Setting < ApplicationRecord
   # otherwise fail Rails' "must exist" check.
   belongs_to :season, foreign_key: :settingable_id, inverse_of: :setting, optional: true
 
-  # nil for a Game-owned row (no `season`) — read `settingable` directly for that case.
-  has_one :game, through: :season
-
   before_validation :assign_settingable_type
 
   def self.for(season:)
@@ -23,12 +20,17 @@ class Setting < ApplicationRecord
   # against that WHERE clause ever widening (Postgres sorts NULL first on a
   # DESC order by default).
   #
-  # Looks up Season first — a direct join on settingable_id would need a
-  # bigint cast, which fails on Game-owned rows (non-numeric id).
+  # Looks up Season first, casting Season.id (always a valid integer) to
+  # text rather than casting settingable_id (a Game-owned row's id is
+  # non-numeric, e.g. 'PTCG') to bigint — the untrusted column is never
+  # cast, so a query planner that evaluates the cast before the type filter
+  # can't blow up on a Game-owned row.
   def self.nearest_prior(season)
-    season_setting_ids = where(settingable_type: 'Season').select(Arel.sql('settingable_id::bigint'))
-    candidate_season = Season.where(id: season_setting_ids)
-                             .where(game_id: season.game_id, end_date: ...season.start_date)
+    candidate_season = Season.where(game_id: season.game_id, end_date: ...season.start_date)
+                             .where(
+                               'id::text IN (SELECT settingable_id FROM settings WHERE settingable_type = ?)',
+                               'Season'
+                             )
                              .order('end_date DESC NULLS LAST')
                              .first
     candidate_season && find_by(settingable: candidate_season)
