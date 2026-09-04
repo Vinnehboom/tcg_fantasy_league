@@ -1,0 +1,33 @@
+<h2 class="mb-3"><%= @score_modifier.name %></h2>
+
+<div class="d-flex p-2 m-2 w-100 justify-content-end gap-3">
+  <% if policy(@score_modifier).edit? %>
+    <%= link_to edit_admin_score_modifier_path(@score_modifier), class: 'btn btn-success' do %>
+      <%= t(".edit") %>
+    <% end %>
+  <% end %>
+  <% if policy(@score_modifier).destroy? %>
+    <%= link_to admin_score_modifier_path(@score_modifier),
+                data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_destroy') },
+                class: 'btn btn-danger' do %>
+      <%= t(".destroy") %>
+    <% end %>
+  <% end %>
+</div>
+
+<table class="table table-dark table-bordered">
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.score_modifier.type') %></td>
+    <td><%= @score_modifier.model_name.human %></td>
+  </tr>
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.score_modifier.name') %></td>
+    <td><%= @score_modifier.name %></td>
+  </tr>
+  <tr>
+    <td class="fw-bold"><%= t('activerecord.attributes.score_modifier.value') %></td>
+    <td><%= @score_modifier.value %></td>
+  </tr>
+</table>
+
+<%= render partial: "attachments", locals: { player_season_modifiers: @player_season_modifiers } %>

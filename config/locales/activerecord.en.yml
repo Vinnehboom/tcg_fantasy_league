@@ -34,6 +34,12 @@ en:
       score_modifier:
         one: Score modifier
         other: Score modifiers
+      multiplier:
+        one: Multiplier
+        other: Multipliers
+      bonus:
+        one: Bonus
+        other: Bonuses
     attributes:
       user:
         email: Email
@@ -112,6 +118,7 @@ en:
       score_modifier:
         name: Name
         value: Value
+        type: Kind
     enums:
       external_request:
         kind:
@@ -153,6 +160,16 @@ en:
       destroy:
         success: Salary draft successfully deleted.
         failed: Salary draft failed to delete.
+    score_modifiers:
+      create:
+        success: Score modifier successfully created.
+        failed: Score modifier failed to save.
+      update:
+        success: Score modifier successfully updated.
+        failed: Score modifier failed to update.
+      destroy:
+        success: Score modifier successfully deleted.
+        failed: Score modifier failed to delete.
     tournaments:
       update:
         success: Results source id successfully updated.

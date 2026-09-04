@@ -1,0 +1,38 @@
+<% if policy(:score_modifier).new? %>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end">
+    <%= link_to new_admin_score_modifier_path, class: 'btn btn-success' do %>
+      <%= t(".add") %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @score_modifiers.any? %>
+  <table class="table table-dark table-striped rounded-2 overflow-hidden">
+    <thead>
+      <tr>
+        <th><%= t('activerecord.attributes.score_modifier.name') %></th>
+        <th><%= t('activerecord.attributes.score_modifier.type') %></th>
+        <th><%= t('activerecord.attributes.score_modifier.value') %></th>
+        <th><%= t('views.tables.actions') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @score_modifiers.each do |score_modifier| %>
+        <tr>
+          <td><%= link_to score_modifier.name, admin_score_modifier_path(score_modifier) %></td>
+          <td><%= score_modifier.model_name.human %></td>
+          <td><%= score_modifier.value %></td>
+          <td>
+            <%= link_to(admin_score_modifier_path(score_modifier), class: 'text-light text-opacity-75') do %>
+              <%= bootstrap_icon("eye") %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @score_modifiers %>
+<% else %>
+  <p><%= t('.no_score_modifiers') %></p>
+<% end %>

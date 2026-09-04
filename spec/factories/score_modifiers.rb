@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :score_modifier do
-    sequence(:name) { |n| "Modifier #{n}" }
+    name { ScoreModifier.names.values.first }
     value { 1 }
 
     factory :multiplier, class: 'Multiplier' do
@@ -16,7 +16,7 @@ FactoryBot.define do
     # itself. Use this trait when a spec needs a persisted modifier but
     # doesn't care which concrete subtype it gets.
     trait :any_subtype do
-      initialize_with { [Multiplier, Bonus].sample.new(name:, value:) }
+      initialize_with { ScoreModifier.subclasses.sample.new(name:, value:) }
     end
   end
 end
