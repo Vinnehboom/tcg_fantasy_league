@@ -67,12 +67,18 @@ Demo::DraftSeeder.call
 
 ### Demo accounts
 
-The seed data creates two accounts:
+The seed data creates these accounts:
 
-| Username | Password    | Role  |
-|----------|-------------|-------|
-| `demo`   | `demopass`  | User  |
-| `admin`  | `adminpass` | Admin |
+| Username             | Password         | Role  |
+|----------------------|------------------|-------|
+| `demo`               | `demopass`       | User  |
+| `admin`              | `adminpass`      | Admin |
+| `demo_player_1`..`4` | `demoplayerpass` | User  |
+
+Sign in as `demo` to see a populated participations page: a completed,
+scored roster on a past tournament's draft, and a submitted roster on an
+upcoming one. `demo_player_1` through `demo_player_4` fill out the rest of
+the leaderboard.
 
 ### Where the data is safe to use
 
