@@ -11,18 +11,17 @@ module Demo
   # ago". Everything else — the tournaments' Result rows, and every score's
   # own validations — still goes through the app's own code, same as
   # Demo::Seeder.
-  class History
+  class History < ApplicationService
+
+    include ProductionGuard
 
     CHECKPOINT_DAYS_AGO = [120, 75, 45, 15].freeze
     PAST_TOURNAMENT_DAYS_AGO = [90, 60, 30].freeze
     PAST_TOURNAMENT_COUNTRIES = %w[US GB JP DE FR].freeze
     HISTORY_HORIZON_DAYS = 150.0
 
-    def self.call
-      new.call
-    end
-
     def call
+      raise_outside_the_sandbox!
       Demo::Games::ALL.each { |entry| seed_history(entry) }
     end
 

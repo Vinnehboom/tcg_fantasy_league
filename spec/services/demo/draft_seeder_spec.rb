@@ -15,6 +15,17 @@ RSpec.describe Demo::DraftSeeder do
   end
 
   describe '.call' do
+    context 'when Rails.env is production' do
+      before { allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production')) }
+
+      it 'raises instead of seeding anything' do
+        users_before = User.count
+
+        expect { described_class.call }.to raise_error(RuntimeError, /must never run/)
+        expect(User.count).to eq(users_before)
+      end
+    end
+
     it 'creates the demo user' do
       described_class.call
 

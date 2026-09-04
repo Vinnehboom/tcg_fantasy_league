@@ -4,11 +4,26 @@ RSpec.describe Demo::History do
   before { Demo::Seeder.call }
 
   describe '.call' do
+    context 'when Rails.env is production' do
+      before { allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production')) }
+
+      it 'raises instead of writing any historical row' do
+        scores_before = ExternalScore.count
+        tournaments_before = Tournament.count
+
+        expect { described_class.call }.to raise_error(RuntimeError, /must never run/)
+        expect(ExternalScore.count).to eq(scores_before)
+        expect(Tournament.count).to eq(tournaments_before)
+      end
+    end
+
     it 'creates five score rows per player, each with a distinct created_at' do
       described_class.call
 
       Demo::Games::ALL.each do |entry|
         game = Game.find(entry.id)
+        expect(game.players.count).to be_positive
+
         game.players.find_each do |player|
           created_ats = player.external_scores.pluck(:created_at)
 
@@ -34,6 +49,8 @@ RSpec.describe Demo::History do
       Demo::Games::ALL.each do |entry|
         game = Game.find(entry.id)
         past_tournaments = game.tournaments.where('external_id LIKE ?', '/tournaments/past-%')
+        expect(past_tournaments.count).to be_positive
+        expect(game.players.count).to be_positive
 
         past_tournaments.each do |tournament|
           game.players.find_each do |player|

@@ -9,16 +9,14 @@ module Demo
   #
   # No results and no past tournaments here — see Demo::History for the
   # historical slice, and Demo::DraftSeeder for the app-domain half.
-  class Seeder
+  class Seeder < ApplicationService
+
+    include ProductionGuard
 
     # Shared across every demo composition root that needs one (this class,
     # Demo::History, Demo::DraftSeeder), so the players and results imports
     # for one game always draw from the same pool — see Decisions D8.
     SEED = 947_628
-
-    def self.call
-      new.call
-    end
 
     def call
       raise_outside_the_sandbox!
@@ -26,18 +24,6 @@ module Demo
     end
 
     private
-
-    # The synthetic adapter already refuses to run in production on its own,
-    # but this checks independently — see Demo::Reset for the same idea
-    # applied to the destructive reset path.
-    def raise_outside_the_sandbox!
-      return unless Rails.env.production?
-
-      raise ExternalData::Exception.new(
-        'Demo seeder invalid in production',
-        "#{self.class.name} must never run against the production database"
-      )
-    end
 
     def seed_game(entry)
       game = ensure_game(entry)
