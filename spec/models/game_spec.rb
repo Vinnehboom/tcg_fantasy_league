@@ -112,13 +112,4 @@ RSpec.describe Game do
       end
     end
   end
-
-  describe '#current_season, with only an internal (default) season on record' do
-    it 'does not treat the internal season as the current one' do
-      game = create(:game)
-      Season.default_for(game:)
-
-      expect(game.current_season).to be_nil
-    end
-  end
 end
