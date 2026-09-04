@@ -13,7 +13,16 @@ module ExternalData
              ExternalData::JsonApiClient::RateLimitError,
              wait: :polynomially_longer, attempts: ExternalData::RetryPolicy.new.max_attempts
 
-    def perform
+    # An injected +adapter+ is a plain object, not an ActiveRecord-backed
+    # GlobalID, so it cannot survive ActiveJob's argument serialization —
+    # this form only works with #perform_now. Demo::Seeder and Demo::History
+    # call it that way, injecting a synthetic adapter directly. Anything
+    # queued with #perform_later (the admin-triggered imports, the cron
+    # schedule) must pass game_id: only and let #adapter resolve the game's
+    # own registered adapter.
+    def perform(game_id:, adapter: nil)
+      @game_id = game_id
+      @adapter = adapter
       run_import
     end
 
@@ -38,25 +47,16 @@ module ExternalData
     end
 
     def game
-      raise '#game not implemented'
+      @game ||= ::Game.find(@game_id)
+    rescue ActiveRecord::RecordNotFound
+      raise "#{self.class.name}: no Game row with id '#{@game_id}' — seed it before running this job."
     end
 
-    # The composition root: config/application.rb's default always calls the
-    # block below (the live adapter), lazily, so it's never constructed
-    # unless actually used. An environment file (development's, currently)
-    # can swap in a different builder that ignores the block entirely — see
-    # H-9. Memoized, since #fetch can call #adapter again after #run_import
-    # already built one.
+    # #perform pre-sets @adapter when the caller injected one; otherwise
+    # this falls back to the game's own registered adapter. The ||= is the
+    # whole mechanism — there is no branch here that chooses between them.
     def adapter
-      @adapter ||= adapter_builder.call(game:) { live_adapter }
-    end
-
-    def adapter_builder
-      Rails.application.config.x.external_data.adapter_builder
-    end
-
-    def live_adapter
-      raise '#live_adapter not implemented'
+      @adapter ||= game.adapter
     end
 
     def kind

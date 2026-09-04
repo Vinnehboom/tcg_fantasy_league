@@ -37,13 +37,13 @@ module Admin
             it 'enqueues the players import job' do
               expect do
                 post admin_api_external_imports_path, params: { game_id: 'PTCG', kind: 'players' }
-              end.to have_enqueued_job(ExternalData::Ptcg::ImportPlayersJob)
+              end.to have_enqueued_job(ExternalData::ImportPlayersJob).with(game_id: 'PTCG')
             end
 
             it 'enqueues the tournaments import job' do
               expect do
                 post admin_api_external_imports_path, params: { game_id: 'PTCG', kind: 'tournaments' }
-              end.to have_enqueued_job(ExternalData::Ptcg::ImportTournamentsJob)
+              end.to have_enqueued_job(ExternalData::ImportTournamentsJob).with(game_id: 'PTCG')
             end
 
             it 'returns 200' do

@@ -33,7 +33,7 @@ module Demo
 
       backdate_scores(game:, entry:)
       tournaments = create_past_tournaments(game:, entry:)
-      import_results(tournaments:, entry:)
+      import_results(game:, tournaments:, entry:)
     end
 
     def already_seeded?(game)
@@ -88,11 +88,16 @@ module Demo
       "/tournaments/past-#{position}"
     end
 
-    def import_results(tournaments:, entry:)
+    # The generic ImportResultsJob (ExternalData::ImportJob) takes an
+    # injected adapter directly (perform_now only — see its own docs). This
+    # adapter must use the same seed and shape Demo::Seeder used for this
+    # game, or the player pools diverge and
+    # ExternalData::Result#resolved_player silently creates scoreless
+    # players.
+    def import_results(game:, tournaments:, entry:)
+      adapter = ExternalData::Synthetic::Adapter.new(game:, seed: Demo::Seeder::SEED, shape: entry.shape)
       tournaments.each do |tournament|
-        ExternalData::Synthetic::ImportResultsJob.perform_now(
-          tournament_id: tournament.id, seed: Demo::Seeder::SEED, shape: entry.shape
-        )
+        ExternalData::ImportResultsJob.perform_now(tournament_id: tournament.id, adapter:)
       end
     end
 

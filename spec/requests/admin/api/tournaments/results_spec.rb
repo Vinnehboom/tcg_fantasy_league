@@ -39,7 +39,7 @@ module Admin
               it 'enqueues the results import job with the tournament id' do
                 expect do
                   patch admin_api_tournament_results_path(tournament)
-                end.to have_enqueued_job(ExternalData::Ptcg::ImportResultsJob).with(tournament_id: tournament.id)
+                end.to have_enqueued_job(ExternalData::ImportResultsJob).with(tournament_id: tournament.id)
               end
 
               it 'returns 200' do

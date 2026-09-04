@@ -80,8 +80,8 @@ Rails.application.configure do
 
   # No live HTTP call from local development (H-9): every ExternalData
   # import uses the synthetic adapter instead of the real one. The real
-  # adapter (the block ImportJob#adapter passes in) is therefore never
-  # invoked here, so it is never constructed either.
+  # adapter (the block Game#adapter passes in — see GameRegistry) is
+  # therefore never invoked here, so it is never constructed either.
   #
   # The real behavior lives in ExternalData::Synthetic::AdapterBuilder, a
   # plain, directly testable class (app/services/external_data/synthetic) —
