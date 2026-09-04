@@ -105,10 +105,12 @@ module ExternalData
         expect { perform_import.call }.not_to change(::Player, :count)
       end
 
-      it "sets the tournament's field_size from the adapter" do
+      it "sets the tournament's field_size from the adapter, not the processed-results count" do
+        expected_field_size = adapter.field_size(tournament:)
+
         perform_import.call
 
-        expect(tournament.reload.field_size).to be_positive
+        expect(tournament.reload.field_size).to eq(expected_field_size)
       end
     end
   end

@@ -12,7 +12,7 @@ RSpec.describe 'external_data:ptcg rake tasks', type: :task do
   describe 'update_players' do
     describe 'when a PTCG game row exists' do
       before do
-        game = create(:game, id: 'PTCG')
+        game = create(:game, :ptcg)
         create(:season, game:, start_date: 1.month.ago.to_date, end_date: 1.month.from_now.to_date)
       end
 
@@ -36,7 +36,7 @@ RSpec.describe 'external_data:ptcg rake tasks', type: :task do
 
   describe 'update_tournaments' do
     describe 'when a PTCG game row exists' do
-      before { create(:game, id: 'PTCG') }
+      before { create(:game, :ptcg) }
 
       it 'imports the scraped upcoming tournaments' do
         tournament = ExternalData::Tournament.new(attributes: { name: 'WC 2024', country: 'US',

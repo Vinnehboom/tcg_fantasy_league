@@ -12,10 +12,10 @@ RSpec.describe 'ExternalData adapter and verifier selection' do
   describe 'the configured adapter_builder' do
     subject(:adapter_builder) { Rails.application.config.x.external_data.adapter_builder }
 
-    it 'keeps test on the real adapter classes: it yields the live-adapter block' do
-      live = instance_double(ExternalData::Pokemon::Tcg::Adapter)
+    it 'keeps test on the real adapter classes: it yields the registered-adapter block' do
+      registered = instance_double(ExternalData::Pokemon::Tcg::Adapter)
 
-      expect(adapter_builder.call(game:) { live }).to equal(live)
+      expect(adapter_builder.call(game:) { registered }).to equal(registered)
     end
   end
 
