@@ -73,8 +73,12 @@ RSpec.describe GameRegistry do
       context 'when the row has an unregistered id' do
         let(:record) { record_class.create!(id: 'OTHER', name: 'Other', base_uri: 'https://example.com') }
 
-        it 'returns nil' do
-          expect(adapter).to be_nil
+        it 'returns a null object instead of nil' do
+          expect(adapter).to be_a(ExternalData::OfflineAdapter)
+        end
+
+        it 'raises a named error instead of a bare NoMethodError when actually used' do
+          expect { adapter.players }.to raise_error(ExternalData::Exception, /invalid adapter/)
         end
       end
     end
