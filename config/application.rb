@@ -23,7 +23,7 @@ module TcgFantasyDraft
     # config/environments/development.rb). The block a caller passes in (the
     # real collaborator) is evaluated lazily, so a builder that never calls
     # it never constructs the real thing.
-    config.x.external_data.adapter_builder = ->(**, &live_adapter) { live_adapter.call }
+    config.x.external_data.adapter_builder = ->(**, &registered_adapter) { registered_adapter.call }
     config.x.external_data.verifier_builder = ->(**, &registered_verifier) { registered_verifier.call }
 
     # Configuration for the application, engines, and railties goes here.

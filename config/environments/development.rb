@@ -91,8 +91,8 @@ Rails.application.configure do
   # only when actually called: this file loads before the autoloader is set
   # up, so a bare top-level ExternalData::Synthetic::AdapterBuilder.new here
   # would raise NameError on every boot, in every environment.
-  config.x.external_data.adapter_builder = lambda do |game:, &live_adapter|
-    ExternalData::Synthetic::AdapterBuilder.new.call(game:, &live_adapter)
+  config.x.external_data.adapter_builder = lambda do |game:, &registered_adapter|
+    ExternalData::Synthetic::AdapterBuilder.new.call(game:, &registered_adapter)
   end
 
   # Same idea for the admin "verify tournament id" flow, via

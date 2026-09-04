@@ -70,15 +70,21 @@ module ExternalData
         expect { perform_import.call }.to change(::Player, :count).by(5)
       end
 
-      it 'never reads the configured adapter_builder, since the adapter is already injected' do
-        previous_builder = Rails.application.config.x.external_data.adapter_builder
-        Rails.application.config.x.external_data.adapter_builder = lambda do |**|
-          raise 'an injected adapter must never fall back to the configured builder'
+      context 'when the configured adapter_builder would raise if called' do
+        before do
+          @previous_adapter_builder = Rails.application.config.x.external_data.adapter_builder
+          Rails.application.config.x.external_data.adapter_builder = lambda do |**|
+            raise 'an injected adapter must never fall back to the configured builder'
+          end
         end
 
-        expect { perform_import.call }.not_to raise_error
-      ensure
-        Rails.application.config.x.external_data.adapter_builder = previous_builder
+        after do
+          Rails.application.config.x.external_data.adapter_builder = @previous_adapter_builder
+        end
+
+        it 'never reads it, since the adapter is already injected' do
+          expect { perform_import.call }.not_to raise_error
+        end
       end
     end
   end
