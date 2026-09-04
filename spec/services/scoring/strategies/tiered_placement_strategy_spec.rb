@@ -124,7 +124,7 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
     end
   end
 
-  describe 'monotonicity in field_size (the ticket done-criterion, as a general property)' do
+  describe 'monotonicity in field_size for the default config (the ticket done-criterion)' do
     # A wide spread crossing every size-class boundary (499/500,
     # 1499/1500, 2999/3000) and a range of placements from 1st to deep
     # in a large field — not just the one field_size the worked example
@@ -172,6 +172,10 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
       it 'falls back to the code default base_points' do
         expect(strategy_for.base_score(placement: 1, field_size: 3000)).to eq(100)
       end
+
+      it 'reports it is using default config' do
+        expect(strategy_for.using_default_config?).to be(true)
+      end
     end
 
     context "when only the season's game has a default Setting" do
@@ -183,6 +187,10 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
       it "uses the game's default values" do
         expect(strategy_for.base_score(placement: 2, field_size: 3000)).to eq(100) # 200 * 0.5**1
       end
+
+      it 'reports it is using default config' do
+        expect(strategy_for.using_default_config?).to be(true)
+      end
     end
 
     context 'when the season has its own Setting row' do
@@ -192,6 +200,10 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
 
       it "uses the season's own values" do
         expect(strategy_for.base_score(placement: 2, field_size: 3000)).to eq(100) # 200 * 0.5**1
+      end
+
+      it 'reports it is not using default config' do
+        expect(strategy_for.using_default_config?).to be(false)
       end
     end
 
@@ -261,6 +273,19 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
         result = result_fixture.new(1, tournament_fixture.new(field_size))
 
         expect(strategy_for.points_for(result:)).to eq(100) # base_score 100 * multiplier clamped to 1, not -5
+      end
+    end
+
+    context "when the settings payload's size_classes isn't an array" do
+      before do
+        create(:setting, season:, settings: { 'scoring' => { 'size_classes' => { 'not' => 'an array' } } })
+      end
+
+      it 'falls back to the code default size classes instead of raising' do
+        field_size = 3000
+        result = result_fixture.new(1, tournament_fixture.new(field_size))
+
+        expect(strategy_for.points_for(result:)).to eq(800) # base_score 100 * DEFAULT_SIZE_CLASSES' XL multiplier 8
       end
     end
 

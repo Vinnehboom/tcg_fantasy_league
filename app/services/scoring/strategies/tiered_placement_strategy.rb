@@ -4,23 +4,28 @@ module Scoring
 
     # Contract every Scoring::*Strategy implements: `.for(season:)` resolves
     # a configured instance for a season, `#points_for(result:)` turns a
-    # placement Result into points.
+    # placement Result into points, and `#using_default_config?` reports
+    # whether the season supplied its own tuning.
     #
     # A tier from the placement (bracketed to powers of 2), decayed
     # geometrically by tier depth and capped by the tournament's size class —
     # max_tier depends on the size class, not the raw field_size, so points
-    # never decrease as field_size grows for a fixed placement (see the
-    # monotonicity spec). PORO per the style guide's carve-out for a
-    # long-lived, queried-many-times calculator.
+    # never decrease as field_size grows for a fixed placement under the
+    # shipped DEFAULT_SIZE_CLASSES band gaps (see the monotonicity spec); an
+    # arbitrary custom config isn't guaranteed to preserve this. `#base_score`
+    # is public too, but it's this class's own tier/decay mechanics, not part
+    # of the shared Strategy contract above — a different Strategy need not
+    # have one.
     class TieredPlacementStrategy
 
       DEFAULT_BASE_POINTS = 100
       DEFAULT_DECAY = 0.65
 
       # Bands, not a fixed enum, so a new one can be inserted without editing
-      # existing ones. Each max_tier_field_size sits one bracket level below
-      # the band above it — that gap is what keeps points from decreasing as
-      # field_size grows.
+      # existing ones. Each max_tier_field_size is chosen so max_tier lands
+      # exactly one bracket level below the class above it
+      # (256/512/1024/2048) — that one-level gap is what keeps points from
+      # decreasing as field_size grows.
       DEFAULT_SIZE_CLASSES = [
         { minimum_field_size: 0, multiplier: 1, max_tier_field_size: 499 },     # S
         { minimum_field_size: 500, multiplier: 2, max_tier_field_size: 999 },   # M
@@ -31,13 +36,14 @@ module Scoring
       def self.for(season:)
         raise MissingSeasonError if season.nil?
 
-        default_config = config_for(season.game.default_setting)
-        config = default_config.merge(config_for(Setting.for(season:)))
+        own_config = config_for(Setting.for(season:))
+        config = config_for(season.game.default_setting).merge(own_config)
 
         new(
           base_points: config.fetch('base_points', DEFAULT_BASE_POINTS),
           decay: config.fetch('decay', DEFAULT_DECAY),
-          size_classes: config.fetch('size_classes', DEFAULT_SIZE_CLASSES)
+          size_classes: config.fetch('size_classes', DEFAULT_SIZE_CLASSES),
+          using_default_config: own_config.blank?
         )
       end
 
@@ -64,11 +70,15 @@ module Scoring
 
       # Drops only the bands that fail to parse; returns nil (not the
       # default list) when nothing survives, so #config_for's `.compact`
-      # omits the key entirely instead of keeping an empty list.
+      # omits the key entirely instead of keeping an empty list. Also nil
+      # for a non-Array value (e.g. a Hash or String in the settings JSON),
+      # rather than raising deeper in Array-shaped per-band logic.
       def self.coerce_size_classes(value)
-        return nil if value.blank?
+        return nil unless value.is_a?(Array)
 
         value.filter_map do |band|
+          next unless band.is_a?(Hash)
+
           minimum_field_size = coerce_integer(band['minimum_field_size'], range: 0..)
           multiplier = coerce_integer(band['multiplier'], range: 1..)
           max_tier_field_size = coerce_integer(band['max_tier_field_size'], range: 1..)
@@ -79,10 +89,16 @@ module Scoring
       end
       private_class_method :config_for, :coerce_integer, :coerce_float, :coerce_size_classes
 
-      def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY, size_classes: DEFAULT_SIZE_CLASSES)
+      def initialize(base_points: DEFAULT_BASE_POINTS, decay: DEFAULT_DECAY, size_classes: DEFAULT_SIZE_CLASSES,
+                     using_default_config: true)
         @base_points = base_points
         @decay = decay
         @size_classes = size_classes
+        @using_default_config = using_default_config
+      end
+
+      def using_default_config?
+        using_default_config
       end
 
       def base_score(placement:, field_size:)
@@ -102,7 +118,7 @@ module Scoring
 
       private
 
-      attr_reader :base_points, :decay, :size_classes
+      attr_reader :base_points, :decay, :size_classes, :using_default_config
 
       def multiplier(field_size)
         band_for(field_size).fetch(:multiplier)
@@ -115,7 +131,8 @@ module Scoring
       end
 
       # tier is always an exact power of 2, so its bit length gives the
-      # exponent directly — exact, unlike float log2 right at a power of 2.
+      # exponent directly (see #smallest_power_of_two_at_least for why bit
+      # length over float log2).
       def level(tier)
         tier.bit_length - 1
       end
