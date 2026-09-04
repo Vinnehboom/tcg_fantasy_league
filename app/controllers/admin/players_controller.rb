@@ -10,7 +10,11 @@ module Admin
 
     def show
       @player = Player.find(params[:id])
-      @player_seasons = @player.player_seasons.includes(:season, player_season_modifiers: :score_modifier)
+      @player_seasons = @player.player_seasons
+                               .includes(season: :game, player_season_modifiers: :score_modifier)
+                               .references(:season)
+                               .order('seasons.start_date')
+      @kept_score_modifiers = ScoreModifier.kept.order(:name).to_a
     end
 
     private

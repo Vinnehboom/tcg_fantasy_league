@@ -15,10 +15,7 @@ RSpec.describe 'Admin players' do
       select 'hot streak', from: "player_season_modifier_score_modifier_id_#{player_season.id}"
       click_button I18n.t('admin.players.show.attach')
 
-      # The attach action is headless (no redirect) - see it took effect by
-      # loading the page again, not by expecting it to update on its own.
-      visit admin_player_path(player)
-
+      expect(page).to have_content('Score modifier successfully attached.')
       expect(page).to have_css('td', exact_text: 'hot streak')
     end
 
@@ -33,9 +30,7 @@ RSpec.describe 'Admin players' do
 
       click_link I18n.t('admin.players.show.detach')
 
-      # Headless again - reload to see the result.
-      visit admin_player_path(player)
-
+      expect(page).to have_content('Score modifier successfully detached.')
       expect(page).to have_content('No score modifier attached yet.')
     end
   end

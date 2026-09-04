@@ -34,7 +34,9 @@ RSpec.describe PlayerSeason do
     end
 
     it "includes a modifier this player_season doesn't have yet" do
-      expect(available_score_modifiers).to include(unattached)
+      unattached_score_modifier = unattached
+
+      expect(available_score_modifiers).to include(unattached_score_modifier)
     end
 
     context 'when a modifier has since been discarded' do

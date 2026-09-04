@@ -68,6 +68,7 @@ en:
       show:
         modifier: Modifier
         no_modifiers: No score modifier attached yet.
+        no_modifiers_available: This season already has every score modifier there is.
         attach: Attach
         detach: Detach
         confirm_detach: Are you sure you want to take this modifier away from the player?
