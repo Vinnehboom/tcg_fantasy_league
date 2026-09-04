@@ -1,18 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
+// attach() has no caller on this branch - the score modifier's own page only
+// detaches. The stacked player-page PR adds the attach form that uses it.
 export default class extends Controller {
-  static values = { url: String, playerSeasonId: String, confirm: String, genericError: String }
-  static targets = ["scoreModifierSelect", "error"]
+  static values = { url: String, confirm: String, genericError: String }
+  static targets = ["error"]
 
   attach(event) {
     event.preventDefault()
 
-    this.submit(this.urlValue, "POST", {
-      player_season_modifier: {
-        player_season_id: this.playerSeasonIdValue,
-        score_modifier_id: this.scoreModifierSelectTarget.value
-      }
-    })
+    this.submit(this.urlValue, "POST", new FormData(this.element))
   }
 
   detach(event) {
@@ -30,13 +27,12 @@ export default class extends Controller {
     const options = {
       method,
       headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
         "X-CSRF-Token": csrfToken
       }
     }
     if (body) {
-      options.body = JSON.stringify(body)
+      options.body = body
     }
 
     this.hideError()

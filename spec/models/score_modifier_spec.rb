@@ -88,4 +88,14 @@ RSpec.describe ScoreModifier do
       expect(described_class.find_by(id: score_modifier.id)).to eq(score_modifier)
     end
   end
+
+  describe 'the name enum values' do
+    it 'has a locale translation for every value, so none ships displayed untranslated' do
+      untranslated = described_class.names.values.reject do |name|
+        I18n.exists?(name, scope: %i[activerecord enums score_modifier name])
+      end
+
+      expect(untranslated).to be_empty
+    end
+  end
 end

@@ -11,7 +11,7 @@ module Admin
         authorize player_season_modifier
 
         if player_season_modifier.save
-          render json: { id: player_season_modifier.id, notice: t('.success') }, status: :ok
+          render json: { id: player_season_modifier.id }, status: :ok
         else
           render json: { error: t('.failed') }, status: :unprocessable_entity
         end
@@ -20,12 +20,11 @@ module Admin
       def destroy
         # Not .kept: an attachment to an already-discarded modifier must
         # stay detachable - discard doesn't cascade-destroy it.
-        score_modifier = ScoreModifier.find(params[:score_modifier_id])
-        player_season_modifier = score_modifier.player_season_modifiers.find(params[:id])
+        player_season_modifier = PlayerSeasonModifier.find(params[:id])
         authorize player_season_modifier
 
         if player_season_modifier.destroy
-          render json: { id: player_season_modifier.id, notice: t('.success') }, status: :ok
+          render json: { id: player_season_modifier.id }, status: :ok
         else
           render json: { error: t('.failed') }, status: :unprocessable_entity
         end
