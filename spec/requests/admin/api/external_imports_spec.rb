@@ -33,7 +33,7 @@ module Admin
             sign_in admin
           end
 
-          context 'with a recognized (game_id, kind) combination' do
+          context 'with a recognized kind' do
             it 'enqueues the players import job' do
               expect do
                 post admin_api_external_imports_path, params: { game_id: 'PTCG', kind: 'players' }
@@ -50,9 +50,17 @@ module Admin
               post admin_api_external_imports_path, params: { game_id: 'PTCG', kind: 'players' }
               expect(response).to have_http_status(:ok)
             end
+
+            it 'is not limited to PTCG, since the job is no longer game-specific' do
+              other_game = create(:game)
+
+              expect do
+                post admin_api_external_imports_path, params: { game_id: other_game.id, kind: 'players' }
+              end.to have_enqueued_job(ExternalData::ImportPlayersJob).with(game_id: other_game.id)
+            end
           end
 
-          context 'with an unrecognized (game_id, kind) combination' do
+          context 'with an unrecognized kind' do
             it 'returns 422' do
               post admin_api_external_imports_path, params: { game_id: 'PTCG', kind: 'results' }
               expect(response).to have_http_status(:unprocessable_content)
