@@ -177,6 +177,7 @@ en:
       destroy:
         success: Score modifier successfully deleted.
         failed: Score modifier failed to delete.
+    api:
       player_season_modifiers:
         create:
           success: Score modifier successfully attached.
