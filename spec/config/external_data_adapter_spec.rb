@@ -1,11 +1,8 @@
 require 'rails_helper'
 
-# Pins the ExternalData adapter- and verifier-selection config for the
-# running (test) environment (H-9). development's own builders are real,
-# directly testable classes instead — see
-# spec/services/external_data/synthetic/adapter_builder_spec.rb and
-# verifier_builder_spec.rb — since development itself cannot be booted in
-# this sandbox (no development.key).
+# Pins the config for the test environment; development cannot be booted
+# in this sandbox (no development.key), so its builders (see
+# adapter_builder_spec.rb, verifier_builder_spec.rb) are tested directly.
 RSpec.describe 'ExternalData adapter and verifier selection' do
   let(:game) { create(:game) }
 

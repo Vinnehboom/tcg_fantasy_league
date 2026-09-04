@@ -1,16 +1,5 @@
 module Demo
 
-  # The demo's historical slice (H-9): backdated score checkpoints and a
-  # handful of past, completed tournaments, so a finished draft and the
-  # leaderboard have something real to show. Create-once, keyed on the past
-  # tournaments' fixed external ids — see Demo::Seeder's own docs for why
-  # this half is not additive like it is.
-  #
-  # Only the historical ExternalScore rows' time axis is hand-written: there
-  # is no external source for "what this player's rating was three months
-  # ago". Everything else — the tournaments' Result rows, and every score's
-  # own validations — still goes through the app's own code, same as
-  # Demo::Seeder.
   class History < ApplicationService
 
     include ProductionGuard
@@ -67,9 +56,8 @@ module Demo
       end
     end
 
-    # entry.past_tournament_count of 3 gives [90, 60, 30] — the most recent
-    # tournament always PAST_TOURNAMENT_INTERVAL_DAYS days ago, spaced apart
-    # by that same interval.
+    # A count of 3 gives [90, 60, 30]: most recent tournament always
+    # PAST_TOURNAMENT_INTERVAL_DAYS days ago.
     def past_tournament_days_ago(count)
       count.downto(1).map { |position| position * PAST_TOURNAMENT_INTERVAL_DAYS }
     end
@@ -88,12 +76,9 @@ module Demo
       "/tournaments/past-#{position}"
     end
 
-    # The generic ImportResultsJob (ExternalData::ImportJob) takes an
-    # injected adapter directly (perform_now only — see its own docs). This
-    # adapter must use the same seed and shape Demo::Seeder used for this
-    # game, or the player pools diverge and
-    # ExternalData::Result#resolved_player silently creates scoreless
-    # players.
+    # Must reuse the same seed and shape Demo::Seeder used for this game, or
+    # the player pools diverge and ExternalData::Result#resolved_player
+    # silently creates scoreless players.
     def import_results(game:, tournaments:, entry:)
       adapter = ExternalData::Synthetic::Adapter.new(game:, seed: Demo::Seeder::SEED, shape: entry.shape)
       tournaments.each do |tournament|

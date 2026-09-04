@@ -1,12 +1,6 @@
-# Per-game composition root for +Game+. Each known game — PTCG today, more
-# later — registers itself once: its id, a +Game.<name>+ finder scope, and
-# whatever per-game collaborators it needs (currently its adapter, its
-# results verifier, and its results-import job class). Callers ask a +Game+
-# instance for its own collaborator — `tournament.game.adapter`,
-# `tournament.game.results_verifier`, `tournament.game.results_import_job`
-# — instead of switching on its id, so onboarding a new game means one
-# +register+ call here, not a new branch in a shared conditional elsewhere
-# in the app.
+# Per-game composition root for +Game+: registers each game's id, its
+# +Game.<name>+ finder scope, and its adapter/results_verifier/
+# results_import_job collaborators.
 module GameRegistry
 
   extend ActiveSupport::Concern
@@ -22,25 +16,12 @@ module GameRegistry
     end
   end
 
-  # Wrapped the same way as #results_verifier below (H-9 round 2): a
-  # configured adapter_builder lambda receives the registered adapter as a
-  # lazy block, so an environment can swap in a different one — currently
-  # only development does (AdapterBuilder ignores the block entirely and
-  # returns a synthetic adapter for every game, registered or not). Outside
-  # that swap, a game with no registered adapter (Riftbound today) gets
-  # OfflineAdapter, not nil — #registered_adapter isolates that special
-  # case at this one boundary, so nothing downstream (ImportJob, Interface)
-  # needs its own nil check.
+  # In development, adapter_builder ignores this block and returns a
+  # synthetic adapter for every game — see AdapterBuilder.
   def adapter
     adapter_builder.call(game: self) { registered_adapter }
   end
 
-  # A configured verifier_builder lambda receives the registered verifier as
-  # a lazy block, so an environment can swap in a different one — currently
-  # only development does, to avoid a real HTTP call from the admin
-  # "verify tournament id" flow. results_import_job stays a direct reader:
-  # it names a job class, not an HTTP call, so there is nothing to stand in
-  # for.
   def results_verifier
     verifier_builder.call(game: self) { registered_verifier }
   end
@@ -55,9 +36,6 @@ module GameRegistry
     Rails.application.config.x.external_data.adapter_builder
   end
 
-  # A Null Object, not nil, for a game with nothing registered: a caller
-  # that actually tries to use it gets a named ExternalData::Exception
-  # instead of a bare NoMethodError.
   def registered_adapter
     self.class.registrations.dig(id, :adapter)&.call(game: self) || ExternalData::OfflineAdapter.new
   end

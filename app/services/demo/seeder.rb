@@ -1,23 +1,12 @@
 module Demo
 
-  # The demo's main entry point (H-9): a Game and an open-ended Season per
-  # Demo::Games entry, then the real players and upcoming-tournaments import
-  # against the synthetic adapter. Additive and idempotent — every lookup
-  # guards its own create, and the import jobs are themselves idempotent, so
-  # a second call adds no rows (it does refresh upcoming tournament dates,
-  # which is wanted: see Decisions D11).
-  #
-  # No results and no past tournaments here — see Demo::History for the
-  # historical slice, and Demo::DraftSeeder for the app-domain half.
+  # No results and no past tournaments here — see Demo::History.
   class Seeder < ApplicationService
 
     include ProductionGuard
 
-    # Shared across every demo composition root that needs one (this class,
-    # Demo::History, Demo::DraftSeeder), so the players and results imports
-    # for one game always draw from the same pool — see Decisions D8. Set to
-    # the adapter's own default seed, one source instead of two constants
-    # that mint the same /players/N namespace with different numbers.
+    # Shared with Demo::History, so the players and results imports for one
+    # game always draw from the same pool.
     SEED = ExternalData::Synthetic::Adapter::DEFAULT_SEED
 
     def call
@@ -45,11 +34,6 @@ module Demo
         ::Season.create!(game:, label: entry.season_label, start_date: 1.year.ago.to_date, end_date: nil)
     end
 
-    # The generic import jobs (ExternalData::ImportJob) take an injected
-    # adapter directly (perform_now only — see its own docs), instead of
-    # the seed/shape kwargs the old per-source synthetic jobs took. Built
-    # once per game and shared by both imports, so both draw from the same
-    # player pool.
     def synthetic_adapter(game:, entry:)
       ExternalData::Synthetic::Adapter.new(game:, seed: SEED, shape: entry.shape)
     end

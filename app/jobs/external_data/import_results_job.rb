@@ -1,9 +1,5 @@
 module ExternalData
 
-  # Results are scoped to one tournament rather than one game, so this job
-  # takes tournament_id: instead of game_id: and derives its game from the
-  # tournament — the same adapter-injection contract as the base class
-  # still applies (see ImportJob#perform).
   class ImportResultsJob < ExternalData::ImportJob
 
     def perform(tournament_id:, adapter: nil)

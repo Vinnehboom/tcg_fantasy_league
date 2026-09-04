@@ -2,12 +2,9 @@ module ExternalData
 
   module Synthetic
 
-    # A game-agnostic adapter that makes no HTTP request. It answers the same
-    # four methods as ExternalData::Pokemon::Tcg::Adapter, with plausible,
-    # seed-reproducible data instead of a real HTTP fetch — see H-9. Nothing here
-    # names a specific game: the caller injects the score shape (see Shape)
-    # and the seed. The default shape's curve is Demo::Curves::LADDER — the
-    # adapter itself does not care where a curve lambda comes from.
+    # A game-agnostic adapter that makes no HTTP request: plausible,
+    # seed-reproducible data instead. The caller injects the score shape
+    # (see Shape) and the seed.
     class Adapter
 
       DEFAULT_SEED = 924_601
@@ -50,9 +47,6 @@ module ExternalData
 
       attr_reader :seed, :score_range, :score_curve, :player_count, :tournament_count, :season
 
-      # A demo dataset written into the production database is not
-      # reversible, so this checks independently of every other guard in the
-      # ticket (the adapter-selection config, Demo::Seeder, Demo::Reset).
       def raise_outside_the_sandbox!
         return unless Rails.env.production?
 
