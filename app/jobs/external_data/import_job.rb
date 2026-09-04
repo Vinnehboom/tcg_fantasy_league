@@ -52,9 +52,6 @@ module ExternalData
       raise "#{self.class.name}: no Game row with id '#{@game_id}' — seed it before running this job."
     end
 
-    # #perform pre-sets @adapter when the caller injected one; otherwise
-    # this falls back to the game's own registered adapter. The ||= is the
-    # whole mechanism — there is no branch here that chooses between them.
     def adapter
       @adapter ||= game.adapter
     end

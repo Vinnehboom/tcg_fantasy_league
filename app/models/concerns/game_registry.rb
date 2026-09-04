@@ -25,10 +25,12 @@ module GameRegistry
   # Wrapped the same way as #results_verifier below (H-9 round 2): a
   # configured adapter_builder lambda receives the registered adapter as a
   # lazy block, so an environment can swap in a different one — currently
-  # only development does, to avoid a real HTTP call from every import job.
-  # A game with no registered adapter (Riftbound today) yields nil here,
-  # same as an unregistered results_verifier: honestly unavailable, not a
-  # branch anywhere that picks a stand-in for it.
+  # only development does (AdapterBuilder ignores the block entirely and
+  # returns a synthetic adapter for every game, registered or not). Outside
+  # that swap, a game with no registered adapter (Riftbound today) gets
+  # OfflineAdapter, not nil — #registered_adapter isolates that special
+  # case at this one boundary, so nothing downstream (ImportJob, Interface)
+  # needs its own nil check.
   def adapter
     adapter_builder.call(game: self) { registered_adapter }
   end
@@ -53,8 +55,11 @@ module GameRegistry
     Rails.application.config.x.external_data.adapter_builder
   end
 
+  # A Null Object, not nil, for a game with nothing registered: a caller
+  # that actually tries to use it gets a named ExternalData::Exception
+  # instead of a bare NoMethodError.
   def registered_adapter
-    self.class.registrations.dig(id, :adapter)&.call(game: self)
+    self.class.registrations.dig(id, :adapter)&.call(game: self) || ExternalData::OfflineAdapter.new
   end
 
   def verifier_builder
