@@ -1,22 +1,25 @@
 module Scoring
 
-  # Turns a Result's placement into points: a tier from the placement
-  # (bracketed to powers of 2), then geometric decay by tier depth, capped
-  # by the tournament's size class. PORO per the style guide's carve-out
-  # for a long-lived, queried-many-times calculator.
+  # Contract every Scoring::*Strategy implements: `.for(season:)` resolves
+  # a configured instance for a season, `#points_for(result:)` turns a
+  # placement Result into points, and `#using_default_config?` reports
+  # whether the season supplied its own tuning.
   #
-  # max_tier depends on the size class, not the raw field_size, so points
-  # never decrease as field_size grows for a fixed placement (see the
-  # monotonicity spec).
-  class Strategy
+  # TieredPlacementStrategy: a tier from the placement (bracketed to powers
+  # of 2), then geometric decay by tier depth, capped by the tournament's
+  # size class. max_tier depends on the size class, not the raw field_size,
+  # so points never decrease as field_size grows for a fixed placement (see
+  # the monotonicity spec). PORO per the style guide's carve-out for a
+  # long-lived, queried-many-times calculator.
+  class TieredPlacementStrategy
 
     DEFAULT_BASE_POINTS = 100
     DEFAULT_DECAY = 0.65
 
-    # Size-class bands, not a fixed enum, so a new band can be inserted
-    # without editing existing ones. max_tier_field_size values are chosen
-    # so points never decrease as field_size grows (see the monotonicity
-    # spec); XL is pinned to 3000 to match the ticket's worked example.
+    # Bands, not a fixed enum, so a new one can be inserted without editing
+    # existing ones. max_tier_field_size values keep points from decreasing
+    # as field_size grows; XL is pinned to 3000 to match the ticket's
+    # worked example.
     DEFAULT_SIZE_CLASSES = [
       { minimum_field_size: 0, multiplier: 1, max_tier_field_size: 499 },     # S
       { minimum_field_size: 500, multiplier: 2, max_tier_field_size: 999 },   # M
@@ -24,8 +27,8 @@ module Scoring
       { minimum_field_size: 3000, multiplier: 8, max_tier_field_size: 3000 } # XL
     ].freeze
 
-    # Resolves tunables from Setting: season's own row, then the game's
-    # default, then code constants — merged per-key, not whole-row.
+    # Tunables merge per-key, not whole-row: season's own Setting, then the
+    # game's default, then code constants.
     def self.for(season:)
       raise MissingSeasonError if season.nil?
 
@@ -55,9 +58,8 @@ module Scoring
     end
     private_class_method :coerce_float
 
-    # Coerces each band independently and drops any that don't parse,
-    # rather than discarding the whole list for one bad row. Falls back to
-    # the code default list only when nothing usable survives.
+    # Coerces each band independently, dropping only the ones that don't
+    # parse, rather than discarding the whole list for one bad row.
     def self.coerce_size_classes(value)
       return DEFAULT_SIZE_CLASSES if value.blank?
 
@@ -80,8 +82,6 @@ module Scoring
       @using_default_config = using_default_config
     end
 
-    # True when no season Setting supplied scoring config (values came from
-    # the game default or code constants instead).
     def using_default_config?
       @using_default_config
     end
@@ -95,8 +95,6 @@ module Scoring
 
     # Duck-typed: `result` need only respond to `placement` and
     # `tournament.field_size` (field_size lives on Tournament, not Result).
-    # Whole-number points: base_score is already a rounded Integer, and
-    # every multiplier is an Integer too.
     def points_for(result:)
       field_size = result.tournament.field_size
 
@@ -117,9 +115,8 @@ module Scoring
       smallest_power_of_two_at_least(placement.to_i.clamp(1..))
     end
 
-    # tier is always an exact power of 2 (it only ever comes from
-    # smallest_power_of_two_at_least below), so its bit length gives the
-    # exponent directly — exact, and avoids float log2's imprecision.
+    # tier is always an exact power of 2, so its bit length gives the
+    # exponent directly — exact, unlike float log2 right at a power of 2.
     def level(tier)
       tier.bit_length - 1
     end
