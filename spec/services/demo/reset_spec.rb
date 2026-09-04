@@ -6,7 +6,7 @@ RSpec.describe Demo::Reset do
       it 'raises instead of truncating anything' do
         create(:game)
 
-        expect { described_class.call(confirm: false) }.to raise_error(ExternalData::Exception, /confirmation/)
+        expect { described_class.call(confirm: false) }.to raise_error(RuntimeError, /confirmation/)
         expect(Game.count).to eq(1)
       end
     end
@@ -35,7 +35,18 @@ RSpec.describe Demo::Reset do
       it 'raises instead of truncating anything, even when confirmed' do
         create(:game)
 
-        expect { described_class.call(confirm: true) }.to raise_error(ExternalData::Exception, /only runs in/)
+        expect { described_class.call(confirm: true) }.to raise_error(RuntimeError, /only runs in/)
+        expect(Game.count).to eq(1)
+      end
+    end
+
+    context 'when the connected database is not the one expected for Rails.env, even though Rails.env is allowed' do
+      before { allow(ActiveRecord::Base.connection.pool.db_config).to receive(:database).and_return('unexpected') }
+
+      it 'raises instead of truncating anything, even when confirmed' do
+        create(:game)
+
+        expect { described_class.call(confirm: true) }.to raise_error(RuntimeError, /DATABASE_URL/)
         expect(Game.count).to eq(1)
       end
     end
