@@ -17,6 +17,15 @@ Rails.application.routes.draw do
     resources :external_requests, only: %i[index show]
     resources :games, only: %i[index show], constraints: { id: %r{[^/]+} }
     resources :tournaments, only: %i[index show update]
+    resources :score_modifiers do
+      resources :player_season_modifiers, only: %i[destroy],
+                                          controller: 'score_modifiers/player_season_modifiers'
+    end
+    # Attach lives on the player's own page, one form per player_season, where
+    # the score modifier is chosen from a select rather than known up front -
+    # so, unlike detach, it cannot be nested under a specific score_modifier's id.
+    resources :player_season_modifiers, only: %i[create],
+                                        controller: 'score_modifiers/player_season_modifiers'
 
     namespace :api do
       resources :external_imports, only: :create

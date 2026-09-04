@@ -43,6 +43,25 @@ en:
         confirm_complete: Are you sure you want to finish this draft? Make sure all results and players have been updated before doing so.
         add_participation: Participate
         view_participation: View participation
+    score_modifiers:
+      index:
+        add: New score modifier
+        no_score_modifiers: No score modifiers found yet.
+      new:
+        title: New score modifier
+      edit:
+        title: Edit score modifier
+      show:
+        edit: Edit
+        destroy: Remove
+        confirm_destroy: Are you sure you want to remove this score modifier?
+      attachments:
+        attachments: Players with this modifier
+        player: Player
+        season: Season
+        no_attachments: No player has this modifier yet.
+        detach: Detach
+        confirm_detach: Are you sure you want to take this modifier away from the player?
     tournaments:
       index:
         no_tournaments: No tournaments found yet.
