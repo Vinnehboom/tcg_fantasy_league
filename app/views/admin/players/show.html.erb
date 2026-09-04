@@ -1,0 +1,55 @@
+<h2 class="mb-3"><%= @player.name %></h2>
+
+<% @player_seasons.each do |player_season| %>
+  <div class="mb-4">
+    <h3><%= "#{player_season.season.game.name} #{player_season.season.label}" %></h3>
+
+    <% if player_season.player_season_modifiers.any? %>
+      <table class="table table-dark table-striped rounded-2 overflow-hidden">
+        <thead>
+          <tr>
+            <th><%= t('.modifier') %></th>
+            <th><%= t('views.tables.actions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% player_season.player_season_modifiers.each do |player_season_modifier| %>
+            <% score_modifier = player_season_modifier.score_modifier %>
+            <% next if score_modifier.nil? %>
+            <tr>
+              <td>
+                <%= score_modifier.name %>
+                <% if score_modifier.discarded? %>
+                  <span class="badge bg-secondary"><%= t('.discarded_modifier') %></span>
+                <% end %>
+              </td>
+              <td>
+                <%= link_to admin_score_modifier_player_season_modifier_path(
+                              score_modifier, player_season_modifier
+                            ),
+                            data: { 'turbo-method': :delete, 'turbo-confirm': t('.confirm_detach') },
+                            class: 'btn btn-sm btn-danger' do %>
+                  <%= t('.detach') %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p><%= t('.no_modifiers') %></p>
+    <% end %>
+
+    <%= form_with url: admin_player_season_modifiers_path, method: :post, scope: :player_season_modifier,
+                  class: 'd-flex gap-2 align-items-center' do |f| %>
+      <%= f.hidden_field :player_season_id, value: player_season.id,
+                          id: "player_season_modifier_player_season_id_#{player_season.id}" %>
+      <%= f.select :score_modifier_id,
+                   player_season.available_score_modifiers.map { |score_modifier| [score_modifier.name, score_modifier.id] },
+                   { include_blank: true },
+                   class: 'form-select', style: 'width: 20rem;', required: true,
+                   id: "player_season_modifier_score_modifier_id_#{player_season.id}" %>
+      <%= f.submit t('.attach'), class: 'btn btn-sm btn-primary' %>
+    <% end %>
+  </div>
+<% end %>

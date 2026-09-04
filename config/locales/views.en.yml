@@ -62,6 +62,16 @@ en:
         no_attachments: No player has this modifier yet.
         detach: Detach
         confirm_detach: Are you sure you want to take this modifier away from the player?
+    players:
+      index:
+        no_players: No players found yet.
+      show:
+        modifier: Modifier
+        no_modifiers: No score modifier attached yet.
+        attach: Attach
+        detach: Detach
+        confirm_detach: Are you sure you want to take this modifier away from the player?
+        discarded_modifier: Removed
     tournaments:
       index:
         no_tournaments: No tournaments found yet.
