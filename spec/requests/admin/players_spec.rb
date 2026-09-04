@@ -123,7 +123,7 @@ module Admin
         end
       end
 
-      context 'when a player_season has an attached modifier' do
+      context 'when the player already has a modifier attached for a season' do
         it 'lists the modifier' do
           score_modifier = create(:multiplier, name: 'hot streak')
           player = create(:player)
@@ -177,7 +177,7 @@ module Admin
         end
       end
 
-      context 'when a player_season has an attached modifier that has since been discarded' do
+      context 'when the attached modifier has since been discarded' do
         it 'renders the page instead of raising, still showing the modifier by name' do
           score_modifier = create(:multiplier, name: 'legend')
           player = create(:player)

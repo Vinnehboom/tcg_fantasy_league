@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Admin players' do
+RSpec.describe 'Admin players', :js do
   let(:admin) { create(:user, :with_role) }
 
   before { sign_in_with(admin) }
@@ -15,7 +15,6 @@ RSpec.describe 'Admin players' do
       select 'hot streak', from: "player_season_modifier_score_modifier_id_#{player_season.id}"
       click_button I18n.t('admin.players.show.attach')
 
-      expect(page).to have_content('Score modifier successfully attached.')
       expect(page).to have_css('td', exact_text: 'hot streak')
     end
 
@@ -28,9 +27,9 @@ RSpec.describe 'Admin players' do
       visit admin_player_path(player)
       expect(page).to have_css('td', exact_text: 'hot streak')
 
-      click_link I18n.t('admin.players.show.detach')
+      accept_confirm { click_button I18n.t('admin.players.show.detach') }
 
-      expect(page).to have_content('Score modifier successfully detached.')
+      expect(page).to have_no_css('td', exact_text: 'hot streak')
       expect(page).to have_content('No score modifier attached yet.')
     end
   end

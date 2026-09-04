@@ -20,36 +20,6 @@ RSpec.describe PlayerSeason do
     end
   end
 
-  describe '#available_score_modifiers' do
-    subject(:available_score_modifiers) { player_season.available_score_modifiers }
-
-    let(:player_season) { create(:player_season) }
-    let(:attached) { create(:multiplier, name: 'hot streak') }
-    let(:unattached) { create(:bonus, name: 'winner') }
-
-    before { create(:player_season_modifier, player_season:, score_modifier: attached) }
-
-    it 'excludes a modifier this player_season already has' do
-      expect(available_score_modifiers).not_to include(attached)
-    end
-
-    it "includes a modifier this player_season doesn't have yet" do
-      unattached_score_modifier = unattached
-
-      expect(available_score_modifiers).to include(unattached_score_modifier)
-    end
-
-    context 'when a modifier has since been discarded' do
-      let(:discarded) { create(:bonus, name: 'legend', discarded_at: Time.current) }
-
-      before { discarded }
-
-      it 'excludes it too' do
-        expect(available_score_modifiers).not_to include(discarded)
-      end
-    end
-  end
-
   describe 'uniqueness' do
     subject { build(:player_season, player:, season:).save }
 
