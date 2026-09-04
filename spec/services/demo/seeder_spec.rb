@@ -2,6 +2,14 @@ require 'rails_helper'
 
 RSpec.describe Demo::Seeder do
   describe '.call' do
+    context 'when Rails.env is production' do
+      before { allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production')) }
+
+      it 'raises instead of seeding anything' do
+        expect { described_class.call }.to raise_error(ExternalData::Exception, /must never run/)
+      end
+    end
+
     it 'creates a Game row for every demo game' do
       expect { described_class.call }.to change(Game, :count).by(Demo::Games::ALL.length)
     end
