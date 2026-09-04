@@ -13,5 +13,8 @@ application.register("removals", RemovalsController)
 import ResultsImportTriggerController from "./results_import_trigger_controller"
 application.register("results-import-trigger", ResultsImportTriggerController)
 
+import ScoreModifierAttachmentController from "./score_modifier_attachment_controller"
+application.register("score-modifier-attachment", ScoreModifierAttachmentController)
+
 import TableFiltersController from "./table_filters_controller"
 application.register("table-filters", TableFiltersController)

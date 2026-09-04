@@ -31,7 +31,7 @@ RSpec.describe 'Admin score modifiers' do
     end
   end
 
-  describe 'show' do
+  describe 'show', :js do
     it 'takes a modifier away from a player' do
       player = create(:player, name: 'Ash Ketchum')
       player_season = player.player_seasons.first
@@ -42,9 +42,8 @@ RSpec.describe 'Admin score modifiers' do
 
       expect(page).to have_css('td', exact_text: 'Ash Ketchum')
 
-      click_link 'Detach'
+      accept_confirm { click_button 'Detach' }
 
-      expect(page).to have_content('Score modifier successfully detached.')
       expect(page).to have_no_css('td', exact_text: 'Ash Ketchum')
     end
   end

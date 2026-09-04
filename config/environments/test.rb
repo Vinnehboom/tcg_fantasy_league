@@ -11,12 +11,9 @@ Rails.application.configure do
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 
-  # Eager loading loads your entire application. Rails' stock comment here
-  # says to leave this off locally and on only in CI - but ScoreModifier's
-  # STI family (ScoreModifier.subclasses) is only reliably populated once
-  # every subclass has actually loaded, so this always runs eager loaded,
-  # matching production, instead of a CI-only toggle. Measured no meaningful
-  # runtime cost from doing so (see the C-27 review discussion on PR #85).
+  # Always eager loaded, matching production: ScoreModifier's STI family
+  # (ScoreModifier.subclasses) is only reliably populated once every
+  # subclass has actually loaded.
   config.eager_load = true
 
   # Configure public file server for tests with Cache-Control for performance.

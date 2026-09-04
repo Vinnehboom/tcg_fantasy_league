@@ -129,6 +129,13 @@ en:
           running: Running
           success: Success
           failure: Failure
+      score_modifier:
+        name:
+          "hot streak": hot streak
+          winner: winner
+          "world champion": world champion
+          legend: legend
+          upcoming: upcoming
     errors:
       models:
         roster:

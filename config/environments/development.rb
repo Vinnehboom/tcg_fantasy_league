@@ -8,12 +8,9 @@ Rails.application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.enable_reloading = true
 
-  # Eager load code on boot, like production and test already do. Without
-  # this, autoloaded constants that nothing has referenced yet - such as
-  # ScoreModifier's STI subclasses - are missing from ScoreModifier.subclasses
-  # until something else happens to load them first. Reloading (above) still
-  # recompiles changed files as normal; this only changes what's loaded up
-  # front.
+  # Eager load code on boot: an autoloaded constant nothing has referenced
+  # yet - such as one of ScoreModifier's STI subclasses - is missing from
+  # ScoreModifier.subclasses until something else loads it first.
   config.eager_load = true
 
   # Show full error reports.

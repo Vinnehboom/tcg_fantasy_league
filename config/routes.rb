@@ -21,9 +21,6 @@ Rails.application.routes.draw do
       resources :player_season_modifiers, only: %i[destroy],
                                           controller: 'score_modifiers/player_season_modifiers'
     end
-    # Attach lives on the player's own page, one form per player_season, where
-    # the score modifier is chosen from a select rather than known up front -
-    # so, unlike detach, it cannot be nested under a specific score_modifier's id.
     resources :player_season_modifiers, only: %i[create],
                                         controller: 'score_modifiers/player_season_modifiers'
 

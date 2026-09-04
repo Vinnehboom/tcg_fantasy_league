@@ -6,7 +6,6 @@ module Admin
     let(:admin) { create(:user, :with_role, role: :admin) }
     let(:score_modifier) { create(:multiplier) }
     let(:player_season) { create(:player_season) }
-    let(:referer) { 'http://www.example.com/some/admin/page' }
 
     before do
       sign_in admin
@@ -23,12 +22,11 @@ module Admin
         expect(score_modifier.reload.player_seasons).to include(player_season)
       end
 
-      it 'redirects back to the page the admin was on, with a success notice' do
-        post(admin_player_season_modifiers_path, params:, headers: { 'HTTP_REFERER' => referer })
+      it 'responds with the created attachment as JSON' do
+        post(admin_player_season_modifiers_path, params:)
 
-        expect(response).to redirect_to(referer)
-        expect(response).to have_http_status(:see_other)
-        expect(flash[:notice]).to eq('Score modifier successfully attached.')
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body['id']).to eq(PlayerSeasonModifier.last.id)
       end
 
       context 'when the player already has this modifier for the season' do
@@ -40,11 +38,11 @@ module Admin
           end.not_to change(PlayerSeasonModifier, :count)
         end
 
-        it 'redirects back with an alert instead of attaching' do
-          post(admin_player_season_modifiers_path, params:, headers: { 'HTTP_REFERER' => referer })
+        it 'responds with an error instead of attaching' do
+          post(admin_player_season_modifiers_path, params:)
 
-          expect(response).to redirect_to(referer)
-          expect(flash[:alert]).to be_present
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response.parsed_body['error']).to be_present
         end
       end
 
@@ -58,7 +56,7 @@ module Admin
         end
       end
 
-      context 'when the player_season does not exist' do
+      context 'when the player is not in that season' do
         let(:params) do
           { player_season_modifier: { player_season_id: 0, score_modifier_id: score_modifier.id } }
         end
@@ -92,13 +90,13 @@ module Admin
         expect(score_modifier.reload.player_seasons).not_to include(player_season)
       end
 
-      it 'redirects back to the page the admin was on, with a success notice' do
-        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier),
-               headers: { 'HTTP_REFERER' => referer }
+      it 'responds with the removed attachment as JSON' do
+        removed_id = player_season_modifier.id
 
-        expect(response).to redirect_to(referer)
-        expect(response).to have_http_status(:see_other)
-        expect(flash[:notice]).to eq('Score modifier successfully detached.')
+        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body['id']).to eq(removed_id)
       end
 
       it 'leaves the player and the season in place' do
@@ -116,11 +114,10 @@ module Admin
           expect(score_modifier.reload.player_seasons).not_to include(player_season)
         end
 
-        it 'still redirects back, not 404s' do
-          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier),
-                 headers: { 'HTTP_REFERER' => referer }
+        it 'still responds with :ok, not 404' do
+          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
 
-          expect(response).to redirect_to(referer)
+          expect(response).to have_http_status(:ok)
         end
       end
     end

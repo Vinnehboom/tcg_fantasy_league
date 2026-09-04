@@ -9,10 +9,8 @@ RSpec.describe 'config/environments/development.rb' do
     # A permissive recorder: development.rb sets many config.* values we
     # don't care about here (cache_classes, active_support.deprecation,
     # ...), and some of those are themselves nested objects
-    # (config.action_mailer.*). Recording just eager_load, and
-    # no-opping/chaining through everything else, lets this example run
-    # the file's real assignment instead of pattern-matching its source
-    # text.
+    # (config.action_mailer.*). Records just eager_load and no-ops/chains
+    # through everything else.
     recorder = Struct.new(:eager_load) do
       def method_missing(*)
         self
