@@ -23,15 +23,17 @@
                 <% end %>
               </td>
               <td>
-                <div data-controller="score-modifier-attachment"
-                     data-score-modifier-attachment-url-value="<%= admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier) %>"
-                     data-score-modifier-attachment-confirm-value="<%= t('.confirm_detach') %>"
-                     data-score-modifier-attachment-generic-error-value="<%= t('admin.score_modifiers.player_season_modifiers.destroy.failed') %>">
-                  <button type="button" class="btn btn-sm btn-danger" data-action="score-modifier-attachment#detach">
-                    <%= t('.detach') %>
-                  </button>
-                  <div data-score-modifier-attachment-target="error" class="text-danger small mt-1" hidden></div>
-                </div>
+                <% if policy(player_season_modifier).destroy? %>
+                  <div data-controller="score-modifier-attachment"
+                       data-score-modifier-attachment-url-value="<%= admin_player_season_modifier_path(player_season_modifier) %>"
+                       data-score-modifier-attachment-confirm-value="<%= t('.confirm_detach') %>"
+                       data-score-modifier-attachment-generic-error-value="<%= t('admin.score_modifiers.player_season_modifiers.destroy.failed') %>">
+                    <button type="button" class="btn btn-sm btn-danger" data-action="score-modifier-attachment#detach">
+                      <%= t('.detach') %>
+                    </button>
+                    <div data-score-modifier-attachment-target="error" class="text-danger small mt-1" hidden></div>
+                  </div>
+                <% end %>
               </td>
             </tr>
           <% end %>
@@ -41,29 +43,33 @@
       <p><%= t('.no_modifiers') %></p>
     <% end %>
 
-    <% available = available_score_modifiers(player_season, @kept_score_modifiers) %>
-    <% if available.any? %>
-      <%= form_with url: admin_player_season_modifiers_path, method: :post, scope: :player_season_modifier,
-                    data: { turbo: false, controller: 'score-modifier-attachment',
-                            action: 'submit->score-modifier-attachment#attach',
-                            score_modifier_attachment_url_value: admin_player_season_modifiers_path,
-                            score_modifier_attachment_generic_error_value:
-                              t('admin.score_modifiers.player_season_modifiers.create.failed') },
-                    class: 'd-flex flex-column gap-1' do |f| %>
-        <%= f.hidden_field :player_season_id, value: player_season.id,
-                            id: "player_season_modifier_player_season_id_#{player_season.id}" %>
-        <div class="d-flex gap-2 align-items-center">
-          <%= f.select :score_modifier_id,
-                       available.map { |score_modifier| [score_modifier_name_label(score_modifier.name), score_modifier.id] },
-                       { include_blank: true },
-                       class: 'form-select', style: 'width: 20rem;', required: true,
-                       id: "player_season_modifier_score_modifier_id_#{player_season.id}" %>
-          <%= f.submit t('.attach'), class: 'btn btn-sm btn-primary' %>
-        </div>
-        <div data-score-modifier-attachment-target="error" class="text-danger small" hidden></div>
+    <% if policy(PlayerSeasonModifier.new).create? %>
+      <% available = available_score_modifiers(player_season:, kept_score_modifiers: @kept_score_modifiers) %>
+      <% if available.any? %>
+        <%= form_with url: admin_player_season_modifiers_path, method: :post, scope: :player_season_modifier,
+                      data: { turbo: false, controller: 'score-modifier-attachment',
+                              action: 'submit->score-modifier-attachment#attach',
+                              score_modifier_attachment_url_value: admin_player_season_modifiers_path,
+                              score_modifier_attachment_generic_error_value:
+                                t('admin.score_modifiers.player_season_modifiers.create.failed') },
+                      class: 'd-flex flex-column gap-1' do |f| %>
+          <%= f.hidden_field :player_season_id, value: player_season.id,
+                              id: "player_season_modifier_player_season_id_#{player_season.id}" %>
+          <div class="d-flex gap-2 align-items-center">
+            <%= f.select :score_modifier_id,
+                         available.map { |score_modifier| [score_modifier_name_label(score_modifier.name), score_modifier.id] },
+                         { include_blank: true },
+                         class: 'form-select', style: 'width: 20rem;', required: true,
+                         id: "player_season_modifier_score_modifier_id_#{player_season.id}" %>
+            <%= f.submit t('.attach'), class: 'btn btn-sm btn-primary' %>
+          </div>
+          <div data-score-modifier-attachment-target="error" class="text-danger small" hidden></div>
+        <% end %>
+      <% elsif @kept_score_modifiers.empty? %>
+        <p><%= t('.no_modifiers_exist') %></p>
+      <% else %>
+        <p><%= t('.no_modifiers_available') %></p>
       <% end %>
-    <% else %>
-      <p><%= t('.no_modifiers_available') %></p>
     <% end %>
   </div>
 <% end %>

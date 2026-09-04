@@ -23,8 +23,8 @@ RSpec.describe 'Admin players', :js do
       player_season = player.player_seasons.first
       score_modifier = create(:multiplier, name: 'hot streak')
       create(:player_season_modifier, player_season:, score_modifier:)
-
       visit admin_player_path(player)
+
       expect(page).to have_css('td', exact_text: 'hot streak')
 
       accept_confirm { click_button I18n.t('admin.players.show.detach') }
