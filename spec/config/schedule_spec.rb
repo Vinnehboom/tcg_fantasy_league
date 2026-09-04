@@ -10,8 +10,8 @@ RSpec.describe 'config/schedule.rb' do
 
   it 'does not enqueue the daily PTCG import jobs while paused' do
     expect(job_list.generate_cron_output)
-      .not_to include('ExternalData::Ptcg::ImportPlayersJob.perform_later')
+      .not_to include('ExternalData::ImportPlayersJob.perform_later')
     expect(job_list.generate_cron_output)
-      .not_to include('ExternalData::Ptcg::ImportTournamentsJob.perform_later')
+      .not_to include('ExternalData::ImportTournamentsJob.perform_later')
   end
 end

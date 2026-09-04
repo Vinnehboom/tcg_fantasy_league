@@ -26,8 +26,8 @@ RSpec.describe 'external_data:ptcg rake tasks', type: :task do
     end
 
     describe 'when no PTCG game row exists' do
-      it 'raises a semantic error instead of a bare RecordNotFound' do
-        message = "external_data:ptcg:update_players: no Game row with id 'PTCG' — seed it before running this task."
+      it 'raises the job\'s semantic error instead of a bare RecordNotFound' do
+        message = "ExternalData::ImportPlayersJob: no Game row with id 'PTCG' — seed it before running this job."
 
         expect { update_players_task.invoke }.to raise_error(RuntimeError, message)
       end
@@ -49,9 +49,8 @@ RSpec.describe 'external_data:ptcg rake tasks', type: :task do
     end
 
     describe 'when no PTCG game row exists' do
-      it 'raises a semantic error instead of a bare RecordNotFound' do
-        message = "external_data:ptcg:update_tournaments: no Game row with id 'PTCG' — " \
-                  'seed it before running this task.'
+      it 'raises the job\'s semantic error instead of a bare RecordNotFound' do
+        message = "ExternalData::ImportTournamentsJob: no Game row with id 'PTCG' — seed it before running this job."
 
         expect { update_tournaments_task.invoke }.to raise_error(RuntimeError, message)
       end
