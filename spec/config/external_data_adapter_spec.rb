@@ -1,13 +1,15 @@
 require 'rails_helper'
 
-# Pins the ExternalData adapter-selection config itself (H-9), not any one
-# job. config/environments/development.rb cannot be exercised by booting
-# development in this sandbox (no development.key), so its lambda is called
-# directly here, with a stub block, instead — never by switching Rails.env.
-RSpec.describe 'ExternalData adapter selection' do
+# Pins the ExternalData adapter- and verifier-selection config for the
+# running (test) environment (H-9). development's own builders are real,
+# directly testable classes instead — see
+# spec/services/external_data/synthetic/adapter_builder_spec.rb and
+# verifier_builder_spec.rb — since development itself cannot be booted in
+# this sandbox (no development.key).
+RSpec.describe 'ExternalData adapter and verifier selection' do
   let(:game) { create(:game) }
 
-  describe 'the builder configured for the running (test) environment' do
+  describe 'the configured adapter_builder' do
     subject(:adapter_builder) { Rails.application.config.x.external_data.adapter_builder }
 
     it 'keeps test on the real adapter classes: it yields the live-adapter block' do
@@ -17,16 +19,17 @@ RSpec.describe 'ExternalData adapter selection' do
     end
   end
 
-  describe "development's builder" do
-    subject(:development_builder) { ->(game:) { ExternalData::Synthetic::Adapter.new(game:) } }
+  describe 'the configured verifier_builder' do
+    subject(:verifier_builder) { Rails.application.config.x.external_data.verifier_builder }
 
-    it 'returns a synthetic adapter for the given game' do
-      expect(development_builder.call(game:)).to be_a(ExternalData::Synthetic::Adapter)
+    it 'keeps test on the real verifier: it yields the registered-verifier block' do
+      registered = ->(_tournament_id) {}
+
+      expect(verifier_builder.call(game:) { registered }).to equal(registered)
     end
 
-    it 'never invokes the live-adapter block, so the real adapter is not constructed' do
-      expect { development_builder.call(game:) { raise 'the real adapter must not be constructed' } }
-        .not_to raise_error
+    it 'yields nil through unchanged, for a game with no registered verifier' do
+      expect(verifier_builder.call(game:) { nil }).to be_nil
     end
   end
 end

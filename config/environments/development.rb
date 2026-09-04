@@ -82,9 +82,22 @@ Rails.application.configure do
   # import uses the synthetic adapter instead of the real one. The real
   # adapter (the block ImportJob#adapter passes in) is therefore never
   # invoked here, so it is never constructed either.
-  config.x.external_data.adapter_builder = ->(game:) { ExternalData::Synthetic::Adapter.new(game:) }
+  #
+  # The real behavior lives in ExternalData::Synthetic::AdapterBuilder, a
+  # plain, directly testable class (app/services/external_data/synthetic) —
+  # not written out here, so this assignment stays the only untested line
+  # (development itself cannot be booted in this sandbox: no
+  # development.key). The reference has to be inside a lambda, evaluated
+  # only when actually called: this file loads before the autoloader is set
+  # up, so a bare top-level ExternalData::Synthetic::AdapterBuilder.new here
+  # would raise NameError on every boot, in every environment.
+  config.x.external_data.adapter_builder = lambda do |game:, &live_adapter|
+    ExternalData::Synthetic::AdapterBuilder.new.call(game:, &live_adapter)
+  end
 
-  # Same idea for the admin "verify tournament id" flow: the registered
-  # verifier (e.g. Game::PTCG_RESULTS_VERIFIER) is never invoked here either.
-  config.x.external_data.verifier_builder = ->(**) { ExternalData::Synthetic::ResultsVerifier.new }
+  # Same idea for the admin "verify tournament id" flow, via
+  # ExternalData::Synthetic::VerifierBuilder.
+  config.x.external_data.verifier_builder = lambda do |game:, &registered_verifier|
+    ExternalData::Synthetic::VerifierBuilder.new.call(game:, &registered_verifier)
+  end
 end
