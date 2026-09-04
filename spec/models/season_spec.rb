@@ -46,57 +46,6 @@ RSpec.describe Season do
     end
   end
 
-  describe '.default_for' do
-    subject(:default_for) { described_class.default_for(game:) }
-
-    let(:game) { create(:game) }
-
-    context 'when the game has no seasons at all' do
-      it 'creates an open-ended season' do
-        expect { default_for }.to change(game.seasons, :count).from(0).to(1)
-      end
-
-      it 'covers every date, past and future' do
-        default_for
-
-        expect(described_class.covering(Date.new(1999, 1, 1))).to include(game.seasons.sole)
-      end
-    end
-
-    context 'when the game already has a season' do
-      before { create(:season, game:) }
-
-      it 'does not create a second one' do
-        expect { default_for }.not_to change(game.seasons, :count)
-      end
-    end
-
-    context 'when called twice for the same game' do
-      before { default_for }
-
-      it 'is idempotent' do
-        expect { default_for }.not_to change(game.seasons, :count)
-      end
-    end
-
-    it 'marks the created season internal' do
-      default_for
-
-      expect(game.seasons.sole.internal).to be(true)
-    end
-
-    context 'when a real season is added after the default one exists' do
-      before { default_for }
-
-      it 'does not reject the real season as overlapping the open-ended default' do
-        real_season = build(:season, game:, label: '2026', start_date: Date.new(2025, 9, 1),
-                                     end_date: Date.new(2026, 8, 31))
-
-        expect(real_season).to be_valid
-      end
-    end
-  end
-
   describe '.covering' do
     subject(:covering) { described_class.covering(date) }
 

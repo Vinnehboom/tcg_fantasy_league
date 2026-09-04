@@ -30,13 +30,12 @@ class Game < ApplicationRecord
     salary_drafts.upcoming
   end
 
-  # Excludes internal (backstop) seasons — only a real, user-facing season counts.
   def current_season(on: Date.current)
     @current_season_by_date ||= {}
     return @current_season_by_date[on] if @current_season_by_date.key?(on)
 
     @current_season_by_date[on] = begin
-      seasons.covering(on).where(internal: false).sole
+      seasons.covering(on).sole
     rescue ActiveRecord::RecordNotFound
       nil
     end

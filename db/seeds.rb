@@ -7,6 +7,3 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
-
-# Backstop every game with a default season (see Season.default_for).
-Game.find_each { |game| Season.default_for(game:) }

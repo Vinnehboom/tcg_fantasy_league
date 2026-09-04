@@ -179,25 +179,6 @@ RSpec.describe Player do
       end
     end
 
-    context "when the game's only Season is an internal default one (a seasonless game like Riftbound)" do
-      before { Season.default_for(game:) }
-
-      it 'still falls back to the plain game base_uri URL, not a spurious ?season= param' do
-        expect(player.external_url).to eq('https://limitlesstcg.com/players/370')
-      end
-    end
-
-    context 'when a real Season covers the current date alongside an internal default one' do
-      before do
-        Season.default_for(game:)
-        create(:season, game:, label: '2026', start_date: 1.month.ago, end_date: 1.month.from_now)
-      end
-
-      it 'resolves to the real season, not the internal one, with no ambiguity error' do
-        expect(player.external_url).to eq('https://limitlesstcg.com/players/370?season=2026')
-      end
-    end
-
     context 'when a Season covers the current date, but only for a different game' do
       before do
         other_game = create(:game)
