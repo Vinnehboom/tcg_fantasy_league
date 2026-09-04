@@ -3,10 +3,12 @@ FactoryBot.define do
     season
     settings { { 'scoring' => { 'placement_points' => [10, 6, 3, 1] } } }
 
-    # Owned by a Game instead of a Season (a game's app-wide default row).
-    # Clears the default `season` association so only the `settingable=`
-    # polymorphic writer runs, letting `settingable_type` come through as
-    # 'Game' rather than being inferred as 'Season'.
+    # A Setting can be owned by a Game (global default) or a Season (more
+    # specific, overrides the game's default for that season only). This
+    # trait builds the game-owned, global one — clears the default `season`
+    # association so only the `settingable=` polymorphic writer runs,
+    # letting `settingable_type` come through as 'Game' rather than being
+    # inferred as 'Season'.
     trait :for_game do
       season { nil }
       settingable { association(:game) }
