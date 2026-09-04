@@ -170,6 +170,13 @@ en:
       destroy:
         success: Score modifier successfully deleted.
         failed: Score modifier failed to delete.
+      player_season_modifiers:
+        create:
+          success: Score modifier successfully attached.
+          failed: Could not attach the score modifier. The player already has this modifier for that season.
+        destroy:
+          success: Score modifier successfully detached.
+          failed: Could not detach the score modifier.
     tournaments:
       update:
         success: Results source id successfully updated.

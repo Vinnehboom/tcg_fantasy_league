@@ -19,5 +19,14 @@ RSpec.describe Multiplier do
     it 'rejects a multiplier that reverses the score' do
       expect(build(:multiplier, value: -2)).not_to be_valid
     end
+
+    it 'reports a missing value once, not once per numericality check' do
+      multiplier = build(:multiplier, value: nil)
+
+      multiplier.valid?
+
+      expect(multiplier.errors.of_kind?(:value, :not_a_number)).to be(true)
+      expect(multiplier.errors.where(:value, :not_a_number).size).to eq(1)
+    end
   end
 end
