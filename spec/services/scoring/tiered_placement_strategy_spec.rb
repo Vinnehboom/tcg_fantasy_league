@@ -88,6 +88,21 @@ module Scoring
         end
       end
 
+      context 'when placement is 1st, across the M and L size classes' do
+        let(:placement) { 1 }
+
+        where(:field_size, :expected_points) do
+          [
+            [1000, 200], # M: multiplier x2
+            [2000, 400]  # L: multiplier x4
+          ]
+        end
+
+        with_them do
+          it { is_expected.to eq(expected_points) }
+        end
+      end
+
       context 'when the tournament has no field_size on record' do
         let(:placement) { 1 }
         let(:field_size) { nil }
@@ -222,6 +237,83 @@ module Scoring
 
         it 'falls back to the code default for the unparseable key' do
           expect(strategy_for.base_score(placement: 1, field_size: 3000)).to eq(100)
+        end
+      end
+
+      context 'when the season has an unparseable value but the game has a valid default for that key' do
+        before do
+          create(:setting, :for_game, settingable: game, settings: { 'scoring' => { 'decay' => 0.5 } })
+          create(:setting, season:, settings: { 'scoring' => { 'decay' => 'half' } })
+        end
+
+        it "falls through to the game's default, not the code constant, per D5's resolution order" do
+          expect(strategy_for.base_score(placement: 2, field_size: 3000)).to eq(50) # 100 * 0.5**1, not 100 * 0.65**1
+        end
+      end
+
+      context 'when the settings payload holds a decay above 1' do
+        before do
+          create(:setting, season:, settings: { 'scoring' => { 'base_points' => 100, 'decay' => 5.0 } })
+        end
+
+        it 'clamps decay to 1.0 rather than letting points grow with tier depth' do
+          expect(strategy_for.base_score(placement: 8, field_size: 3000)).to eq(100) # 100 * 1.0**3, not 100 * 5.0**3
+        end
+      end
+
+      context 'when a configured size class has a negative multiplier' do
+        before do
+          create(:setting, season:, settings: {
+            'scoring' => {
+              'size_classes' => [{ 'minimum_field_size' => 0, 'multiplier' => -5, 'max_tier_field_size' => 3000 }]
+            }
+          })
+        end
+
+        it 'clamps the multiplier to a positive minimum rather than scoring negative points' do
+          field_size = 3000
+          result = result_fixture.new(1, tournament_fixture.new(field_size))
+
+          expect(strategy_for.points_for(result:)).to eq(100) # base_score 100 * multiplier clamped to 1, not -5
+        end
+      end
+
+      context 'when the settings payload has a partially-invalid size_classes list' do
+        before do
+          create(:setting, season:, settings: {
+            'scoring' => {
+              'size_classes' => [
+                { 'minimum_field_size' => 0, 'multiplier' => 1, 'max_tier_field_size' => 100 },
+                { 'minimum_field_size' => 500 } # missing multiplier and max_tier_field_size
+              ]
+            }
+          })
+        end
+
+        it 'drops only the band that fails to parse, keeping the valid one' do
+          field_size = 3000
+          result = result_fixture.new(1, tournament_fixture.new(field_size))
+
+          expect(strategy_for.points_for(result:)).to eq(100) # only the S-shaped band survives
+        end
+      end
+
+      context 'when every band in the settings payload fails to parse, and the game has a valid default list' do
+        before do
+          create(:setting, :for_game, settingable: game, settings: {
+            'scoring' => {
+              'size_classes' => [{ 'minimum_field_size' => 0, 'multiplier' => 7, 'max_tier_field_size' => 3000 }]
+            }
+          })
+          create(:setting, season:,
+                           settings: { 'scoring' => { 'size_classes' => [{ 'minimum_field_size' => 'nope' }] } })
+        end
+
+        it "falls through to the game's default size classes, not straight to the code default" do
+          field_size = 3000
+          result = result_fixture.new(1, tournament_fixture.new(field_size))
+
+          expect(strategy_for.points_for(result:)).to eq(700) # base_score 100 * the game default's multiplier 7
         end
       end
 
