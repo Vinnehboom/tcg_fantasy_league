@@ -14,5 +14,7 @@
     ".claude/settings.json",
     ".claude/kanban-cycle.json",
     "docs/orchestrator-handoff.md"
-  ]
+  ],
+  "_comment_externally_owned_ticket_ids": "Standing exclusion relayed to generation 8 (2026-09-04) from Vinnie via another session ('PR video mocking with test services', session_011cBxF8xkMUZWyYoJGQpBJC), which he gave these two tickets to own and drive end to end, outside this orchestrator's normal flow. Verified against primary sources before trusting it: the H-8 Notion card carries extensive, dated, internally-consistent decisions attributed to Vinnie that this orchestrator did not write, and the named session is real and active on this same repo. Do not dispatch these tickets, do not triage/rebase/comment/dispatch onto their PRs once opened (two sessions pushing one branch fight each other), and do not count their PRs toward max_open_prs/max_stacked_prs. This is temporary and ticket-specific, not a policy change — remove an ID from this list only when Vinnie says the exclusion is over, never on inference (e.g. the other session going quiet, or its PR merging, isn't by itself proof the exclusion lifted).",
+  "externally_owned_ticket_ids": ["H-8", "H-9"]
 }

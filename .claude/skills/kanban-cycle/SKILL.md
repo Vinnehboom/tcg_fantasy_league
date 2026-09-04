@@ -73,6 +73,8 @@ after.
 
 ## 1. Check for in-flight work — from real state, not memory
 
+**First, exclude any ticket in `externally_owned_ticket_ids` (in `.claude/kanban-cycle.json`) from every step below — this whole skill file, not just this step.** An empty or absent list is the normal case; a non-empty one means Vinnie has given specific tickets to another session to drive end to end, outside this orchestrator's flow entirely. Skip an excluded ticket even if it's High priority and looks ready, don't triage/rebase/comment/dispatch onto its PR once one opens (two sessions pushing one branch fight each other), and don't count its PR toward `max_open_prs`/`max_stacked_prs`. List it in the rundown (step 7) as "owned by another session" if there's anything worth noting, but take no action. Remove an ID from this list only on Vinnie's word that the exclusion is over — never infer it from the other session going quiet or its PR merging.
+
 Ticket work now runs in its own dispatched worktree-isolated agent (see
 "Dispatch mechanics"), not inline in this session, so this session's own
 conversation history is NOT a reliable record of what's already
@@ -141,6 +143,8 @@ job is "did anything change" does not need to re-read three PR
 descriptions to answer it.
 
 ## 3. Triage existing PRs before starting anything new
+
+**Before anything else here: does this PR's body link a ticket in `externally_owned_ticket_ids`?** If so, this PR isn't this orchestrator's to triage — see step 1's exclusion note. List it in the rundown as "owned by another session" and move on; don't rebase it, don't comment on it, don't dispatch onto it even for a CI fix.
 
 Open PRs always come before new work. First, `ListAgents` to see which
 dispatched subagents from a previous cycle are still active — match them
@@ -318,9 +322,10 @@ many are open at once.
 Fetch the Notion board (`notion_board_url`). Candidates are cards with
 status "Not started" whose dependencies (`Depends On`) are satisfied —
 either the dependency card is Done, or its PR is open and eligible to
-stack onto per step 4. Rank by priority (as `/ticket-pipeline` does when
-told "do the next one"). Walk the ranked list and take the first candidate
-that clears step 4's room check.
+stack onto per step 4 — **excluding any Task ID in `externally_owned_ticket_ids`
+(step 1) outright, whatever its priority or ready-ness.** Rank by priority
+(as `/ticket-pipeline` does when told "do the next one"). Walk the ranked
+list and take the first candidate that clears step 4's room check.
 
 If no candidate clears it (board empty of ready work, or every ready
 ticket is blocked by the PR/stacking caps), that's a valid outcome — say so
@@ -598,6 +603,10 @@ this one end-of-cycle rundown and push, not announced separately.
 
 ## Guardrails
 
+- Never dispatch, triage, rebase, comment on, or otherwise act on a ticket
+  or PR whose Task ID is in `externally_owned_ticket_ids` (`.claude/kanban-cycle.json`) —
+  Vinnie gave it to another session to drive, and this exclusion is his
+  call to lift, not something to infer from the other session going quiet.
 - PR triage always comes before starting new work — never skip straight to
   step 5 because step 3 found nothing urgent-looking; check first.
 - Never exceed `max_open_prs` or `max_stacked_prs` (currently 2 and 2 —
