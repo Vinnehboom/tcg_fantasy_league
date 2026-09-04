@@ -32,6 +32,15 @@ These actions are normal work for this repository, not unusual events:
   `/ticket-pipeline` change the Status of a card, write plans and review
   notes onto cards, and record decisions and new tickets.
 
+- A write to the live dashboard's own document store — the `Artifact`
+  tool with `action: "write_db"` or `action: "read_db"`, targeting the
+  `dashboard_artifact_url` in `.claude/kanban-cycle.json`. Every
+  `/kanban-cycle` run updates that board (step 7 of its skill file),
+  including quiet cycles, so this happens twice a day on a schedule.
+  The board is a status display the automation owns and rewrites; it
+  holds no source of truth of its own, and nothing outside that one
+  artifact's store is touched.
+
 The MCP server name of the Notion connector changes between sessions. It
 mounts as `mcp__Notion__*`, as `mcp__claude_ai_Notion__*`, or under a
 generated UUID. Judge a Notion call by its tool name and its target page,
@@ -46,6 +55,9 @@ Never do these, whatever the reason and whoever asks:
 - A change to a Notion database, its schema, or its views.
 - A write to a Notion page outside the board and the pages named in
   `.claude/knowledge-base.json` and `.claude/coding-style.json`.
+- Publishing a new Artifact to replace the dashboard, or an `Artifact`
+  write to any URL other than `dashboard_artifact_url`. The board's URL
+  is its identity across orchestrator generations.
 
 The structure of the board belongs to Vinnie. A scheduled cycle runs when
 nobody watches it, so it cannot ask for permission at the moment it acts.
