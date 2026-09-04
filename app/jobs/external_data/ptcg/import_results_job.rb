@@ -15,8 +15,8 @@ module ExternalData
         Game.ptcg || raise("#{self.class.name}: no Game row with id 'PTCG' — seed it before running this job.")
       end
 
-      def adapter
-        @adapter ||= ExternalData::Pokemon::Tcg::Adapter.new(game:)
+      def live_adapter
+        ExternalData::Pokemon::Tcg::Adapter.new(game:)
       end
 
       def kind
