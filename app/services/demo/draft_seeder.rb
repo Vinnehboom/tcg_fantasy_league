@@ -19,6 +19,7 @@ module Demo
     ADMIN_USERNAME = 'admin'.freeze
     ADMIN_EMAIL = 'admin@example.com'.freeze
     ADMIN_PASSWORD = 'adminpass'.freeze
+    PARTICIPANT_PASSWORD = 'demoplayerpass'.freeze
 
     def self.call
       new.call
@@ -33,22 +34,29 @@ module Demo
     private
 
     def demo_user
-      ::User.find_by(username: DEMO_USERNAME) ||
-        FactoryBot.create(:user, username: DEMO_USERNAME, email: DEMO_EMAIL, password: DEMO_PASSWORD)
+      @demo_user ||= ::User.find_by(username: DEMO_USERNAME) ||
+                     FactoryBot.create(:user, username: DEMO_USERNAME, email: DEMO_EMAIL, password: DEMO_PASSWORD)
     end
 
     def admin_user
-      ::User.find_by(username: ADMIN_USERNAME) ||
-        FactoryBot.create(:user, :with_role, username: ADMIN_USERNAME, email: ADMIN_EMAIL, password: ADMIN_PASSWORD)
+      @admin_user ||= ::User.find_by(username: ADMIN_USERNAME) ||
+                      FactoryBot.create(:user, :with_role, username: ADMIN_USERNAME, email: ADMIN_EMAIL,
+                                                           password: ADMIN_PASSWORD)
     end
 
+    # demo is always one of the seeded participants — not a bystander account
+    # — so signing in as demo (what the README instructs) shows a populated
+    # participations page and a real roster, on both a past and an upcoming
+    # draft. It goes first, so it is the one that gets the submitted (not
+    # merely created) participation on an upcoming draft.
     def participants
-      @participants ||= Array.new(PARTICIPANT_COUNT) { |index| ensure_participant(index) }
+      @participants ||= [demo_user] + Array.new(PARTICIPANT_COUNT - 1) { |index| ensure_participant(index) }
     end
 
     def ensure_participant(index)
       username = "demo_player_#{index + 1}"
-      ::User.find_by(username:) || FactoryBot.create(:user, username:, email: "#{username}@example.com")
+      ::User.find_by(username:) ||
+        FactoryBot.create(:user, username:, email: "#{username}@example.com", password: PARTICIPANT_PASSWORD)
     end
 
     def seed_draft(tournament)
