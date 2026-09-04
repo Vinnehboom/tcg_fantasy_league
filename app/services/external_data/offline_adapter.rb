@@ -17,6 +17,11 @@ module ExternalData
                                         'the #results method was called on an invalid adapter')
     end
 
+    def field_size(**)
+      raise ExternalData::Exception.new('Offline method called',
+                                        'the #field_size method was called on an invalid adapter')
+    end
+
   end
 
 end

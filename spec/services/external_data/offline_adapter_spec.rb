@@ -28,4 +28,12 @@ RSpec.describe ExternalData::OfflineAdapter do
       expect { adapter.results(tournament: build(:tournament)) }.to raise_error(ExternalData::Exception, message)
     end
   end
+
+  describe '#field_size' do
+    it 'raises an external data exception explaining the adapter is invalid' do
+      message = /the #field_size method was called on an invalid adapter/
+
+      expect { adapter.field_size(tournament: build(:tournament)) }.to raise_error(ExternalData::Exception, message)
+    end
+  end
 end
