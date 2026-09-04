@@ -21,10 +21,23 @@ module Demo
     end
 
     def call
+      raise_outside_the_sandbox!
       Demo::Games::ALL.each { |entry| seed_game(entry) }
     end
 
     private
+
+    # The synthetic adapter already refuses to run in production on its own,
+    # but this checks independently — see Demo::Reset for the same idea
+    # applied to the destructive reset path.
+    def raise_outside_the_sandbox!
+      return unless Rails.env.production?
+
+      raise ExternalData::Exception.new(
+        'Demo seeder invalid in production',
+        "#{self.class.name} must never run against the production database"
+      )
+    end
 
     def seed_game(entry)
       game = ensure_game(entry)
