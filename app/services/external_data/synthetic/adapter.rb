@@ -15,6 +15,7 @@ module ExternalData
       MIN_DAYS_OUT = 7
       RESULTS_PER_TOURNAMENT = 32
       JITTER_SPAN = 12
+      FIELD_SIZE_JITTER_SPAN = 200
 
       def initialize(game:, seed: DEFAULT_SEED, shape: DEFAULT_SHAPE, season: game.current_season)
         raise_outside_the_sandbox!
@@ -41,7 +42,7 @@ module ExternalData
 
       def field_size(tournament:)
         digest = tournament_digest(tournament)
-        results_count + 1 + (digest % 200)
+        results_count + 1 + (digest % FIELD_SIZE_JITTER_SPAN) # +1: always strictly above results_count
       end
 
       private
@@ -116,10 +117,10 @@ module ExternalData
       def build_results(digest)
         rng = Random.new(digest)
         chosen_indices = (0...player_count).to_a.sample(results_count, random: rng)
-        chosen_indices.each_with_index.map { |player_index, position| build_result(player_index, position + 1) }
+        chosen_indices.map.with_index(1) { |player_index, placement| build_result(player_index:, placement:) }
       end
 
-      def build_result(player_index, placement)
+      def build_result(player_index:, placement:)
         ExternalData::Result.new(
           attributes: {
             player_external_id: "/players/#{player_index}",

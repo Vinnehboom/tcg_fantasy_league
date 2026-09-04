@@ -8,17 +8,20 @@ module Demo
   # score — jittered, but never String#hash: the caller seeds the Random.
   module HistoryCurves
 
+    ACCUMULATING_JITTER = (-8..8)
+    WANDERING_JITTER = (-40..40)
+
     # Championship points only accumulate, so history rises monotonically
     # toward the current value as the fraction approaches 1.
     ACCUMULATING = lambda do |current_score:, fraction:, range:, rng:|
       raw = range.min + ((current_score - range.min) * fraction)
-      (raw + rng.rand(-8..8)).round.clamp(range.min, current_score)
+      (raw + rng.rand(ACCUMULATING_JITTER)).round.clamp(range.min, current_score)
     end
 
     # An ELO rating moves both ways, so history wanders around the current
     # value instead of climbing toward it — more so the further back in time.
     WANDERING = lambda do |current_score:, fraction:, range:, rng:|
-      drift = rng.rand(-40..40) * (1 - fraction)
+      drift = rng.rand(WANDERING_JITTER) * (1 - fraction)
       (current_score + drift).round.clamp(range.min, range.max)
     end
 

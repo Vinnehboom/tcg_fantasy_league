@@ -15,8 +15,10 @@ module Demo
 
     # Shared across every demo composition root that needs one (this class,
     # Demo::History, Demo::DraftSeeder), so the players and results imports
-    # for one game always draw from the same pool — see Decisions D8.
-    SEED = 947_628
+    # for one game always draw from the same pool — see Decisions D8. Set to
+    # the adapter's own default seed, one source instead of two constants
+    # that mint the same /players/N namespace with different numbers.
+    SEED = ExternalData::Synthetic::Adapter::DEFAULT_SEED
 
     def call
       raise_outside_the_sandbox!
@@ -27,9 +29,9 @@ module Demo
 
     def seed_game(entry)
       game = ensure_game(entry)
-      ensure_season(game, entry)
-      import_players(game, entry)
-      import_tournaments(game, entry)
+      ensure_season(game:, entry:)
+      import_players(game:, entry:)
+      import_tournaments(game:, entry:)
     end
 
     def ensure_game(entry)
@@ -37,16 +39,16 @@ module Demo
         ::Game.create!(id: entry.id, name: entry.name, base_uri: entry.base_uri)
     end
 
-    def ensure_season(game, entry)
+    def ensure_season(game:, entry:)
       ::Season.find_by(game:, label: entry.season_label) ||
         ::Season.create!(game:, label: entry.season_label, start_date: 1.year.ago.to_date, end_date: nil)
     end
 
-    def import_players(game, entry)
+    def import_players(game:, entry:)
       ExternalData::Synthetic::ImportPlayersJob.perform_now(game_id: game.id, seed: SEED, shape: entry.shape)
     end
 
-    def import_tournaments(game, entry)
+    def import_tournaments(game:, entry:)
       ExternalData::Synthetic::ImportTournamentsJob.perform_now(game_id: game.id, seed: SEED, shape: entry.shape)
     end
 

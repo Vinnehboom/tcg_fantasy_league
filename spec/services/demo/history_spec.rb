@@ -43,6 +43,17 @@ RSpec.describe Demo::History do
         .to all(be < Date.current)
     end
 
+    it "creates exactly each game's own configured number of past tournaments" do
+      described_class.call
+
+      Demo::Games::ALL.each do |entry|
+        game = Game.find(entry.id)
+        past_count = game.tournaments.where('external_id LIKE ?', '/tournaments/past-%').count
+
+        expect(past_count).to eq(entry.past_tournament_count)
+      end
+    end
+
     it "computes latest_score_before as greater than zero at each past tournament's date" do
       described_class.call
 

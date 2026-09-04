@@ -21,7 +21,7 @@ module ExternalData
 
       private
 
-      attr_reader :seed, :shape
+      attr_reader :tournament_id, :seed, :shape
 
       def game
         tournament.game
@@ -44,7 +44,7 @@ module ExternalData
       end
 
       def tournament
-        @tournament ||= ::Tournament.find(@tournament_id)
+        @tournament ||= ::Tournament.find(tournament_id)
       end
 
     end
