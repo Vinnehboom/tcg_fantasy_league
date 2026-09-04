@@ -41,8 +41,22 @@ module ExternalData
       raise '#game not implemented'
     end
 
+    # The composition root: config/application.rb's default always calls the
+    # block below (the live adapter), lazily, so it's never constructed
+    # unless actually used. An environment file (development's, currently)
+    # can swap in a different builder that ignores the block entirely — see
+    # H-9. Memoized, since #fetch can call #adapter again after #run_import
+    # already built one.
     def adapter
-      raise '#adapter not implemented'
+      @adapter ||= adapter_builder.call(game:) { live_adapter }
+    end
+
+    def adapter_builder
+      Rails.application.config.x.external_data.adapter_builder
+    end
+
+    def live_adapter
+      raise '#live_adapter not implemented'
     end
 
     def kind

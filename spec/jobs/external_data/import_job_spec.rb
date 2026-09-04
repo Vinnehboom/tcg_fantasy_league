@@ -37,8 +37,8 @@ module ExternalData
         expect { job.send(:game) }.to raise_error('#game not implemented')
       end
 
-      it 'raises when #adapter is not overridden' do
-        expect { job.send(:adapter) }.to raise_error('#adapter not implemented')
+      it 'raises when #live_adapter is not overridden' do
+        expect { job.send(:live_adapter) }.to raise_error('#live_adapter not implemented')
       end
 
       it 'raises when #kind is not overridden' do

@@ -77,4 +77,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # No live HTTP call from local development (H-9): every ExternalData
+  # import uses the synthetic adapter instead of the real one. The real
+  # adapter (the block ImportJob#adapter passes in) is therefore never
+  # invoked here, so it is never constructed either.
+  config.x.external_data.adapter_builder = ->(game:) { ExternalData::Synthetic::Adapter.new(game:) }
 end
