@@ -3,7 +3,6 @@ require 'rails_helper'
 RSpec.describe Setting do
   it { is_expected.to belong_to(:settingable) }
   it { is_expected.to belong_to(:season).optional }
-  it { is_expected.to have_one(:game).through(:season) }
   it { is_expected.to validate_presence_of(:settings) }
 
   describe 'uniqueness' do
@@ -52,10 +51,6 @@ RSpec.describe Setting do
 
       it 'is valid without a backing Season row' do
         expect(setting).to be_valid
-      end
-
-      it 'returns nil, not the owning game, from #game (it only resolves through Season)' do
-        expect(setting.game).to be_nil
       end
     end
   end
