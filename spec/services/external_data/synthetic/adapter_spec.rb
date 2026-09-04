@@ -54,7 +54,7 @@ RSpec.describe ExternalData::Synthetic::Adapter do
 
   describe '#players' do
     it 'returns the requested number of players' do
-      shape = shape_for(score_range: (200..1600), score_curve: ExternalData::Synthetic::ScoreCurves::LADDER,
+      shape = shape_for(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
                         player_count: 10)
 
       expect(described_class.new(game:, shape:).players.length).to eq(10)
@@ -69,14 +69,14 @@ RSpec.describe ExternalData::Synthetic::Adapter do
     end
 
     it 'places the ladder-shaped median well below the band midpoint' do
-      shape = shape_for(score_range: (200..1600), score_curve: ExternalData::Synthetic::ScoreCurves::LADDER)
+      shape = shape_for(score_range: (200..1600), score_curve: Demo::Curves::LADDER)
       sorted_scores = described_class.new(game:, shape:).players.map(&:external_points).sort
 
       expect(sorted_scores[sorted_scores.length / 2]).to be < 900
     end
 
     it 'concentrates the ELO-band-shaped middle half of the field within the middle of the band' do
-      shape = shape_for(score_range: (1000..1600), score_curve: ExternalData::Synthetic::ScoreCurves::ELO_BAND)
+      shape = shape_for(score_range: (1000..1600), score_curve: Demo::Curves::ELO_BAND)
       sorted_scores = described_class.new(game:, shape:).players.map(&:external_points).sort
       middle_half = sorted_scores[(sorted_scores.length / 4)..(sorted_scores.length * 3 / 4)]
 
@@ -86,7 +86,7 @@ RSpec.describe ExternalData::Synthetic::Adapter do
 
   describe '#upcoming_tournaments' do
     it 'returns the requested number of tournaments' do
-      shape = shape_for(score_range: (200..1600), score_curve: ExternalData::Synthetic::ScoreCurves::LADDER,
+      shape = shape_for(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
                         tournament_count: 5)
 
       expect(described_class.new(game:, shape:).upcoming_tournaments.length).to eq(5)
@@ -103,7 +103,7 @@ RSpec.describe ExternalData::Synthetic::Adapter do
     let(:tournament) { build(:tournament, external_id: '/tournaments/0') }
 
     it 'names only players the adapter itself would generate for the same seed and player count' do
-      shape = shape_for(score_range: (200..1600), score_curve: ExternalData::Synthetic::ScoreCurves::LADDER,
+      shape = shape_for(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
                         player_count: 20)
       generated_ids = described_class.new(game:, shape:).players.map(&:external_id)
       result_ids = described_class.new(game:, shape:).results(tournament:).map(&:player_external_id)
