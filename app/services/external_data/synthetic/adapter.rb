@@ -6,11 +6,12 @@ module ExternalData
     # four methods as ExternalData::Pokemon::Tcg::Adapter, with plausible,
     # seed-reproducible data instead of a live fetch — see H-9. Nothing here
     # names a specific game: the caller injects the score shape (see Shape)
-    # and the seed.
+    # and the seed. The default shape's curve is Demo::Curves::LADDER — the
+    # adapter itself does not care where a curve lambda comes from.
     class Adapter
 
       DEFAULT_SEED = 924_601
-      DEFAULT_SHAPE = Shape.new(score_range: (200..1600), score_curve: ScoreCurves::LADDER,
+      DEFAULT_SHAPE = Shape.new(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
                                 player_count: 64, tournament_count: 3)
       MIN_DAYS_OUT = 7
       RESULTS_PER_TOURNAMENT = 32
