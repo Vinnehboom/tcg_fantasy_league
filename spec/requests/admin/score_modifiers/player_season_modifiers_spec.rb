@@ -6,6 +6,7 @@ module Admin
     let(:admin) { create(:user, :with_role, role: :admin) }
     let(:score_modifier) { create(:multiplier) }
     let(:player_season) { create(:player_season) }
+    let(:referer) { 'http://www.example.com/some/admin/page' }
 
     before do
       sign_in admin
@@ -22,10 +23,12 @@ module Admin
         expect(score_modifier.reload.player_seasons).to include(player_season)
       end
 
-      it 'responds with no content' do
-        post(admin_player_season_modifiers_path, params:)
+      it 'redirects back to the page the admin was on, with a success notice' do
+        post(admin_player_season_modifiers_path, params:, headers: { 'HTTP_REFERER' => referer })
 
-        expect(response).to have_http_status(:no_content)
+        expect(response).to redirect_to(referer)
+        expect(response).to have_http_status(:see_other)
+        expect(flash[:notice]).to eq('Score modifier successfully attached.')
       end
 
       context 'when the player already has this modifier for the season' do
@@ -37,10 +40,11 @@ module Admin
           end.not_to change(PlayerSeasonModifier, :count)
         end
 
-        it 'responds unprocessable' do
-          post(admin_player_season_modifiers_path, params:)
+        it 'redirects back with an alert instead of attaching' do
+          post(admin_player_season_modifiers_path, params:, headers: { 'HTTP_REFERER' => referer })
 
-          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to redirect_to(referer)
+          expect(flash[:alert]).to be_present
         end
       end
 
@@ -88,10 +92,13 @@ module Admin
         expect(score_modifier.reload.player_seasons).not_to include(player_season)
       end
 
-      it 'responds with no content' do
-        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+      it 'redirects back to the page the admin was on, with a success notice' do
+        delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier),
+               headers: { 'HTTP_REFERER' => referer }
 
-        expect(response).to have_http_status(:no_content)
+        expect(response).to redirect_to(referer)
+        expect(response).to have_http_status(:see_other)
+        expect(flash[:notice]).to eq('Score modifier successfully detached.')
       end
 
       it 'leaves the player and the season in place' do
@@ -109,10 +116,11 @@ module Admin
           expect(score_modifier.reload.player_seasons).not_to include(player_season)
         end
 
-        it 'still responds with no content' do
-          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier)
+        it 'still redirects back, not 404s' do
+          delete admin_score_modifier_player_season_modifier_path(score_modifier, player_season_modifier),
+                 headers: { 'HTTP_REFERER' => referer }
 
-          expect(response).to have_http_status(:no_content)
+          expect(response).to redirect_to(referer)
         end
       end
     end

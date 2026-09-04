@@ -44,10 +44,7 @@ RSpec.describe 'Admin score modifiers' do
 
       click_link 'Detach'
 
-      # The detach action is headless (no redirect) - see it took effect by
-      # loading the page again, not by expecting it to update on its own.
-      visit admin_score_modifier_path(score_modifier)
-
+      expect(page).to have_content('Score modifier successfully detached.')
       expect(page).to have_no_css('td', exact_text: 'Ash Ketchum')
     end
   end

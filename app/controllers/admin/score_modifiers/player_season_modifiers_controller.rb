@@ -4,9 +4,11 @@ module Admin
 
     class PlayerSeasonModifiersController < Admin::ApplicationController
 
-      # Headless: this action's only consumer is a form on the player's own
-      # page (a separate PR/route), which reloads itself to show the result.
-      # There's nothing here for this controller to redirect to on its own.
+      # Both actions redirect_back: their consumers are two different pages
+      # (this branch's score_modifier show page, and the player page in the
+      # stacked PR) and neither is a fixed, knowable target here. :see_other
+      # (303) makes Turbo re-fetch the referring page as a GET, so the
+      # result - and the flash - actually show up.
       def create
         player_season = chosen_player_season
         score_modifier = ScoreModifier.kept.find(params.dig(:player_season_modifier, :score_modifier_id))
@@ -14,9 +16,9 @@ module Admin
         authorize player_season_modifier
 
         if player_season_modifier.save
-          head :no_content
+          redirect_back fallback_location: admin_score_modifiers_path, status: :see_other, notice: t('.success')
         else
-          head :unprocessable_entity
+          redirect_back fallback_location: admin_score_modifiers_path, status: :see_other, alert: t('.failed')
         end
       end
 
@@ -28,9 +30,9 @@ module Admin
         authorize player_season_modifier
 
         if player_season_modifier.destroy
-          head :no_content
+          redirect_back fallback_location: admin_score_modifiers_path, status: :see_other, notice: t('.success')
         else
-          head :unprocessable_entity
+          redirect_back fallback_location: admin_score_modifiers_path, status: :see_other, alert: t('.failed')
         end
       end
 
