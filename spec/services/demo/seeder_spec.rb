@@ -6,7 +6,7 @@ RSpec.describe Demo::Seeder do
       before { allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production')) }
 
       it 'raises instead of seeding anything' do
-        expect { described_class.call }.to raise_error(ExternalData::Exception, /must never run/)
+        expect { described_class.call }.to raise_error(RuntimeError, /must never run/)
       end
     end
 

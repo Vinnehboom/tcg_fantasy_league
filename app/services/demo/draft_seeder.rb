@@ -8,7 +8,9 @@ module Demo
   # Every FactoryBot call here is guarded by a lookup first: FactoryBot's
   # create is not idempotent on its own, so a second call must find the
   # existing row instead of making a new one.
-  class DraftSeeder
+  class DraftSeeder < ApplicationService
+
+    include ProductionGuard
 
     ROSTER_SIZE = 5
     PRICE_CAP_HEADROOM = 10.0
@@ -21,11 +23,8 @@ module Demo
     ADMIN_PASSWORD = 'adminpass'.freeze
     PARTICIPANT_PASSWORD = 'demoplayerpass'.freeze
 
-    def self.call
-      new.call
-    end
-
     def call
+      raise_outside_the_sandbox!
       demo_user
       admin_user
       ::Tournament.find_each { |tournament| seed_draft(tournament) }
