@@ -13,7 +13,9 @@ class Game < ApplicationRecord
     )
   end
 
-  register :ptcg, id: 'PTCG', results_verifier: PTCG_RESULTS_VERIFIER,
+  PTCG_ADAPTER = ->(game:) { ExternalData::Pokemon::Tcg::Adapter.new(game:) }
+
+  register :ptcg, id: 'PTCG', adapter: PTCG_ADAPTER, results_verifier: PTCG_RESULTS_VERIFIER,
                   results_import_job: ExternalData::Ptcg::ImportResultsJob
 
   validates :name, presence: true
