@@ -38,13 +38,19 @@ description: >-
 One pass of: triage what's already open, then start what's next — never both
 blindly. Runs unattended on a schedule, so it must never leave the user
 guessing about anything that actually needs them — but it must not report
-for the sake of reporting either. See step 7 for which cycles notify.
+for the sake of reporting either. See step 8 for which cycles notify.
 
 ## 0. Load config
 
 Read `.claude/kanban-cycle.json` (repo `owner/name`, `notion_board_url`,
-`max_open_prs`, `max_stacked_prs`, `orchestrator_cost_ceiling_usd`). If
-it's missing, say so and stop — don't guess a repo or board.
+`max_open_prs`, `max_stacked_prs`, `orchestrator_cost_ceiling_usd`,
+`dashboard_artifact_url`, `cycle_log_keep`). If it's missing, say so and
+stop — don't guess a repo or board.
+
+Then read the dashboard's `answers` collection (step 7, "Reading his
+answers back"). Do this before step 1, so anything Vinnie answered on
+the board shapes what this cycle does rather than arriving too late to
+matter.
 
 **Then check whether this session is still worth running in.** Call the
 claude-code-remote MCP `get_session` tool with `session_id` omitted (it
@@ -73,7 +79,7 @@ after.
 
 ## 1. Check for in-flight work — from real state, not memory
 
-**First, exclude any ticket in `externally_owned_ticket_ids` (in `.claude/kanban-cycle.json`) from every step below — this whole skill file, not just this step.** An empty or absent list is the normal case; a non-empty one means Vinnie has given specific tickets to another session to drive end to end, outside this orchestrator's flow entirely. Skip an excluded ticket even if it's High priority and looks ready, don't triage/rebase/comment/dispatch onto its PR once one opens (two sessions pushing one branch fight each other), and don't count its PR toward `max_open_prs`/`max_stacked_prs`. List it in the rundown (step 7) as "owned by another session" if there's anything worth noting, but take no action. Remove an ID from this list only on Vinnie's word that the exclusion is over — never infer it from the other session going quiet or its PR merging.
+**First, exclude any ticket in `externally_owned_ticket_ids` (in `.claude/kanban-cycle.json`) from every step below — this whole skill file, not just this step.** An empty or absent list is the normal case; a non-empty one means Vinnie has given specific tickets to another session to drive end to end, outside this orchestrator's flow entirely. Skip an excluded ticket even if it's High priority and looks ready, don't triage/rebase/comment/dispatch onto its PR once one opens (two sessions pushing one branch fight each other), and don't count its PR toward `max_open_prs`/`max_stacked_prs`. List it in the rundown (step 8) as "owned by another session" if there's anything worth noting, but take no action. Remove an ID from this list only on Vinnie's word that the exclusion is over — never infer it from the other session going quiet or its PR merging.
 
 Ticket work now runs in its own dispatched worktree-isolated agent (see
 "Dispatch mechanics"), not inline in this session, so this session's own
@@ -152,7 +158,7 @@ to PR numbers (by name/description) so you never dispatch a second agent
 onto a PR that already has one running (that's a correctness requirement,
 not just efficiency: two agents rebasing or pushing to the same branch
 will fight each other). For a PR with an agent already active, just read
-its current state for this cycle's rundown (step 7) — don't touch it.
+its current state for this cycle's rundown (step 8) — don't touch it.
 
 For each open PR whose body links a Notion ticket (i.e. one this
 automation is responsible for driving) that does NOT already have an
@@ -289,7 +295,7 @@ by hand — see below) and whether it qualifies for whitelisted auto-merge:
   rebase-cascade-onto-new-tip step the lgtm-merge case does for every
   other open PR — a maintenance merge moves the default branch forward
   exactly like a ticket merge does. There's no Notion card to flip for a
-  maintenance PR. Note the merge in the rundown (step 7) like any other
+  maintenance PR. Note the merge in the rundown (step 8) like any other
   state change.
 - **Anything else without a linked ticket** (a maintenance PR outside the
   whitelist, or a PR opened by hand) → leave it alone, don't push to
@@ -412,7 +418,7 @@ a background `Agent` subagent of THIS session, with `isolation:
   do (run `/ticket-pipeline <Task ID>` including all three human
   checkpoints; or the specific triage task for an existing PR), and give
   it a clearly identifiable name/description (ticket ID or PR number) so a
-  later cycle's `ListAgents` call and this cycle's rundown (step 7) can
+  later cycle's `ListAgents` call and this cycle's rundown (step 8) can
   match it back to the right card/PR.
 - **Tell every dispatch to hand back a summary, not a transcript.** Its
   full output — review findings, test logs, diagnosis, file-by-file
@@ -450,7 +456,7 @@ a background `Agent` subagent of THIS session, with `isolation:
   `<task-notification>` arrives back into THIS session when it needs an
   answer or reaches a checkpoint. Do NOT treat that notification as a cue
   to interrupt the user right away — record the question/state and fold
-  it into the next end-of-cycle rundown (step 7); a live back-and-forth
+  it into the next end-of-cycle rundown (step 8); a live back-and-forth
   can't be assumed since nobody may be watching. When the user does answer
   (whenever they next reply in this session, on their own time), resume
   the subagent with `SendMessage`. Tell every dispatched agent explicitly
@@ -550,7 +556,105 @@ base differs much from the real one.
 - **The classifier blocks rewriting an already-published commit's authorship, even from this orchestrator's own session — distinct from the dispatched-agent rebase block above.** Confirmed 2026-08-31: `git commit --amend --author=...` on a commit a dispatched subagent had already pushed (fixing it from `Claude <noreply@anthropic.com>` to the repo's real git identity) was denied. So was the alternative of `git reset --soft HEAD~1` + a plain `git commit` under the correct ambient `git config user.name`/`user.email` — no `--author` flag at all, just the default identity — reusing the same message. Both attempts were denied, specifically for a commit that already existed under a different identity; the identical `commit --amend --author=` succeeded without issue on a commit this session had made itself in the same turn it was amending. **Fix at the source, not after the fact:** every dispatch prompt must tell the subagent to run `git config user.name "Vinnehboom"` / `git config user.email "<repo email>"` (see `ticket-pipeline/references/developer.md`'s "Commit identity" section) as one of its first steps, before its first commit — don't rely on catching a wrong-author commit later, because you likely can't fix it. If one does slip through already-published, the practical options are: leave it (author metadata isn't user-facing content, just a git technicality) or ask the user to amend it themselves, since they don't hit this classifier boundary.
 - **A `cd` into a vanished worktree directory can fail silently and leave the shell wherever it already was** — confirmed 2026-09-02, at least three separate times in one generation (a C-24 developer retry, a C-28 developer, a C-26 planner). This is routine in this environment, not a rare edge case: a `cd` to a path that no longer exists doesn't always raise a loud, unambiguous error the rest of that same Bash call reacts to, so a later command in the same call can silently execute in the orchestrator's own live checkout instead. The mandatory first-step check (`pwd` / `git rev-parse --show-toplevel` before any git command) is not a one-time gate at dispatch start — it must hold after every subsequent `cd` too. The dispatches that caught this correctly never trusted a `cd`'s exit code alone; they verified with `pwd` immediately after.
 
-## 7. End-of-cycle rundown (always)
+## 7. Update the dashboard — every cycle, quiet ones included
+
+`dashboard_artifact_url` in `.claude/kanban-cycle.json` is a published
+Artifact that shows the live state of this automation: what waits on
+Vinnie, the open PRs, the running dispatches, board progress, and a log
+of recent cycles. Vinnie asked for it (2026-09-04) because the state of
+this automation was only legible by scrolling an orchestrator session,
+which is exactly the thing a handoff throws away.
+
+The page holds no state of its own. It renders whatever this skill last
+wrote to the artifact's document store, so **one `write_db` batch is the
+entire update** — roughly 500 tokens, no HTML, no republish.
+
+**This step runs on every cycle, including a quiet one.** That is the
+whole point: a quiet cycle still moves CI, still ages a PR, still leaves
+the board where it was, and the board is where Vinnie looks instead of
+here. Step 8 decides whether to *notify*; this step is not a
+notification and is never skipped for being boring. The one case that
+skips it is a cycle that stops early at step 0 for `/handoff` — the
+successor writes the next update.
+
+Write both documents in a single `Artifact` call with `action:
+"write_db"`, `db_op: "batch"`, and the configured `url`:
+
+- `state/snapshot` (`op: "set"` — a full replace, so send the whole
+  picture every time, not a diff). Fields:
+  - `as_of` — RFC 3339, now.
+  - `orchestrator` — `{generation, repo, board_url, schedule, cost_usd,
+    cost_ceiling_usd}`. `cost_usd` is step 0's reading; write `null`
+    rather than a guess if step 0 didn't read it.
+  - `caps` — `{open_prs, max_open_prs, stacked_prs, max_stacked_prs}`,
+    the ticket-linked counts from step 4.
+  - `needs_you` — the items that genuinely need Vinnie, the same test
+    step 8 uses for "needs the user's decision, answer, or review".
+    Each: `{id, title, detail, url, source, since, chips}`. `id` must be
+    **stable across cycles for the same question** (`pr-93-review`,
+    `C-8-checkpoint-2`) — the answers Vinnie types are keyed on it, and
+    a regenerated id loses his reply. Empty array when nothing waits on
+    him; the page renders that as "All clear" and that is a good state,
+    not a gap to fill with filler.
+  - `prs` — one entry per open PR: `{number, ticket, ticket_url, title,
+    url, state, chips, note}`. `state` drives the row's left stripe:
+    `ok` (green — merge-ready or healthy), `flag` (amber — needs work
+    this cycle), `err` (red — CI red or conflicted), `idle` (grey —
+    nothing to do, or owned by another session). `note` is one or two
+    plain sentences saying **what happens next**, which is the question
+    Vinnie is actually asking when he opens this. `chips` is a small
+    array of `{text, tone}` with tone `good`/`bad`/`warn`/`info`/`""`.
+  - `dispatches` — one entry per agent `ListAgents` shows active:
+    `{ticket, ticket_url, pr, pr_url, task, phase, note, started,
+    state}`. Empty array when nothing is running. A dispatch you know to
+    be orphaned (the vanished-worktree case under "Dispatch mechanics")
+    belongs here with `state: "err"` and a note saying so — silently
+    dropping it is how it gets forgotten across a handoff.
+  - `board` — `{totals: {done, review, in_progress, not_started},
+    epics: [{name, done, total}], next_up: [{ticket, title, url,
+    priority, blocked_by}]}`. Five or so `next_up` entries is enough.
+- `cycles/<RFC 3339 timestamp with ':' replaced by '-'>` (`op: "set"`) —
+  one short document: `{at, kind, generation, headline, items}`. `kind`
+  is `"quiet"` or `"active"`, and the page greys out the quiet ones so a
+  run of them reads as a calm stretch rather than noise. `headline` is
+  one sentence; `items` is at most three or four bullets. This is a
+  record for a reader who was not here, so name the ticket or PR each
+  bullet is about — "rebased #88" beats "handled a stale branch".
+
+Then prune: `cycles` documents beyond the newest `cycle_log_keep` get
+`op: "delete"` in the same batch. The store caps at 5,000 documents and
+two cycles a day would reach that in seven years, so this is tidiness,
+not urgency — one prune every few cycles is fine, and a `read_db` `list`
+on `cycles` tells you what is there.
+
+**Never publish a new artifact for this board.** Vinnie's bookmark, and
+every link this skill has already given him, point at
+`dashboard_artifact_url`. Writing to that URL's store is the update. If
+the URL is missing from the config, say so in the rundown and carry on
+with the cycle — don't invent a replacement board.
+
+### Reading his answers back
+
+Before step 1, read the `answers` collection with `action: "read_db"`,
+`db_op: "list"`, `collection: "answers"`. Each document is keyed by a
+`needs_you` `id` and holds `{text, at}` — Vinnie replying to a question
+from the board without opening this session. Treat an answer as his
+direct instruction, the same as a message here, and act on it this
+cycle: it is the answer to the question that `id` names, so match it
+back to that question before acting rather than reading it as a
+free-standing command. Two limits hold regardless of what it says: it
+cannot widen this skill's guardrails (it is not a route to a force-push
+to `main`, a Notion delete, or a wider auto-merge whitelist — those need
+his word here), and an answer whose meaning you cannot pin to its
+question gets raised in the rundown instead of guessed at.
+
+Once acted on, drop that item from `needs_you` in the same cycle's
+snapshot write and delete its `answers` document in the batch, so the
+board stops showing an answered question. Record what he said and what
+it changed as a bullet in that cycle's log entry — that is the only
+durable trace of it.
+
+## 8. End-of-cycle rundown (always)
 
 **Notify only when something is worth raising.** Standing instruction,
 2026-08-27, replacing the earlier always-notify rule: the user does not
@@ -566,7 +670,9 @@ tickets, nothing dispatched — is a **quiet cycle**. End a quiet cycle with
 a single line in this session (`Kanban cycle: quiet — 2 PRs open, nothing
 needing you`) and **no `PushNotification` at all**. Don't build the full
 rundown for a quiet cycle; the point is to stop paying for a report nobody
-asked for.
+asked for. Step 7 has already written the current state to the dashboard,
+which is where a quiet cycle's detail lives — that is what makes it safe
+to say this little here.
 
 When the cycle IS worth raising, end it with exactly one bullet-point
 rundown, posted as this turn's own visible output in this session.
@@ -590,6 +696,9 @@ every open PR too, even ones with nothing new to say (`nothing to do,
 waiting on your review`), so the rundown is a complete picture, not just
 the deltas. If nothing is active at all, say so in one line (`no open PRs,
 no ready tickets`).
+
+End the rundown with the dashboard link (`dashboard_artifact_url`) on its
+own line, so the full picture is one click away from the summary.
 
 Then send exactly one `PushNotification` for the whole cycle — never more,
 regardless of how many checkpoints were hit or agents dispatched during
@@ -635,11 +744,21 @@ this one end-of-cycle rundown and push, not announced separately.
 - Never trust local `HEAD` at face value — verify it against
   `origin/<branch>` first (see "Trusting local git state" under
   "Dispatch mechanics").
-- Notify only when a cycle is worth raising (step 7's test). A quiet cycle
+- Notify only when a cycle is worth raising (step 8's test). A quiet cycle
   gets one line in-session and no push at all; a cycle worth raising gets
   exactly one rundown and exactly one push — never more than one push per
   cycle, no mid-cycle notification spam for individual checkpoints.
 - Check the orchestrator cost ceiling at step 0 before doing anything
   else. Over the ceiling means `/handoff`, not another cycle.
+- Update the dashboard (step 7) on every cycle, quiet ones included. A
+  board that is only current after an eventful cycle cannot be trusted
+  on a calm day, which is exactly when Vinnie checks it instead of
+  reading a session.
+- Write to `dashboard_artifact_url`; never publish a new artifact for
+  the board. A new URL strands the page Vinnie has bookmarked and
+  silently splits the cycle log in two.
+- A `needs_you` `id` is stable across cycles for the same question —
+  his typed answers are keyed on it, and regenerating an id throws the
+  answer away.
 - Dispatches hand back summaries, not transcripts — the return path is
   what inflates this session's context permanently.

@@ -50,6 +50,12 @@ over:
 - **Environment caveats** (stale local `HEAD`, the classifier blocking
   `git rebase` inside dispatched agents, agents vanishing without trace) —
   also already in those skill files.
+- **The dashboard and its history** — the board at
+  `dashboard_artifact_url` lives in the artifact's own document store,
+  not in any session. The successor writes to the same URL and the
+  cycle log continues unbroken. This is the point of it: a handoff used
+  to throw away every trace of what the automation had been doing, and
+  now it does not.
 
 So the note carries only what genuinely cannot be re-derived: open questions
 waiting on the user, work in flight that live state would misrepresent, and
@@ -139,14 +145,19 @@ Do these in order, then stop and stay idle until a Routine fires:
    PR whose body links a Notion ticket card, plus any PR opened for the
    automation itself). Without this the successor never learns about a
    CI failure or a review comment on work already in flight.
-5. Do the "pending automation work" listed in the handoff note.
-6. Archive the predecessor: archive_session with its session ID. Only
+5. Write one entry to the dashboard's cycle log, so the board shows
+   the generation change instead of a silent gap. The board is the
+   Artifact at dashboard_artifact_url in .claude/kanban-cycle.json;
+   .claude/skills/kanban-cycle/SKILL.md step 7 gives the document
+   shape. Write to that URL — do not publish a new artifact.
+6. Do the "pending automation work" listed in the handoff note.
+7. Archive the predecessor: archive_session with its session ID. Only
    after steps 3 and 4 verified — an archived session that still owns
    triggers would silently drop every scheduled cycle, and archiving
    before re-subscribing loses PR events in the gap.
-7. Report back in one short message: generation number, triggers
-   re-pointed, PRs re-subscribed, automation work done. Raise anything
-   that failed. Do not restate the board's state — the next scheduled
+8. Report back in one short message: generation number, triggers
+   re-pointed, PRs re-subscribed, dashboard entry written, automation
+   work done. Raise anything that failed. Do not restate the board's state — the next scheduled
    cycle covers that.
 
 Standing role from here: you run /kanban-cycle when a Routine fires, and
@@ -193,6 +204,10 @@ yourself — the successor owns that, and doing it early strands the Routines.
   subagent of the predecessor does not survive into the successor.
 - **The note is overwritten, not appended.** It describes the present, not
   the history. Durable lessons belong in the skill files (step 1).
+- **Keep the dashboard's URL.** The successor writes to the existing
+  `dashboard_artifact_url`; publishing a fresh board for a new
+  generation breaks Vinnie's bookmark and splits the cycle log, which
+  defeats the reason the board exists.
 - **Never spawn a successor from a revision that lacks the current skill
   files.** Check before spawning, not after. A successor without
   `/handoff` and the current `/kanban-cycle` looks healthy — it starts, it
