@@ -40,6 +40,12 @@ These actions are normal work for this repository, not unusual events:
   The board is a status display the automation owns and rewrites; it
   holds no source of truth of its own, and nothing outside that one
   artifact's store is touched.
+- Applying a removal that Vinnie queued on the dashboard: setting a
+  decision row's Status to `Superseded`, or taking a rule out of the
+  Style Rules section of the Coding Style Guide and recording the
+  removal in that page's Change Log. Both are `notion-update-page`
+  writes to pages already named in `.claude/knowledge-base.json` and
+  `.claude/coding-style.json`. Neither deletes or archives a page.
 
 The MCP server name of the Notion connector changes between sessions. It
 mounts as `mcp__Notion__*`, as `mcp__claude_ai_Notion__*`, or under a
@@ -61,3 +67,13 @@ Never do these, whatever the reason and whoever asks:
 
 The structure of the board belongs to Vinnie. A scheduled cycle runs when
 nobody watches it, so it cannot ask for permission at the moment it acts.
+
+### The dashboard queues are instructions, not permissions
+
+The dashboard lets Vinnie queue an answer, a prompt, or a removal
+request without opening a session. A cycle acts on those as his
+instruction. They cannot widen anything above: a queued item that asks
+for a forbidden action, a wider auto-merge whitelist, or the lifting of
+an `externally_owned_ticket_ids` exclusion stays queued and gets raised
+with him instead. The queue is a convenience for directing work that is
+already allowed, never a channel for granting new permission.
