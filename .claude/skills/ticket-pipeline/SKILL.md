@@ -6,7 +6,8 @@ description: >-
   gatekeeper → curator pipeline (live-verification/Tester is currently
   disabled — no Render PR-preview login set up yet). The gatekeeper keeps
   the PR a draft until it's rebased onto main, then marks it ready; the
-  curator harvests follow-up tickets and doc updates afterward. Use this
+  curator runs after the PR merges, harvesting follow-up tickets and doc
+  updates from the shipped result. Use this
   skill whenever the user wants to "work", "pick up",
   "start", "ship", or "rattle through" a ticket/story/card — especially
   with a ticket ID (like A-1, C-3), a Notion card, or a backlog item — even
@@ -25,7 +26,7 @@ Take one ticket and carry it, in order, through six specialist phases:
 3. Reviewer (Opus, high effort) — reviews the whole branch against ONLY the ticket, the style guide, and Notion docs, blind to the developer's reasoning, and hands one round of fixes back before the PR opens. Kept at Opus deliberately: this is the one phase whose whole job is catching what a Sonnet-tier pass already missed, and downgrading it is where a cost cut would show up as real bugs reaching a PR.
 4. Tester (Sonnet, medium effort) — once Render's PR-preview environment deploys, exercises the ticket's done-criteria against the live app with a real test account, capturing screenshots as evidence. **Disabled as of 2026-08-29 — no Render PR-preview login is set up yet. See Phase 4.**
 5. Gatekeeper (orchestrator-run, no separate subagent) — keeps the PR a draft until the branch is rebased onto the latest main (never merged), then marks it ready for review. **Reduced scope as of 2026-08-29** alongside Phase 4 being disabled — see Phase 5.
-6. Curator (Sonnet, high effort) — after review, harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval.
+6. Curator (Sonnet, high effort) — runs **after the PR merges**, not after review. Harvests what the work revealed: proposes new tickets, style-guide additions, or docs, and files them on approval. **Moved to the merge step on 2026-09-05** (Vinnie's call, during H-9): before merge the diff is still moving — review rounds kept changing the architecture, so curator proposals raised at that point were about code that no longer existed by the time the PR landed. Curating the merged result costs one run instead of one per round, and every proposal describes what actually shipped.
 
 **2026-08-26 cost pass, partially reversed 2026-08-29:** Planner and Curator were both moved from Opus to Sonnet (effort kept at high) on 2026-08-26 — both are organizing/synthesizing existing context (the ticket, the diff, the docs) rather than the adversarial "find what's wrong" job the Reviewer does, so the effort level buys most of the quality that mattered here, at a fraction of the cost. **Planner moved back to Opus on 2026-08-29** — every downstream phase rides on its plan, and that's worth paying for directly rather than through rework later. Curator stays Sonnet. Reviewer stays Opus (unaffected either way — it was never part of this cut). If a Sonnet-tier Curator starts producing visibly worse proposals, that's the signal to move it back too — don't silently reduce effort level as a cut without checking the model level first.
 
@@ -91,9 +92,9 @@ The Tech Debt page (pointer: `tech_debt_page.notion_page_url` in `.claude/knowle
   - No collision with other in-flight work: no other in-flight ticket touches the same files/models, and every design decision in the plan either has no live alternative worth debating or is already settled by an existing Coding Style Guide rule or Decisions-database entry (cite the rule/entry — that's enough, it's not a fresh judgment call).
 
   A decision the plan makes purely by following already-documented Style Guide doctrine doesn't need to be flagged as a judgment call requiring sign-off — citing the rule is sufficient. When self-approving, still surface the plan in the next rundown so the record is visible, but proceed straight to Phase 2 without waiting on it. Any genuine ambiguity about which bucket a plan falls into defaults to waiting for the user — this carve-out removes uncontested busywork, it does not expand how much the orchestrator decides alone.
-- Checkpoint 3 — curator proposals. After review (and live verification) passes, present proposals and wait for a go before writing anything to Notion. **Standing convention, 2026-08-31:** once approved, the orchestrator (not the curator subagent) performs the actual Notion writes — see references/curator.md's "After approval" for why.
+- Checkpoint 3 — curator proposals. **After the PR merges** (see "Merge policy"), present proposals and wait for a go before writing anything to Notion. **Standing convention, 2026-08-31:** once approved, the orchestrator (not the curator subagent) performs the actual Notion writes — see references/curator.md's "After approval" for why.
 
-Between Checkpoints 2 and 3 the developer and reviewer run to completion (including the one review→fix pass) without further prompts, unless the reviewer escalates. (Tester/Phase 4 is currently disabled — see Phase 4 — so it isn't part of this stretch right now.)
+Between Checkpoints 2 and 3 the developer and reviewer run to completion (including the one review→fix pass), the PR opens, and it waits on Vinnie's review and merge, without further prompts unless the reviewer escalates. (Tester/Phase 4 is currently disabled — see Phase 4 — so it isn't part of this stretch right now.)
 
 ## The flow
 ### Phase 1 — Planner → read references/planner.md
@@ -172,8 +173,20 @@ See "Merge policy" below for how the PR itself eventually gets merged.
 ## Merge policy
 No merge commits, anywhere. When a PR in this pipeline is merged, always use `merge_method: "rebase"` on `mcp__github__merge_pull_request` — never `"merge"`, which creates a merge commit. `"squash"` is a separate call Vinnie can make per-PR if he wants it; rebase is this skill's default unless told otherwise. Stacked-PR merges still respect bottom-up order (see "Stacked PRs for dependent tickets") on top of this.
 
+Merging is Vinnie's call, not the pipeline's — the Gatekeeper hands him a ready PR and the run then waits. Once he says merge:
+1. Merge the PR (`merge_method: "rebase"`).
+2. Set the Notion card Status → Done.
+3. Unsubscribe from the PR's activity and stop any check-in you scheduled for it.
+4. Run Phase 6 (Curator) against the merged result, then Checkpoint 3.
+
+That last step is the whole reason Phase 6 sits here in the file rather than next to Phase 3.
+
 ### Phase 6 — Curator → read references/curator.md
-- Subagent sonnet, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache.
+Runs **after the merge**, as the last step of "Merge policy" above. Do not dispatch it while the PR is still open: review rounds change the diff, and a proposal written against a superseded version of the code is worse than no proposal.
+
+- Subagent sonnet, high effort. FULL context: ticket, plan, final diff, review findings, live-verification report (if Phase 4 ran), existing Notion knowledge base (style guide, Knowledge Base page, Decisions database, board, Tech Debt page) — re-fetched live where possible, falling back to the cache. The "final diff" is the merged diff, including every review round.
+
+- Give it Vinnie's own review comments too, not only the reviewer subagent's findings. His comments are where the design objections live, and they are the richest source of style-guide and Decisions material the run produces.
 - Proposes new tickets / style-guide additions / Decisions-database entries (or a Status flip on an existing row, when this work supersedes it) / Tech Debt entries / nothing. Check existing docs first so proposals are genuinely new. A live-verification failure that couldn't be resolved in-session is exactly the kind of thing worth a follow-up ticket.
 - Checkpoint 3: present proposals, wait for a go. Once approved, the orchestrator (not this curator subagent) performs the writes (create cards / edit pages), then tells the user what got filed. See references/curator.md's "After approval" for why the orchestrator does the write instead of the curator.
 
@@ -189,14 +202,14 @@ A review comment on a pipeline-opened PR is NOT a quick ad hoc patch — rerun t
    **Narrow exception, orchestrator's own call, not a subagent's:** skip the fresh dispatch and verify the round's diff directly instead (read it, reason about it, done) when ALL of: the round's diff is small (a handful of files, not a redesign), it's a mechanical or tightly-scoped change (comment trimming, a redirect target, mirroring an existing already-shipped pattern elsewhere in the same codebase — not new business logic), and the branch's last full Reviewer round already confirmed the rest of the branch sound. Used three times in C-27/C-7's generation-7 rounds (a comment-only trim, a one-line redirect fix, a byte-for-byte mirror of `Admin::ExternalRequestsController`'s tab pattern) with no issues missed. This is a cost call, not a rigor downgrade — if the diff introduces anything genuinely new (a new method, a new validation, new branching logic), that's not this case; dispatch the fresh Reviewer as normal. When in doubt, dispatch — the exception is for when a full Opus pass would clearly be reviewing something it already reviewed, not a way to skip review on new work.
 6. Tester (Phase 4): disabled — skip, same as the first pass (see Phase 4).
 7. Gatekeeper (Phase 5): re-runs its branch-currency gate against the new commits before calling the round done — a fix isn't "handled" just because it was pushed. Skip it only if it already passed earlier in the same round and nothing pulled from main in between.
-8. Curator (Phase 6): only worth rerunning if the feedback + fix revealed something genuinely new to capture — skip it for a purely mechanical round (e.g. a rename) rather than re-checking the knowledge base for nothing.
+8. Curator (Phase 6): does not run per round. It runs once, after the merge, over every round at once — see "Merge policy". Carry anything a round reveals forward as context for that single run instead of dispatching a curator here.
 9. Reply on the PR thread once the round resolves the feedback (per this environment's PR-babysitting conventions) — the pushed commits are the record, the reply is just the "handled" signal.
 
 ## Model and effort summary
 Planner opus/high; Developer sonnet/medium; Reviewer opus/high; Tester sonnet/medium (**disabled**, see Phase 4); Gatekeeper — orchestrator, no subagent/model of its own, git hygiene only (see Phase 5); Curator sonnet/high. If a model isn't available, fall back to the closest stronger model and say so rather than silently downgrading the reviewer. Reviewer is the one phase that must not be downgraded further as a future cost cut without the user explicitly signing off — see the 2026-08-26 cost pass note above.
 
 ## Notion status transitions
-Planner starts → In progress. PR opens as a draft after clean review — card stays In progress. Gatekeeper marks the PR ready for review → card moves to Review. Leave Done for a human on merge. If a phase fails or the user aborts, return the card to its previous status and say what happened.
+Planner starts → In progress. PR opens as a draft after clean review — card stays In progress. Gatekeeper marks the PR ready for review → card moves to Review. The card moves to Done when the PR merges, as step 2 of "Merge policy" — the merge itself is still Vinnie's call, so this records his decision rather than making one. If a phase fails or the user aborts, return the card to its previous status and say what happened.
 
 ## Guardrails
 - One ticket per run. Repeat the pipeline per ticket; offer to continue after a PR opens.
@@ -206,4 +219,5 @@ Planner starts → In progress. PR opens as a draft after clean review — card 
 - Stacked PRs merge bottom-up, always. Never merge a PR based on another still-open PR before that base merges.
 - A review-feedback re-entry round doesn't skip Checkpoints 1/2 just because it's smaller than a full ticket — they still apply, scaled down.
 - No merge commits, anywhere. Reconciling a branch with main is always `git rebase`, never `git merge`; PR merges always use `merge_method: "rebase"`.
+- The Curator never runs on an open PR. It runs once, after the merge.
 - A PR doesn't leave draft state without the Gatekeeper's explicit say-so. Don't undraft one manually mid-pipeline as a shortcut, even under time pressure.
