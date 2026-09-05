@@ -49,7 +49,20 @@ Only capture when it reads as a *durable* preference, not a one-off:
    headings unless no existing category fits.
 5. **Prepend a Change Log line** (newest at top) in the exact format:
    `YYYY-MM-DD — <category>: <what changed> (context: <brief source, e.g. file/ticket/discussion>)`
-6. **Confirm** back to the user with a one-liner ("Added under Testing: ...") —
+   Anchor this edit on the first existing `- ` bullet under `## Change Log`.
+   Set `old_str` to that whole bullet line. Set `new_str` to your new
+   bullet, then a newline, then that same bullet line again, unchanged.
+   **Never anchor on the italic format line above the bullets, and never
+   anchor on part of a bullet, such as its date and category prefix.**
+   Both mistakes corrupt the log, and both have happened: one entry kept a
+   stray `2026-09-02 — Structure & Architecture:` prefix from the bullet
+   above it, and another had the format line spliced onto its end.
+   Repaired 2026-09-05, on Vinnie's request.
+6. **Re-fetch the page and read the top three Change Log bullets.** If a
+   line is split, merged, duplicated, or carries text from its neighbor,
+   correct it now. A corrupted entry looks fine to the writer. It stays
+   invisible until somebody reads the log months later.
+7. **Confirm** back to the user with a one-liner ("Added under Testing: ...") —
    do not dump the whole doc back.
 
 ## Guardrails
