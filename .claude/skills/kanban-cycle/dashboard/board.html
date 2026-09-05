@@ -11,6 +11,8 @@
     --attention:#8F4D00; --attention-soft:#FAEDDA; --attention-edge:#D98A2B;
     --good:#1B7A4E; --good-soft:#DFEFE7;
     --bad:#AC2A20; --bad-soft:#F9E5E2;
+    /* chart series - validated for CVD against the light surface */
+    --s-ticket:#2E6BB8; --s-maint:#C0468A;
     --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
     --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
     --pad:clamp(14px,2.4vw,26px);
@@ -24,6 +26,7 @@
       --attention:#EDA845; --attention-soft:#31220F; --attention-edge:#B8792A;
       --good:#54C48D; --good-soft:#0F2C21;
       --bad:#F0776A; --bad-soft:#331815;
+      --s-ticket:#4E8FD6; --s-maint:#D164A2;
     }
   }
   :root[data-theme="dark"]{
@@ -34,6 +37,7 @@
     --attention:#EDA845; --attention-soft:#31220F; --attention-edge:#B8792A;
     --good:#54C48D; --good-soft:#0F2C21;
     --bad:#F0776A; --bad-soft:#331815;
+    --s-ticket:#4E8FD6; --s-maint:#D164A2;
   }
 
   *{box-sizing:border-box}
@@ -44,10 +48,10 @@
   }
   a{color:var(--accent); text-decoration:none; border-bottom:1px solid transparent}
   a:hover{border-bottom-color:currentColor}
-  a:focus-visible,button:focus-visible,textarea:focus-visible{
+  a:focus-visible,button:focus-visible,textarea:focus-visible,select:focus-visible{
     outline:2px solid var(--accent); outline-offset:2px; border-radius:2px;
   }
-  .wrap{max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,44px) var(--pad) 64px}
+  .wrap{max-width:1180px; margin:0 auto; padding:clamp(20px,4vw,44px) var(--pad) 72px}
 
   /* ---------- masthead ---------- */
   .masthead{
@@ -71,9 +75,24 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
   }
 
+  /* ---------- project tabs ---------- */
+  .tabs{display:flex; flex-wrap:wrap; gap:0; border:1px solid var(--rule); border-top:none; background:var(--surface)}
+  .tab{
+    font-family:var(--mono); font-size:12px; font-weight:500; letter-spacing:.06em;
+    padding:9px 16px; border:none; border-right:1px solid var(--rule); background:none;
+    color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:7px;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{color:var(--ink); background:var(--accent-soft); box-shadow:inset 0 -2px 0 var(--accent)}
+  .tab .badge{
+    font-size:10px; padding:1px 5px; background:var(--attention-edge); color:#fff;
+    border-radius:8px; font-weight:600;
+  }
+  .tab .badge[data-zero="true"]{display:none}
+
   /* ---------- instrument strip ---------- */
   .strip{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
     border:1px solid var(--rule); border-top:none; background:var(--surface);
   }
   .gauge{padding:12px 16px; border-right:1px solid var(--rule); display:flex; flex-direction:column; gap:4px}
@@ -87,6 +106,12 @@
     font-variant-numeric:tabular-nums; color:var(--ink);
   }
   .gauge dd .sub{color:var(--muted); font-weight:400}
+  .gauge dd.warn{color:var(--attention)}
+  .gauge dd.bad{color:var(--bad)}
+  .meter{height:4px; background:var(--surface-2); margin-top:2px}
+  .meter span{display:block; height:100%; background:var(--accent)}
+  .meter span.warn{background:var(--attention-edge)}
+  .meter span.bad{background:var(--bad)}
 
   /* ---------- sections ---------- */
   section{margin-top:34px}
@@ -99,6 +124,7 @@
     letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2);
   }
   .head .count{font-family:var(--mono); font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .sub-head{border-bottom-color:var(--rule)}
 
   .empty{
     font-size:14px; color:var(--muted); padding:14px 16px;
@@ -127,15 +153,17 @@
   .allclear p{margin:0; font-size:14px; color:var(--ink-2)}
 
   .reply{display:flex; flex-direction:column; gap:6px}
-  .reply label{
+  .reply label, .compose label{
     font-family:var(--mono); font-size:10px; letter-spacing:.14em;
     text-transform:uppercase; color:var(--attention);
   }
-  .reply textarea{
+  .compose label{color:var(--muted)}
+  textarea, select{
     font-family:var(--sans); font-size:14px; color:var(--ink);
     background:var(--surface); border:1px solid var(--rule-strong);
-    padding:8px 10px; min-height:62px; resize:vertical; width:100%;
+    padding:8px 10px; width:100%;
   }
+  textarea{min-height:62px; resize:vertical}
   .reply-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   button.send{
     font-family:var(--sans); font-size:13px; font-weight:600; color:var(--surface);
@@ -143,7 +171,14 @@
   }
   button.send:hover{filter:brightness(1.12)}
   button.send[disabled]{opacity:.5; cursor:default; filter:none}
-  .reply-note{font-family:var(--mono); font-size:11px; color:var(--muted)}
+  button.ghost{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); background:none; border:1px solid var(--rule-strong);
+    padding:2px 8px; cursor:pointer; white-space:nowrap;
+  }
+  button.ghost:hover{color:var(--bad); border-color:var(--bad)}
+  button.ghost[disabled]{opacity:.55; cursor:default; color:var(--muted); border-color:var(--rule-strong)}
+  .note-line{font-family:var(--mono); font-size:11px; color:var(--muted)}
   .saved{
     font-size:14px; color:var(--ink-2); background:var(--surface);
     border:1px solid var(--rule); border-left:3px solid var(--good); padding:8px 10px;
@@ -153,7 +188,21 @@
     text-transform:uppercase; color:var(--good); margin-bottom:3px;
   }
 
-  /* ---------- rows (PRs, dispatches, next-up) ---------- */
+  /* ---------- prompt composer ---------- */
+  .compose{
+    border:1px solid var(--rule); background:var(--surface); padding:14px 16px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .compose-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .compose select{width:auto; min-width:190px; font-family:var(--mono); font-size:12.5px}
+  .queued{border:1px solid var(--rule); border-top:none; background:var(--surface)}
+  .queued .q{
+    display:flex; gap:12px; justify-content:space-between; align-items:flex-start;
+    padding:9px 16px; border-bottom:1px solid var(--rule); font-size:13.5px; color:var(--ink-2);
+  }
+  .queued .q:last-child{border-bottom:none}
+
+  /* ---------- rows ---------- */
   .rows{border:1px solid var(--rule); background:var(--surface)}
   .row{
     display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 18px;
@@ -190,42 +239,64 @@
   .chip.bad{color:var(--bad); border-color:var(--bad); background:var(--bad-soft)}
   .chip.warn{color:var(--attention); border-color:var(--attention-edge); background:var(--attention-soft)}
   .chip.info{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+  .chip.proj{letter-spacing:.1em}
+  .age{font-family:var(--mono); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .age.stale{color:var(--attention); font-weight:500}
+
+  /* ---------- two-column zones ---------- */
+  .duo{display:grid; grid-template-columns:minmax(0,1fr); gap:22px}
+  @media (min-width:860px){.duo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+  .duo.board-split{grid-template-columns:minmax(0,1fr)}
+  @media (min-width:860px){.duo.board-split{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
 
   /* ---------- board ---------- */
-  .board-grid{display:grid; grid-template-columns:minmax(0,1fr); gap:22px}
-  @media (min-width:840px){.board-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
   .epics{border:1px solid var(--rule); background:var(--surface); padding:14px 16px}
   .epic{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 12px; padding:7px 0}
   .epic + .epic{border-top:1px solid var(--rule)}
   .epic-name{font-size:13.5px; color:var(--ink-2); overflow-wrap:anywhere}
-  .epic-num{
-    font-family:var(--mono); font-size:12px; color:var(--muted);
-    font-variant-numeric:tabular-nums; white-space:nowrap;
-  }
+  .epic-num{font-family:var(--mono); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap}
   .bar{grid-column:1 / -1; height:5px; background:var(--surface-2); overflow:hidden}
   .bar span{display:block; height:100%; background:var(--accent)}
   .bar span.full{background:var(--good)}
-  .totals{
-    display:flex; flex-wrap:wrap; gap:0; border:1px solid var(--rule);
-    background:var(--surface); margin-bottom:12px;
-  }
-  .totals div{
-    flex:1 1 90px; padding:10px 14px; border-right:1px solid var(--rule);
-    display:flex; flex-direction:column; gap:2px;
-  }
+  .totals{display:flex; flex-wrap:wrap; border:1px solid var(--rule); background:var(--surface); margin-bottom:12px}
+  .totals div{flex:1 1 90px; padding:10px 14px; border-right:1px solid var(--rule); display:flex; flex-direction:column; gap:2px}
   .totals div:last-child{border-right:none}
   .totals .n{font-family:var(--mono); font-size:20px; font-weight:600; font-variant-numeric:tabular-nums}
   .totals .k{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted)}
+
+  /* ---------- panels (throughput / agents) ---------- */
+  .panel{border:1px solid var(--rule); background:var(--surface); padding:14px 16px}
+  .panel-figures{display:flex; flex-wrap:wrap; gap:18px; margin-bottom:12px}
+  .fig{display:flex; flex-direction:column; gap:1px}
+  .fig .n{font-family:var(--mono); font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1.15}
+  .fig .k{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted)}
+  .legend{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:8px}
+  .legend span{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; color:var(--ink-2)}
+  .swatch{width:10px; height:10px; flex:none}
+  .chart-scroll{overflow-x:auto}
+  svg{display:block; max-width:100%}
+  svg text{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  .tip{
+    position:fixed; z-index:20; pointer-events:none; opacity:0;
+    background:var(--ink); color:var(--ground); font-family:var(--mono); font-size:11.5px;
+    padding:6px 9px; line-height:1.45; white-space:nowrap; transition:opacity .1s;
+  }
+  .tip[data-on="1"]{opacity:1}
+
+  /* ---------- knowledge ---------- */
+  .kn{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 14px; padding:11px 16px; border-bottom:1px solid var(--rule)}
+  .kn:last-child{border-bottom:none}
+  .kn-text{font-size:14px; color:var(--ink); overflow-wrap:anywhere}
+  .kn-meta{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:3px}
+  .kn.pending{background:var(--attention-soft)}
+  .kn-side{display:flex; align-items:flex-start; gap:6px; flex-wrap:wrap; justify-content:flex-end}
 
   /* ---------- cycle log ---------- */
   .log{border:1px solid var(--rule); background:var(--surface)}
   .entry{display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 16px; padding:11px 16px; border-bottom:1px solid var(--rule)}
   .entry:last-child{border-bottom:none}
   .entry.quiet{color:var(--muted)}
-  .stamp{
-    font-family:var(--mono); font-size:11.5px; color:var(--muted);
-    font-variant-numeric:tabular-nums; white-space:nowrap; padding-top:1px;
-  }
+  .stamp{font-family:var(--mono); font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; padding-top:1px}
   .entry-head{font-size:14px; color:var(--ink)}
   .entry.quiet .entry-head{color:var(--muted)}
   .entry ul{margin:5px 0 0; padding-left:16px; grid-column:2}
@@ -242,10 +313,7 @@
     font-size:13.5px; color:var(--ink-2);
   }
   .banner b{color:var(--attention)}
-  footer{
-    margin-top:44px; padding-top:14px; border-top:1px solid var(--rule);
-    font-size:13px; color:var(--muted); max-width:72ch;
-  }
+  footer{margin-top:48px; padding-top:14px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); max-width:74ch}
   footer p{margin:0 0 7px}
   footer code{font-family:var(--mono); font-size:12px; color:var(--ink-2)}
 </style>
@@ -253,7 +321,7 @@
 <div class="wrap">
   <header class="masthead">
     <div>
-      <div class="eyebrow" id="repo-line">Vinnehboom / tcg_fantasy_league</div>
+      <div class="eyebrow" id="repo-line">Orchestrated projects</div>
       <h1>Orchestrator Board</h1>
     </div>
     <div class="live" id="live" data-state="loading">
@@ -261,12 +329,19 @@
     </div>
   </header>
 
+  <div class="tabs" id="tabs" role="tablist"></div>
   <dl class="strip" id="strip"></dl>
   <div id="banner-slot"></div>
 
   <section>
     <div class="head"><h2>Waiting on you</h2><span class="count" id="ask-count"></span></div>
     <div id="asks"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Send a prompt</h2><span class="count" id="req-count"></span></div>
+    <div id="compose"></div>
+    <div id="queued"></div>
   </section>
 
   <section>
@@ -281,16 +356,29 @@
 
   <section>
     <div class="head"><h2>Board</h2><span class="count" id="board-count"></span></div>
-    <div class="board-grid">
+    <div class="duo board-split">
       <div>
         <div class="totals" id="totals"></div>
         <div class="epics" id="epics"></div>
       </div>
       <div>
-        <div class="head" style="border-bottom-color:var(--rule)"><h2>Next up</h2><span class="count" id="next-count"></span></div>
+        <div class="head sub-head"><h2>Next up</h2><span class="count" id="next-count"></span></div>
         <div id="nextup"></div>
       </div>
     </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>How it is going</h2><span class="count" id="tp-count"></span></div>
+    <div class="duo">
+      <div class="panel" id="throughput"></div>
+      <div class="panel" id="agents"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Decisions and style rules</h2><span class="count" id="kn-count"></span></div>
+    <div id="knowledge"></div>
   </section>
 
   <section>
@@ -300,93 +388,35 @@
 
   <footer>
     <p>Each <code>/kanban-cycle</code> run writes what it found to this page: pull requests, dispatched agents, board counts, and one line in the cycle log. The page shows that record. It does not read GitHub or Notion by itself.</p>
-    <p>Answers you type here are read at the start of the next cycle. They do not stop a cycle or start one.</p>
+    <p>Prompts, answers, and removal requests that you type here wait in a queue. The next cycle for that project reads the queue, acts, and clears it. Nothing here starts a cycle.</p>
+    <p>A removal request never erases a Notion page. A decision moves to Superseded. A style rule is taken out of the guide, and the change log keeps the record.</p>
     <p id="capture-note"></p>
   </footer>
 </div>
+<div class="tip" id="tip"></div>
 
 <script>
 (function () {
   "use strict";
 
-  /* Rendered before the live store answers, and whenever it cannot be reached.
-     Captured when this page was published; the live snapshot replaces it. */
-  var FALLBACK = {
-    captured_at: "2026-09-04T23:16:52Z",
-    as_of: "2026-09-04T23:16:52Z",
-    orchestrator: {
-      generation: 8,
-      repo: "Vinnehboom/tcg_fantasy_league",
-      board_url: "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0",
-      schedule: "08:00 and 17:30 BST",
-      cost_usd: null,
-      cost_ceiling_usd: 50
-    },
-    caps: { open_prs: 2, max_open_prs: 2, stacked_prs: 0, max_stacked_prs: 2 },
+  /* Shown before the live store answers, and whenever it cannot be reached.
+     Captured when this page was published; the live store replaces it. */
+  var FALLBACK_CAPTURED = "2026-09-05T00:00:00Z";
+  var FALLBACK = [{
+    project: { key: "tcg", name: "TCG Fantasy League", repo: "Vinnehboom/tcg_fantasy_league" },
+    as_of: FALLBACK_CAPTURED,
+    orchestrator: { generation: 8, schedule: "08:00 and 17:30 BST", cost_usd: null, cost_ceiling_usd: 50 },
+    health: { rate_limit: null },
+    caps: { open_prs: 1, max_open_prs: 2, stacked_prs: 0, max_stacked_prs: 2 },
     needs_you: [],
-    prs: [
-      {
-        number: 93, ticket: "C-27", state: "ok",
-        title: "Admin player page: show a player's score modifiers",
-        url: "https://github.com/Vinnehboom/tcg_fantasy_league/pull/93",
-        ticket_url: "https://app.notion.com/3cd4af79fc018109941ef2098ad29591",
-        chips: [{ text: "CI green", tone: "good" }, { text: "lgtm", tone: "good" }, { text: "base main", tone: "" }],
-        note: "You said lgtm at 21:29 and CI went green at 21:40. The next cycle rebase-merges it, sets C-27 to Done, and rebases the other open branches."
-      },
-      {
-        number: 88, ticket: "C-7", state: "flag",
-        title: "Scoring::Strategy + placement weighting",
-        url: "https://github.com/Vinnehboom/tcg_fantasy_league/pull/88",
-        ticket_url: "https://app.notion.com/3a94af79fc0181cfa221d624e8e23fe0",
-        chips: [{ text: "CI green", tone: "good" }, { text: "review comments", tone: "warn" }, { text: "base main", tone: "" }],
-        note: "New review comments at 21:38, after the last push. The next cycle gathers every unresolved thread and sends one dispatch to answer them all."
-      },
-      {
-        number: 94, ticket: "H-9", state: "idle",
-        title: "Synthetic external-data adapter + demo seed data",
-        url: "https://github.com/Vinnehboom/tcg_fantasy_league/pull/94",
-        ticket_url: "https://app.notion.com/3d04af79fc018176ab17c5f8b5c09d9f",
-        chips: [{ text: "CI green", tone: "good" }, { text: "another session", tone: "info" }],
-        note: "H-8 and H-9 belong to a separate session. This orchestrator does not triage, rebase, or count them, and waits for your word to lift the exclusion."
-      }
-    ],
+    prs: [],
     dispatches: [],
-    board: {
-      totals: { done: 35, review: 3, in_progress: 0, not_started: 52 },
-      epics: [
-        { name: "C — Scoring & pricing", done: 16, total: 30 },
-        { name: "No epic", done: 6, total: 24 },
-        { name: "A — Import infrastructure", done: 9, total: 9 },
-        { name: "M — Communities", done: 0, total: 7 },
-        { name: "D — Riftbound", done: 0, total: 5 },
-        { name: "B — Pokemon JSON", done: 4, total: 4 },
-        { name: "J — Private draft rooms", done: 0, total: 2 },
-        { name: "L — Social", done: 0, total: 2 },
-        { name: "N — Site & supporters", done: 0, total: 2 }
-      ],
-      next_up: [
-        { ticket: "P-1", title: "Register with the ICO and pay the data protection fee", url: "https://app.notion.com/3d04af79fc018111bbe3e7b362e434b2", priority: "High", blocked_by: null },
-        { ticket: "P-11", title: "robots.txt and noindex on the player pages", url: "https://app.notion.com/3d04af79fc01817a996ec359f90d98ed", priority: "High", blocked_by: null },
-        { ticket: "P-12", title: "Devise hardening: confirmable, paranoid, session timeout", url: "https://app.notion.com/3d04af79fc0181e0b537c530f6d87f53", priority: "High", blocked_by: null },
-        { ticket: "P-2", title: "Privacy notice and terms pages", url: "https://app.notion.com/3d04af79fc0181df8e1ce2920536aea0", priority: "High", blocked_by: null },
-        { ticket: "C-8", title: "Rewrite SalaryDrafts::Scorer", url: "https://app.notion.com/3a94af79fc0181098384e3fbb4b75c97", priority: "Normal", blocked_by: "C-7" }
-      ]
-    }
-  };
-
-  var FALLBACK_CYCLES = [{
-    id: "seed",
-    at: "2026-09-04T23:16:52Z",
-    kind: "active",
-    generation: 8,
-    headline: "Board created and seeded from live GitHub and Notion state.",
-    items: [
-      "3 open PRs read: #93 merge-ready, #88 has unanswered review comments, #94 owned by another session.",
-      "90 cards on the board: 35 done, 3 in review, 52 not started."
-    ]
+    board: { totals: {}, epics: [], next_up: [] },
+    agents: null,
+    throughput: null,
+    knowledge: null
   }];
 
-  /* ---------- helpers ---------- */
   var $ = function (id) { return document.getElementById(id); };
 
   function esc(v) {
@@ -394,171 +424,483 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-
   function stamp(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return esc(iso || "—");
-    return d.toLocaleString(undefined, {
-      day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false
-    });
+    return d.toLocaleString(undefined, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
   }
-
+  function hoursSince(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? null : (Date.now() - d.getTime()) / 3600000;
+  }
   function ago(iso) {
+    var h = hoursSince(iso);
+    if (h == null) return "";
+    if (h < 1 / 60) return "just now";
+    if (h < 1) return Math.round(h * 60) + " min";
+    if (h < 48) return Math.round(h) + "h";
+    return Math.round(h / 24) + "d";
+  }
+  function until(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
-    var mins = Math.round((Date.now() - d.getTime()) / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return mins + " min ago";
-    var hrs = Math.round(mins / 60);
-    if (hrs < 24) return hrs + (hrs === 1 ? " hour ago" : " hours ago");
-    var days = Math.round(hrs / 24);
-    return days + (days === 1 ? " day ago" : " days ago");
+    var h = (d.getTime() - Date.now()) / 3600000;
+    if (h <= 0) return "now";
+    if (h < 1) return Math.round(h * 60) + " min";
+    if (h < 48) return Math.round(h) + "h";
+    return Math.round(h / 24) + "d";
   }
-
   function chips(list) {
     return (list || []).map(function (c) {
-      var tone = c.tone ? " " + esc(c.tone) : "";
-      return '<span class="chip' + tone + '">' + esc(c.text) + "</span>";
+      return '<span class="chip' + (c.tone ? " " + esc(c.tone) : "") + '">' + esc(c.text) + "</span>";
     }).join("");
   }
-
   function link(url, text) {
     return url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(text) + "</a>" : esc(text);
   }
-
-  /* ---------- render ---------- */
-  function renderStrip(s) {
-    var o = s.orchestrator || {};
-    var caps = s.caps || {};
-    var t = (s.board && s.board.totals) || {};
-    var total = (t.done || 0) + (t.review || 0) + (t.in_progress || 0) + (t.not_started || 0);
-    var pct = total ? Math.round((t.done || 0) / total * 100) : 0;
-    var cost = o.cost_usd == null
-      ? '<span class="sub">not recorded</span>'
-      : "$" + Number(o.cost_usd).toFixed(0) + ' <span class="sub">/ ' + esc(o.cost_ceiling_usd) + "</span>";
-
-    var cells = [
-      ["Generation", "gen " + esc(o.generation == null ? "?" : o.generation)],
-      ["Cycles run at", esc(o.schedule || "—")],
-      ["PR slots used", esc(caps.open_prs == null ? "?" : caps.open_prs) + ' <span class="sub">/ ' + esc(caps.max_open_prs == null ? "?" : caps.max_open_prs) + "</span>"],
-      ["Stacked", esc(caps.stacked_prs == null ? "?" : caps.stacked_prs) + ' <span class="sub">/ ' + esc(caps.max_stacked_prs == null ? "?" : caps.max_stacked_prs) + "</span>"],
-      ["Board done", pct + '% <span class="sub">' + (t.done || 0) + "/" + total + "</span>"],
-      ["Session cost", cost]
-    ];
-
-    $("strip").innerHTML = cells.map(function (c) {
-      return '<div class="gauge"><dt>' + c[0] + "</dt><dd>" + c[1] + "</dd></div>";
-    }).join("");
-
-    if (o.repo) $("repo-line").textContent = o.repo.replace("/", " / ");
+  function projChip(p) {
+    return state.projects.length > 1 ? '<span class="chip proj">' + esc(p.project.key) + "</span>" : "";
+  }
+  /* A thing waiting on a person goes stale at 48h; the board says so rather than
+     letting it blend in with everything else. */
+  var STALE_H = 48;
+  function ageTag(iso) {
+    if (!iso) return "";
+    var h = hoursSince(iso);
+    if (h == null) return "";
+    return '<span class="age' + (h >= STALE_H ? " stale" : "") + '">' + esc(ago(iso)) + "</span>";
   }
 
-  function renderAsks(s, answers, canWrite) {
-    var asks = s.needs_you || [];
-    $("ask-count").textContent = asks.length ? asks.length + " open" : "";
+  /* ---------- state ---------- */
+  var state = { projects: [], cycles: [], answers: {}, requests: [], retractions: {}, active: "all", live: false, store: null };
 
-    if (!asks.length) {
-      $("asks").innerHTML =
-        '<div class="allclear"><span class="mark">All clear</span>' +
+  function readPref() { try { return localStorage.getItem("ob.project"); } catch (e) { return null; } }
+  function writePref(v) { try { localStorage.setItem("ob.project", v); } catch (e) { /* private window */ } }
+
+  function visible() {
+    if (state.active === "all") return state.projects;
+    return state.projects.filter(function (p) { return p.project.key === state.active; });
+  }
+  function allAsks() {
+    var out = [];
+    state.projects.forEach(function (p) {
+      (p.needs_you || []).forEach(function (a) { out.push({ ask: a, p: p }); });
+    });
+    return out.sort(function (a, b) { return new Date(a.ask.since || 0) - new Date(b.ask.since || 0); });
+  }
+
+  /* ---------- tabs ---------- */
+  function renderTabs() {
+    var ps = state.projects;
+    if (ps.length <= 1) { $("tabs").innerHTML = ""; $("tabs").style.display = "none"; return; }
+    $("tabs").style.display = "";
+    var total = allAsks().length;
+    var html = ['<button class="tab" role="tab" data-key="all" aria-selected="' + (state.active === "all") + '">All projects' +
+      '<span class="badge" data-zero="' + (total === 0) + '">' + total + "</span></button>"];
+    ps.forEach(function (p) {
+      var n = (p.needs_you || []).length;
+      html.push('<button class="tab" role="tab" data-key="' + esc(p.project.key) + '" aria-selected="' +
+        (state.active === p.project.key) + '">' + esc(p.project.name || p.project.key) +
+        '<span class="badge" data-zero="' + (n === 0) + '">' + n + "</span></button>");
+    });
+    $("tabs").innerHTML = html.join("");
+  }
+
+  /* ---------- strip ---------- */
+  function renderStrip() {
+    var vis = visible();
+    if (!vis.length) { $("strip").innerHTML = ""; return; }
+    var cells = [];
+
+    if (vis.length === 1) {
+      var p = vis[0], o = p.orchestrator || {}, caps = p.caps || {};
+      cells.push(["Generation", "gen " + esc(o.generation == null ? "?" : o.generation), ""]);
+      cells.push(["Cycles run at", esc(o.schedule || "—"), ""]);
+      cells.push(["PR slots used", esc(caps.open_prs) + ' <span class="sub">/ ' + esc(caps.max_open_prs) + "</span>", ""]);
+      var t = (p.board && p.board.totals) || {};
+      var tot = (t.done || 0) + (t.review || 0) + (t.in_progress || 0) + (t.not_started || 0);
+      cells.push(["Board done", (tot ? Math.round((t.done || 0) / tot * 100) : 0) + '% <span class="sub">' + (t.done || 0) + "/" + tot + "</span>", ""]);
+      cells.push(costCell(o));
+      cells.push(rateCell(p.health));
+    } else {
+      var prs = 0, disp = 0, done = 0, cards = 0;
+      vis.forEach(function (p) {
+        prs += (p.prs || []).length;
+        disp += (p.dispatches || []).length;
+        var t = (p.board && p.board.totals) || {};
+        done += t.done || 0;
+        cards += (t.done || 0) + (t.review || 0) + (t.in_progress || 0) + (t.not_started || 0);
+      });
+      cells.push(["Projects", String(vis.length), ""]);
+      cells.push(["Open PRs", String(prs), ""]);
+      cells.push(["Dispatches running", String(disp), ""]);
+      cells.push(["Cards done", (cards ? Math.round(done / cards * 100) : 0) + '% <span class="sub">' + done + "/" + cards + "</span>", ""]);
+      var worst = vis.map(function (p) { return p.health; }).filter(Boolean)
+        .sort(function (a, b) { return rank(b.rate_limit) - rank(a.rate_limit); })[0];
+      cells.push(rateCell(worst));
+    }
+
+    var oldest = allAsks().filter(function (x) { return x.ask.since; })[0];
+    cells.push(["Oldest waiting", oldest
+      ? '<span class="' + (hoursSince(oldest.ask.since) >= STALE_H ? "" : "") + '">' + esc(ago(oldest.ask.since)) + "</span>"
+      : '<span class="sub">nothing</span>',
+      oldest && hoursSince(oldest.ask.since) >= STALE_H ? "warn" : ""]);
+
+    $("strip").innerHTML = cells.map(function (c) {
+      return '<div class="gauge"><dt>' + c[0] + '</dt><dd class="' + (c[2] || "") + '">' + c[1] + "</dd></div>";
+    }).join("");
+
+    $("repo-line").textContent = vis.length === 1
+      ? (vis[0].project.repo || vis[0].project.name || "")
+      : vis.length + " orchestrated projects";
+  }
+
+  function costCell(o) {
+    if (o.cost_usd == null) return ["Session cost", '<span class="sub">not recorded</span>', ""];
+    var pct = o.cost_ceiling_usd ? Math.min(100, o.cost_usd / o.cost_ceiling_usd * 100) : 0;
+    var tone = pct >= 90 ? "bad" : pct >= 70 ? "warn" : "";
+    return ["Session cost",
+      "$" + Number(o.cost_usd).toFixed(0) + ' <span class="sub">/ ' + esc(o.cost_ceiling_usd) + "</span>" +
+      '<div class="meter"><span class="' + tone + '" style="width:' + pct.toFixed(0) + '%"></span></div>', tone];
+  }
+  function rank(rl) {
+    if (!rl) return 0;
+    return { allowed: 1, allowed_warning: 2, rejected: 3 }[rl.status] || 1;
+  }
+  function rateCell(health) {
+    var rl = health && health.rate_limit;
+    if (!rl || !rl.status) return ["Rate limit", '<span class="sub">not recorded</span>', ""];
+    var tone = rl.status === "allowed" ? "" : rl.status === "allowed_warning" ? "warn" : "bad";
+    var label = { allowed: "healthy", allowed_warning: "warning", rejected: "throttled" }[rl.status] || rl.status;
+    return ["Rate limit", esc(label) + (rl.resets_at ? ' <span class="sub">resets in ' + esc(until(rl.resets_at)) + "</span>" : ""), tone];
+  }
+
+  /* ---------- waiting on you ---------- */
+  function renderAsks() {
+    var items = state.active === "all" ? allAsks()
+      : allAsks().filter(function (x) { return x.p.project.key === state.active; });
+    $("ask-count").textContent = items.length ? items.length + " open" : "";
+
+    if (!items.length) {
+      $("asks").innerHTML = '<div class="allclear"><span class="mark">All clear</span>' +
         "<p>No decision, answer, or review is waiting on you. The next cycle runs on its own.</p></div>";
       return;
     }
-
-    $("asks").innerHTML = asks.map(function (a) {
-      var id = String(a.id || "");
-      var saved = answers[id];
+    $("asks").innerHTML = items.map(function (x) {
+      var a = x.ask, id = String(a.id || ""), saved = state.answers[id];
       var body = saved
         ? '<div class="saved"><span class="who">Your answer · ' + stamp(saved.at) + "</span>" + esc(saved.text) + "</div>"
-        : canWrite
+        : state.live
           ? '<div class="reply"><label for="r-' + esc(id) + '">Answer this</label>' +
-            '<textarea id="r-' + esc(id) + '" data-ask="' + esc(id) + '" placeholder="Typed here, picked up at the start of the next cycle."></textarea>' +
+            '<textarea id="r-' + esc(id) + '" data-ask="' + esc(id) + '" placeholder="Read at the start of the next cycle for this project."></textarea>' +
             '<div class="reply-row"><button class="send" data-ask="' + esc(id) + '">Save answer</button>' +
-            '<span class="reply-note" data-note="' + esc(id) + '"></span></div></div>'
-          : '<div class="reply-note">Answer on the pull request or the Notion card — this page cannot reach the store.</div>';
-
+            '<span class="note-line" data-note="' + esc(id) + '"></span></div></div>'
+          : '<div class="note-line">Answer on the pull request or the Notion card — this page cannot reach the store.</div>';
       return '<div class="ask"><div class="ask-top">' +
-        '<span class="ask-title">' + link(a.url, a.title || "Untitled") + "</span>" +
+        projChip(x.p) + '<span class="ask-title">' + link(a.url, a.title || "Untitled") + "</span>" +
         chips(a.chips) + "</div>" +
         (a.detail ? '<p class="ask-detail">' + esc(a.detail) + "</p>" : "") +
         '<div class="ask-meta">' + esc(a.source || "orchestrator") +
-        (a.since ? " · asked " + ago(a.since) : "") + "</div>" + body + "</div>";
+        (a.since ? " · waiting " + ago(a.since) : "") + "</div>" + body + "</div>";
     }).join("");
   }
 
-  function renderPrs(s) {
-    var prs = s.prs || [];
-    $("pr-count").textContent = prs.length ? prs.length + " open" : "";
-    if (!prs.length) {
+  /* ---------- prompt composer ---------- */
+  function renderCompose() {
+    if (!state.live) {
+      $("compose").innerHTML = '<div class="empty">This page cannot reach the store, so it cannot queue a prompt.</div>';
+      $("queued").innerHTML = ""; $("req-count").textContent = "";
+      return;
+    }
+    var opts = state.projects.map(function (p) {
+      var sel = p.project.key === state.active ? " selected" : "";
+      return '<option value="' + esc(p.project.key) + '"' + sel + ">" + esc(p.project.name || p.project.key) + "</option>";
+    }).join("");
+    $("compose").innerHTML =
+      '<div class="compose"><label for="req-text">Tell the orchestrator what to do</label>' +
+      '<textarea id="req-text" placeholder="Merge #88 once CI is green. Pick up P-11 next."></textarea>' +
+      '<div class="compose-row">' +
+      (state.projects.length > 1 ? '<select id="req-project" aria-label="Project">' + opts + "</select>" : "") +
+      '<button class="send" id="req-send">Queue it</button>' +
+      '<span class="note-line" id="req-note">Picked up by the next cycle for that project. It cannot start one.</span>' +
+      "</div></div>";
+
+    var pending = state.requests.filter(function (r) {
+      return state.active === "all" || r.project === state.active;
+    });
+    $("req-count").textContent = pending.length ? pending.length + " queued" : "";
+    $("queued").innerHTML = pending.length
+      ? '<div class="queued">' + pending.map(function (r) {
+        return '<div class="q"><span>' + esc(r.text) + "</span>" +
+          '<span class="note-line">' + esc(r.project || "") + " · " + stamp(r.at) + "</span></div>";
+      }).join("") + "</div>"
+      : "";
+  }
+
+  /* ---------- PRs / dispatches ---------- */
+  function renderPrs() {
+    var rows = [];
+    visible().forEach(function (p) { (p.prs || []).forEach(function (r) { rows.push({ r: r, p: p }); }); });
+    $("pr-count").textContent = rows.length ? rows.length + " open" : "";
+    if (!rows.length) {
       $("prs").innerHTML = '<div class="empty">No open pull requests. The next cycle can pick up a new ticket.</div>';
       return;
     }
-    $("prs").innerHTML = '<div class="rows">' + prs.map(function (p) {
-      var cls = ["row", p.state || ""].join(" ").trim();
-      return '<div class="' + esc(cls) + '"><div class="row-main"><div class="row-id">' +
-        link(p.url, "#" + p.number) +
-        (p.ticket ? '<span class="sep">·</span>' + link(p.ticket_url, p.ticket) : "") +
-        '</div><div class="row-title">' + esc(p.title || "") + "</div>" +
-        (p.note ? '<div class="row-note">' + esc(p.note) + "</div>" : "") +
-        '</div><div class="row-side">' + chips(p.chips) + "</div></div>";
+    $("prs").innerHTML = '<div class="rows">' + rows.map(function (x) {
+      var r = x.r;
+      return '<div class="row ' + esc(r.state || "") + '"><div class="row-main"><div class="row-id">' +
+        projChip(x.p) + link(r.url, "#" + r.number) +
+        (r.ticket ? '<span class="sep">·</span>' + link(r.ticket_url, r.ticket) : "") +
+        (r.waiting_since ? ageTag(r.waiting_since) : "") +
+        '</div><div class="row-title">' + esc(r.title || "") + "</div>" +
+        (r.note ? '<div class="row-note">' + esc(r.note) + "</div>" : "") +
+        '</div><div class="row-side">' + chips(r.chips) + "</div></div>";
     }).join("") + "</div>";
   }
 
-  function renderDispatches(s) {
-    var ds = s.dispatches || [];
-    $("dispatch-count").textContent = ds.length ? ds.length + " running" : "";
-    if (!ds.length) {
-      $("dispatches").innerHTML =
-        '<div class="empty">No dispatched agent is running. Work starts when a cycle fires, or when you ask for a ticket.</div>';
+  function renderDispatches() {
+    var rows = [];
+    visible().forEach(function (p) { (p.dispatches || []).forEach(function (d) { rows.push({ d: d, p: p }); }); });
+    $("dispatch-count").textContent = rows.length ? rows.length + " running" : "";
+    if (!rows.length) {
+      $("dispatches").innerHTML = '<div class="empty">No dispatched agent is running. Work starts when a cycle fires, or when you ask for a ticket.</div>';
       return;
     }
-    $("dispatches").innerHTML = '<div class="rows">' + ds.map(function (d) {
-      var cls = "row " + (d.state || "flag");
-      return '<div class="' + esc(cls) + '"><div class="row-main"><div class="row-id">' +
-        link(d.ticket_url, d.ticket || d.label || "dispatch") +
+    $("dispatches").innerHTML = '<div class="rows">' + rows.map(function (x) {
+      var d = x.d;
+      return '<div class="row ' + esc(d.state || "flag") + '"><div class="row-main"><div class="row-id">' +
+        projChip(x.p) + link(d.ticket_url, d.ticket || d.label || "dispatch") +
         (d.pr ? '<span class="sep">·</span>' + link(d.pr_url, "#" + d.pr) : "") +
+        (d.started ? ageTag(d.started) : "") +
         '</div><div class="row-title">' + esc(d.task || "") + "</div>" +
         (d.note ? '<div class="row-note">' + esc(d.note) + "</div>" : "") +
-        '</div><div class="row-side">' +
-        chips((d.phase ? [{ text: d.phase, tone: "info" }] : []).concat(d.chips || [])) +
-        (d.started ? '<span class="chip">' + esc(ago(d.started)) + "</span>" : "") +
+        '</div><div class="row-side">' + chips((d.phase ? [{ text: d.phase, tone: "info" }] : []).concat(d.chips || [])) +
         "</div></div>";
     }).join("") + "</div>";
   }
 
-  function renderBoard(s) {
-    var b = s.board || {};
-    var t = b.totals || {};
+  /* ---------- board ---------- */
+  function renderBoard() {
+    var vis = visible();
+    var t = { done: 0, review: 0, in_progress: 0, not_started: 0 };
+    vis.forEach(function (p) {
+      var b = (p.board && p.board.totals) || {};
+      Object.keys(t).forEach(function (k) { t[k] += b[k] || 0; });
+    });
     var order = [["done", "Done"], ["review", "In review"], ["in_progress", "In progress"], ["not_started", "Not started"]];
-    var total = order.reduce(function (n, k) { return n + (t[k[0]] || 0); }, 0);
+    var total = order.reduce(function (n, k) { return n + t[k[0]]; }, 0);
     $("board-count").textContent = total ? total + " cards" : "";
-
     $("totals").innerHTML = order.map(function (k) {
-      return '<div><span class="n">' + (t[k[0]] || 0) + '</span><span class="k">' + k[1] + "</span></div>";
+      return '<div><span class="n">' + t[k[0]] + '</span><span class="k">' + k[1] + "</span></div>";
     }).join("");
 
-    var epics = b.epics || [];
+    var epics = [];
+    vis.forEach(function (p) {
+      (p.board && p.board.epics || []).forEach(function (e) {
+        epics.push({ name: (vis.length > 1 ? p.project.key + " · " : "") + e.name, done: e.done, total: e.total });
+      });
+    });
     $("epics").innerHTML = epics.length ? epics.map(function (e) {
       var pct = e.total ? Math.round(e.done / e.total * 100) : 0;
-      return '<div class="epic"><span class="epic-name">' + esc(e.name) + "</span>" +
+      return '<div class="epic"><span class="epic-name">' + esc(e.name) + '</span>' +
         '<span class="epic-num">' + e.done + "/" + e.total + "</span>" +
         '<div class="bar"><span class="' + (pct === 100 ? "full" : "") + '" style="width:' + pct + '%"></span></div></div>';
     }).join("") : '<div class="empty">No epic breakdown recorded.</div>';
 
-    var next = b.next_up || [];
+    var next = [];
+    vis.forEach(function (p) { (p.board && p.board.next_up || []).forEach(function (n) { next.push({ n: n, p: p }); }); });
     $("next-count").textContent = next.length ? next.length + " ready" : "";
-    $("nextup").innerHTML = next.length ? '<div class="rows">' + next.map(function (n) {
-      var blocked = !!n.blocked_by;
+    $("nextup").innerHTML = next.length ? '<div class="rows">' + next.map(function (x) {
+      var n = x.n, blocked = !!n.blocked_by;
       return '<div class="row ' + (blocked ? "idle" : "") + '"><div class="row-main"><div class="row-id">' +
-        link(n.url, n.ticket || "?") + "</div>" +
+        projChip(x.p) + link(n.url, n.ticket || "?") + "</div>" +
         '<div class="row-title">' + esc(n.title || "") + "</div>" +
         (blocked ? '<div class="row-note">Waits for ' + esc(n.blocked_by) + ".</div>" : "") +
-        '</div><div class="row-side">' +
-        chips([{ text: n.priority || "Normal", tone: n.priority === "High" ? "warn" : "" }]) +
+        '</div><div class="row-side">' + chips([{ text: n.priority || "Normal", tone: n.priority === "High" ? "warn" : "" }]) +
         "</div></div>";
     }).join("") + "</div>" : '<div class="empty">No ticket is ready to pick up.</div>';
   }
 
-  function renderLog(list) {
+  /* ---------- throughput chart ---------- */
+  function renderThroughput() {
+    var vis = visible();
+    var byWeek = {}, medians = [], tickets = 0, maint = 0;
+    vis.forEach(function (p) {
+      var tp = p.throughput;
+      if (!tp) return;
+      (tp.weeks || []).forEach(function (w) {
+        var e = byWeek[w.week] || (byWeek[w.week] = { week: w.week, ticket: 0, maint: 0 });
+        e.ticket += w.ticket || 0;
+        e.maint += (w.total || 0) - (w.ticket || 0);
+      });
+      if (tp.ticket_median_hours != null) medians.push(tp.ticket_median_hours);
+      tickets += tp.ticket_count || 0;
+      maint += tp.maintenance_count || 0;
+    });
+    var weeks = Object.keys(byWeek).sort().map(function (k) { return byWeek[k]; });
+    $("tp-count").textContent = weeks.length ? weeks.length + " weeks" : "";
+
+    if (!weeks.length) {
+      $("throughput").innerHTML = '<div class="head sub-head"><h2>Throughput</h2></div>' +
+        '<p class="note-line">No merge history recorded yet.</p>';
+      return;
+    }
+    var med = medians.length ? Math.round(medians.reduce(function (a, b) { return a + b; }, 0) / medians.length * 10) / 10 : null;
+
+    var W = 460, H = 206, PADL = 30, PADR = 8, PADT = 14, PADB = 50;
+    var max = Math.max.apply(null, weeks.map(function (w) { return w.ticket + w.maint; }));
+    var step = Math.max(1, Math.ceil(max / 4));
+    var top = Math.ceil(max / step) * step;
+    var iw = W - PADL - PADR, ih = H - PADT - PADB;
+    var bw = Math.min(46, iw / weeks.length - 12);
+    var y = function (v) { return PADT + ih - (v / top) * ih; };
+
+    var parts = [];
+    for (var g = 0; g <= top; g += step) {
+      parts.push('<line x1="' + PADL + '" y1="' + y(g).toFixed(1) + '" x2="' + (W - PADR) + '" y2="' + y(g).toFixed(1) +
+        '" stroke="var(--rule)" stroke-width="1"/>');
+      parts.push('<text x="' + (PADL - 7) + '" y="' + (y(g) + 3.5).toFixed(1) + '" font-size="10" fill="var(--muted)" text-anchor="end">' + g + "</text>");
+    }
+    weeks.forEach(function (w, i) {
+      var cx = PADL + (iw / weeks.length) * (i + 0.5);
+      var x = cx - bw / 2, tot = w.ticket + w.maint;
+      var hT = (w.ticket / top) * ih, hM = (w.maint / top) * ih;
+      // 2px surface gap between the two stacked segments keeps them distinct
+      if (w.maint > 0) {
+        parts.push('<rect x="' + x.toFixed(1) + '" y="' + y(tot).toFixed(1) + '" width="' + bw.toFixed(1) +
+          '" height="' + Math.max(0, hM - 2).toFixed(1) + '" fill="var(--s-maint)" rx="3"/>');
+      }
+      if (w.ticket > 0) {
+        parts.push('<rect x="' + x.toFixed(1) + '" y="' + y(w.ticket).toFixed(1) + '" width="' + bw.toFixed(1) +
+          '" height="' + hT.toFixed(1) + '" fill="var(--s-ticket)" rx="3"/>');
+      }
+      parts.push('<text x="' + cx.toFixed(1) + '" y="' + (y(tot) - 5).toFixed(1) +
+        '" font-size="10.5" font-weight="600" fill="var(--ink-2)" text-anchor="middle">' + tot + "</text>");
+      var d = new Date(w.week + "T00:00:00Z");
+      var label = isNaN(d) ? w.week : d.toLocaleDateString(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
+      parts.push('<text x="' + cx.toFixed(1) + '" y="' + (H - 34) + '" font-size="10" fill="var(--muted)" text-anchor="middle">' + esc(label) + "</text>");
+      parts.push('<rect x="' + (cx - (iw / weeks.length) / 2).toFixed(1) + '" y="' + PADT + '" width="' + (iw / weeks.length).toFixed(1) +
+        '" height="' + ih + '" fill="transparent" data-tip="Week of ' + esc(label) + ' — ' + w.ticket +
+        ' ticket, ' + w.maint + ' maintenance"/>');
+    });
+    parts.push('<text x="' + PADL + '" y="' + (H - 8) + '" font-size="9.5" fill="var(--muted)">Pull requests merged, by week</text>');
+
+    $("throughput").innerHTML =
+      '<div class="head sub-head"><h2>Throughput</h2></div>' +
+      '<div class="panel-figures">' +
+      '<div class="fig"><span class="n">' + tickets + '</span><span class="k">ticket PRs</span></div>' +
+      '<div class="fig"><span class="n">' + maint + '</span><span class="k">maintenance PRs</span></div>' +
+      (med != null ? '<div class="fig"><span class="n">' + med + 'h</span><span class="k">median open</span></div>' : "") +
+      "</div>" +
+      '<div class="legend">' +
+      '<span><i class="swatch" style="background:var(--s-ticket)"></i>Ticket work</span>' +
+      '<span><i class="swatch" style="background:var(--s-maint)"></i>Automation upkeep</span></div>' +
+      '<div class="chart-scroll"><svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H +
+      '" role="img" aria-label="Pull requests merged per week, split into ticket work and automation upkeep">' +
+      parts.join("") + "</svg></div>";
+  }
+
+  /* ---------- agent usage ---------- */
+  function renderAgents() {
+    var vis = visible();
+    var acc = { dispatched: 0, completed: 0, failed: 0, vanished: 0, minutes: [], window: null, recent: [] };
+    var any = false;
+    vis.forEach(function (p) {
+      var a = p.agents;
+      if (!a) return;
+      any = true;
+      acc.dispatched += a.dispatched || 0;
+      acc.completed += a.completed || 0;
+      acc.failed += a.failed || 0;
+      acc.vanished += a.vanished || 0;
+      acc.window = a.window_days || acc.window;
+      if (a.median_minutes != null) acc.minutes.push(a.median_minutes);
+      (a.recent || []).forEach(function (r) { acc.recent.push(r); });
+    });
+
+    if (!any || !acc.dispatched) {
+      $("agents").innerHTML = '<div class="head sub-head"><h2>Agent usage</h2></div>' +
+        '<p class="note-line">Nothing recorded yet. Each cycle logs how many agents it dispatched, how long they ran, and how each one ended — this fills in from the next cycle.</p>';
+      return;
+    }
+    var med = acc.minutes.length ? Math.round(acc.minutes.reduce(function (a, b) { return a + b; }, 0) / acc.minutes.length) : null;
+    var lost = acc.failed + acc.vanished;
+    var segs = [["completed", acc.completed, "var(--good)"], ["failed", acc.failed, "var(--bad)"], ["vanished", acc.vanished, "var(--attention-edge)"]];
+    var bar = segs.filter(function (s) { return s[1] > 0; }).map(function (s) {
+      return '<span style="width:' + (s[1] / acc.dispatched * 100).toFixed(1) + '%;background:' + s[2] +
+        '" title="' + s[1] + " " + s[0] + '"></span>';
+    }).join("");
+
+    $("agents").innerHTML = '<div class="head sub-head"><h2>Agent usage</h2>' +
+      '<span class="count">' + (acc.window ? "last " + acc.window + " days" : "") + "</span></div>" +
+      '<div class="panel-figures">' +
+      '<div class="fig"><span class="n">' + acc.dispatched + '</span><span class="k">dispatched</span></div>' +
+      (med != null ? '<div class="fig"><span class="n">' + med + 'm</span><span class="k">median run</span></div>' : "") +
+      '<div class="fig"><span class="n">' + Math.round(lost / acc.dispatched * 100) + '%</span><span class="k">lost or failed</span></div>' +
+      "</div>" +
+      '<div class="bar" style="height:8px;display:flex">' + bar + "</div>" +
+      '<div class="legend" style="margin-top:8px">' + segs.map(function (s) {
+        return '<span><i class="swatch" style="background:' + s[2] + '"></i>' + s[1] + " " + s[0] + "</span>";
+      }).join("") + "</div>" +
+      (acc.recent.length ? '<div class="rows" style="margin-top:12px;border-left:none;border-right:none;border-bottom:none">' +
+        acc.recent.slice(0, 5).map(function (r) {
+          var tone = r.outcome === "completed" ? "good" : r.outcome === "failed" ? "bad" : "warn";
+          return '<div class="row" style="padding:8px 0"><div class="row-main"><div class="row-id">' +
+            esc(r.ticket || "dispatch") + (r.phase ? '<span class="sep">·</span>' + esc(r.phase) : "") + "</div></div>" +
+            '<div class="row-side">' + (r.minutes != null ? '<span class="age">' + r.minutes + "m</span>" : "") +
+            '<span class="chip ' + tone + '">' + esc(r.outcome) + "</span></div></div>";
+        }).join("") + "</div>" : "");
+  }
+
+  /* ---------- knowledge ---------- */
+  function renderKnowledge() {
+    var vis = visible();
+    var decisions = [], style = [];
+    vis.forEach(function (p) {
+      var k = p.knowledge;
+      if (!k) return;
+      (k.decisions || []).forEach(function (d) { decisions.push({ d: d, p: p }); });
+      (k.style || []).forEach(function (s) { style.push({ d: s, p: p }); });
+    });
+    $("kn-count").textContent = (decisions.length + style.length)
+      ? decisions.length + " decisions · " + style.length + " rules" : "";
+
+    if (!decisions.length && !style.length) {
+      $("knowledge").innerHTML = '<div class="empty">No decisions or style rules recorded yet.</div>';
+      return;
+    }
+    function rowsFor(list, kind) {
+      return list.map(function (x) {
+        var e = x.d, id = kind + ":" + String(e.id || "");
+        var pend = state.retractions[id];
+        var side = pend
+          ? '<span class="chip warn">removal queued</span>'
+          : state.live
+            ? '<button class="ghost" data-retract="' + esc(id) + '" data-kind="' + kind + '" data-title="' +
+              esc((e.title || e.text || "").slice(0, 120)) + '" data-project="' + esc(x.p.project.key) + '">Retract</button>'
+            : "";
+        var status = e.status ? '<span class="chip ' + (e.status === "Active" ? "" : "info") + '">' + esc(e.status) + "</span>" : "";
+        return '<div class="kn' + (pend ? " pending" : "") + '"><div>' +
+          '<div class="kn-text">' + (e.url ? link(e.url, e.title || e.text) : esc(e.title || e.text)) + "</div>" +
+          '<div class="kn-meta">' + (state.projects.length > 1 ? esc(x.p.project.key) + " · " : "") +
+          esc(e.category || kind) + (e.at ? " · " + esc(e.at) : "") + "</div></div>" +
+          '<div class="kn-side">' + status + side + "</div></div>";
+      }).join("");
+    }
+    $("knowledge").innerHTML =
+      '<div class="duo">' +
+      '<div><div class="head sub-head"><h2>Recent decisions</h2><span class="count">' + decisions.length + "</span></div>" +
+      (decisions.length ? '<div class="rows">' + rowsFor(decisions, "decision") + "</div>" : '<div class="empty">None recorded.</div>') + "</div>" +
+      '<div><div class="head sub-head"><h2>Recent style rules</h2><span class="count">' + style.length + "</span></div>" +
+      (style.length ? '<div class="rows">' + rowsFor(style, "style") + "</div>" : '<div class="empty">None recorded.</div>') + "</div>" +
+      "</div>";
+  }
+
+  /* ---------- cycle log ---------- */
+  function renderLog() {
+    var list = state.cycles.filter(function (c) {
+      return state.active === "all" || !c.project || c.project === state.active;
+    });
     $("log-count").textContent = list.length ? list.length + " recorded" : "";
     if (!list.length) {
       $("log").innerHTML = '<div class="empty">No cycle has written to this board yet.</div>';
@@ -569,94 +911,143 @@
       return '<div class="entry ' + (c.kind === "quiet" ? "quiet" : "") + '">' +
         '<span class="stamp">' + stamp(c.at) + "</span>" +
         '<div class="entry-head">' + esc(c.headline || "") +
+        (state.projects.length > 1 && c.project ? ' <span class="chip proj">' + esc(c.project) + "</span>" : "") +
         (c.generation != null ? ' <span class="chip">gen ' + esc(c.generation) + "</span>" : "") + "</div>" +
         (items ? "<ul>" + items + "</ul>" : "") + "</div>";
     }).join("") + "</div>";
   }
 
-  function setLive(state, text) {
-    var el = $("live");
-    el.dataset.state = state;
-    $("live-text").textContent = text;
-  }
-
-  /* ---------- state ---------- */
-  var current = FALLBACK;
-  var answers = {};
-  var canWrite = false;
-  var store = null;
-
+  /* ---------- paint ---------- */
   function paint() {
-    renderStrip(current);
-    renderAsks(current, answers, canWrite);
-    renderPrs(current);
-    renderDispatches(current);
-    renderBoard(current);
+    renderTabs(); renderStrip(); renderAsks(); renderCompose();
+    renderPrs(); renderDispatches(); renderBoard();
+    renderThroughput(); renderAgents(); renderKnowledge(); renderLog();
   }
 
+  function setLive(s, text) { $("live").dataset.state = s; $("live-text").textContent = text; }
+  function offline(msg) {
+    state.live = false;
+    setLive("offline", "Not live");
+    $("banner-slot").innerHTML = '<div class="banner"><b>Not live.</b><span>' + esc(msg) +
+      " Showing the copy built into this page on " + stamp(FALLBACK_CAPTURED) + ".</span></div>";
+    paint();
+  }
+
+  state.projects = FALLBACK;
+  state.active = readPref() || "all";
   paint();
-  renderLog(FALLBACK_CYCLES);
-  $("capture-note").innerHTML = "Fallback copy built into this page on " + stamp(FALLBACK.captured_at) + ".";
+  $("capture-note").textContent = "Fallback copy built into this page on " + stamp(FALLBACK_CAPTURED) + ".";
+
+  /* ---------- events ---------- */
+  $("tabs").addEventListener("click", function (ev) {
+    var t = ev.target.closest(".tab");
+    if (!t) return;
+    state.active = t.dataset.key;
+    writePref(state.active);
+    paint();
+  });
+
+  function noteFor(id, msg) {
+    var n = document.querySelector('[data-note="' + id.replace(/"/g, '\\"') + '"]');
+    if (n) n.textContent = msg;
+  }
+
+  $("asks").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button.send");
+    if (!btn || !state.store) return;
+    var id = btn.dataset.ask;
+    var box = document.querySelector('textarea[data-ask="' + id.replace(/"/g, '\\"') + '"]');
+    if (!box || !box.value.trim()) { noteFor(id, "Write something first."); return; }
+    var proj = (allAsks().filter(function (x) { return String(x.ask.id) === id; })[0] || {}).p;
+    btn.disabled = true; noteFor(id, "Saving…");
+    state.store.collection("answers").doc(id)
+      .set({ text: box.value.trim().slice(0, 4000), at: new Date().toISOString(), project: proj ? proj.project.key : null })
+      .then(function () { noteFor(id, "Saved. The next cycle reads it."); })
+      .catch(function (e) {
+        btn.disabled = false;
+        noteFor(id, e && e.code === "not_granted" ? "You do not have permission to answer here." : "Could not save. Try again.");
+      });
+  });
+
+  $("compose").addEventListener("click", function (ev) {
+    if (!ev.target.closest("#req-send") || !state.store) return;
+    var box = $("req-text"), sel = $("req-project"), note = $("req-note"), btn = $("req-send");
+    if (!box.value.trim()) { note.textContent = "Write a prompt first."; return; }
+    var project = sel ? sel.value : (state.projects[0] && state.projects[0].project.key);
+    btn.disabled = true; note.textContent = "Queuing…";
+    state.store.collection("requests").doc()
+      .set({ text: box.value.trim().slice(0, 4000), at: new Date().toISOString(), project: project })
+      .then(function () { box.value = ""; btn.disabled = false; note.textContent = "Queued for the next " + project + " cycle."; })
+      .catch(function () { btn.disabled = false; note.textContent = "Could not queue it. Try again."; });
+  });
+
+  $("knowledge").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button.ghost");
+    if (!btn || !state.store) return;
+    btn.disabled = true; btn.textContent = "Queuing…";
+    state.store.collection("retractions").doc(btn.dataset.retract.replace(/[^A-Za-z0-9_.:~@+-]/g, "-"))
+      .set({
+        kind: btn.dataset.kind, target: btn.dataset.retract, title: btn.dataset.title,
+        project: btn.dataset.project, at: new Date().toISOString()
+      })
+      .then(function () { btn.textContent = "Queued"; })
+      .catch(function () { btn.disabled = false; btn.textContent = "Retry"; });
+  });
+
+  /* chart tooltip */
+  var tip = $("tip");
+  document.addEventListener("mousemove", function (ev) {
+    var t = ev.target.closest ? ev.target.closest("[data-tip]") : null;
+    if (!t) { tip.dataset.on = "0"; return; }
+    tip.textContent = t.getAttribute("data-tip");
+    tip.dataset.on = "1";
+    tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 10, ev.clientX + 12) + "px";
+    tip.style.top = (ev.clientY - tip.offsetHeight - 10) + "px";
+  });
 
   /* ---------- live store ---------- */
-  function offline(msg) {
-    setLive("offline", "Not live");
-    $("banner-slot").innerHTML =
-      '<div class="banner"><b>Not live.</b><span>' + esc(msg) +
-      " Showing the copy built into this page on " + stamp(FALLBACK.captured_at) + ".</span></div>";
-  }
-
-  function wireReplies() {
-    $("asks").addEventListener("click", function (ev) {
-      var btn = ev.target.closest("button.send");
-      if (!btn || !store) return;
-      var id = btn.dataset.ask;
-      var box = document.querySelector('textarea[data-ask="' + id.replace(/"/g, '\\"') + '"]');
-      var note = document.querySelector('[data-note="' + id.replace(/"/g, '\\"') + '"]');
-      if (!box || !box.value.trim()) { if (note) note.textContent = "Write something first."; return; }
-      btn.disabled = true;
-      if (note) note.textContent = "Saving…";
-      store.collection("answers").doc(id)
-        .set({ text: box.value.trim().slice(0, 4000), at: new Date().toISOString() })
-        .then(function () { if (note) note.textContent = "Saved. The next cycle reads it."; })
-        .catch(function (e) {
-          btn.disabled = false;
-          if (note) note.textContent = e && e.code === "not_granted"
-            ? "You do not have permission to answer here."
-            : "Could not save. Try again.";
-        });
-    });
-  }
-
   if (!window.claude || typeof window.claude.use !== "function") {
     offline("This copy of the page cannot reach the live store.");
   } else {
     window.claude.use("db").then(function (db) {
       if (!db) { offline("The live store did not answer."); return; }
-      store = db;
-      canWrite = true;
+      state.store = db; state.live = true;
       setLive("live", "Live");
-      wireReplies();
 
-      db.doc("state/snapshot").onSnapshot(function (snap) {
-        if (!snap.exists) return;
-        current = snap.data();
+      db.collection("state").onSnapshot(function (q) {
+        var ps = q.docs.map(function (d) {
+          var v = d.data() || {};
+          if (!v.project) v.project = { key: d.id, name: d.id };
+          return v;
+        }).sort(function (a, b) { return (a.project.name || "").localeCompare(b.project.name || ""); });
+        if (ps.length) state.projects = ps;
+        if (state.active !== "all" && !ps.some(function (p) { return p.project.key === state.active; })) state.active = "all";
+        var newest = ps.map(function (p) { return p.as_of; }).sort().pop();
+        setLive("live", "Live · updated " + ago(newest));
         paint();
-        setLive("live", "Live · updated " + ago(current.as_of));
       }, function () { offline("The live snapshot stopped updating."); });
 
       db.collection("cycles").orderBy("at", "desc").limit(40).onSnapshot(function (q) {
-        renderLog(q.docs.map(function (d) {
-          var v = d.data() || {};
-          return { id: d.id, at: v.at, kind: v.kind, headline: v.headline, items: v.items, generation: v.generation };
-        }));
+        state.cycles = q.docs.map(function (d) { var v = d.data() || {}; v.id = d.id; return v; });
+        renderLog();
       }, function () { /* keep whatever the log already shows */ });
 
       db.collection("answers").onSnapshot(function (q) {
-        answers = {};
-        q.docs.forEach(function (d) { answers[d.id] = d.data() || {}; });
-        renderAsks(current, answers, canWrite);
-      }, function () { /* answers stay hidden; the reply box still works */ });
+        state.answers = {};
+        q.docs.forEach(function (d) { state.answers[d.id] = d.data() || {}; });
+        renderAsks();
+      }, function () { /* the reply box still works */ });
+
+      db.collection("requests").orderBy("at", "desc").limit(20).onSnapshot(function (q) {
+        state.requests = q.docs.map(function (d) { var v = d.data() || {}; v.id = d.id; return v; });
+        renderCompose();
+      }, function () { /* composer still works */ });
+
+      db.collection("retractions").onSnapshot(function (q) {
+        state.retractions = {};
+        q.docs.forEach(function (d) { var v = d.data() || {}; state.retractions[v.target || d.id] = v; });
+        renderKnowledge();
+      }, function () { /* buttons still work */ });
     }).catch(function () { offline("The live store could not be reached."); });
   }
 })();
