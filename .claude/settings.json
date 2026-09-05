@@ -44,5 +44,16 @@
         ]
       }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "vinnie-automation": {
+      "source": {
+        "source": "github",
+        "repo": "Vinnehboom/claude-automation"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "kanban-automation@vinnie-automation": true
   }
 }
