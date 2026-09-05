@@ -2,9 +2,6 @@ module Scoring
 
   module Strategies
 
-    # The Scoring::*Strategy contract (.for, #points_for, #using_default_config?)
-    # is asserted by the 'a Scoring::Strategy' shared example, not restated here.
-    #
     # A tier from the placement (bracketed to powers of 2), decayed
     # geometrically by tier depth and capped by the tournament's size class —
     # max_tier depends on the size class, not the raw field_size, so points
@@ -12,7 +9,7 @@ module Scoring
     # shipped DEFAULT_SIZE_CLASSES band gaps (see the monotonicity spec); an
     # arbitrary custom config isn't guaranteed to preserve this. `#base_score`
     # is public too, but it's this class's own tier/decay mechanics, not part
-    # of the shared contract above — a different Strategy need not have one.
+    # of the Scoring::*Strategy contract — a different Strategy need not have one.
     class TieredPlacementStrategy
 
       DEFAULT_BASE_POINTS = 100
