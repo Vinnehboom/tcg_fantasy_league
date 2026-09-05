@@ -8,6 +8,8 @@ RSpec.describe Scoring::Strategies::TieredPlacementStrategy do
   let(:tournament_fixture) { Struct.new(:field_size) }
   let(:result_fixture) { Struct.new(:placement, :tournament) }
 
+  it_behaves_like 'a Scoring::Strategy'
+
   describe '#base_score' do
     context 'with the worked 3000-player (XL) example' do
       where(:placement, :expected_base_score) do
