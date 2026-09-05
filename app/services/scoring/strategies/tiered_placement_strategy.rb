@@ -2,10 +2,8 @@ module Scoring
 
   module Strategies
 
-    # Contract every Scoring::*Strategy implements: `.for(season:)` resolves
-    # a configured instance for a season, `#points_for(result:)` turns a
-    # placement Result into points, and `#using_default_config?` reports
-    # whether the season supplied its own tuning.
+    # The Scoring::*Strategy contract (.for, #points_for, #using_default_config?)
+    # is asserted by the 'a Scoring::Strategy' shared example, not restated here.
     #
     # A tier from the placement (bracketed to powers of 2), decayed
     # geometrically by tier depth and capped by the tournament's size class —
@@ -14,8 +12,7 @@ module Scoring
     # shipped DEFAULT_SIZE_CLASSES band gaps (see the monotonicity spec); an
     # arbitrary custom config isn't guaranteed to preserve this. `#base_score`
     # is public too, but it's this class's own tier/decay mechanics, not part
-    # of the shared Strategy contract above — a different Strategy need not
-    # have one.
+    # of the shared contract above — a different Strategy need not have one.
     class TieredPlacementStrategy
 
       DEFAULT_BASE_POINTS = 100
