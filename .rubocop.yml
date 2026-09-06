@@ -1,5 +1,6 @@
 
 require:
+  - ./lib/rubocop/tcg
   - rubocop-rails
   - rubocop-rspec
   - rubocop-rspec_rails
@@ -49,6 +50,19 @@ Metrics/AbcSize:
   Max: 32
 Style/Documentation:
   Enabled: false
+
+Tcg/NoDecisionReferencesInComments:
+  Enabled: true
+  ForbiddenPatterns:
+    - '\b[A-Z]{1,2}-\d+\b'
+    - '(?<![\w&#])#\d+\b'
+    - '\bdecisions?\b'
+    - '\btickets?\b'
+    - '\breview round\b'
+    - '\bfinding \d+\b'
+    - '\bsupersed\w*\b'
+Tcg/StringHash:
+  Enabled: true
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 Layout/EmptyLinesAroundClassBody:
