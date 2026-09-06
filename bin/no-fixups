@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'shellwords'
+
+base = ENV.fetch('LINT_BASE_REF', 'origin/main')
+ref = Shellwords.escape(base)
+resolved = system("git rev-parse --verify --quiet #{ref} > /dev/null") ||
+           (system('git fetch --quiet origin main:refs/remotes/origin/main > /dev/null 2>&1') &&
+            system("git rev-parse --verify --quiet #{ref} > /dev/null"))
+
+unless resolved
+  warn "no-fixups: cannot resolve #{base}, so there is nothing to compare against. Skipped."
+  exit 0
+end
+
+fixups = `git log --format=%s #{ref}..HEAD`.lines.map(&:strip).grep(/\A(?:fixup|squash)!/)
+exit 0 if fixups.empty?
+
+abort <<~MESSAGE
+  #{fixups.length} commit(s) still carry a fixup! or squash! subject:
+
+  #{fixups.map { |subject| "  #{subject}" }.join("\n")}
+
+  Fold them into their target commits before you push:
+    GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash #{base}
+MESSAGE
