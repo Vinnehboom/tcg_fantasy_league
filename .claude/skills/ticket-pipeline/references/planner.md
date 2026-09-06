@@ -50,8 +50,17 @@ State the ticket's risk level as one of **Low / Medium / High**, with a one-line
 
 This is a separate judgment from the prose **Risks** section below (which lists specific concerns/edge cases) — Risk classification is the one-line categorical tag the self-approval gate reads mechanically.
 
+## Step 2.7 — Propose a Capture plan (standing instruction, 2026-09-06)
+Before you write this section, read the Knowledge Base page's `## Capture notes` section (cached in `context.md`) — it holds what earlier capture runs taught (a selector that broke, a page that should just be part of the automatic core surface). Act on a note that applies to this ticket, and say plainly, in your hand-back, which note (if any) you acted on — the orchestrator removes it from the page once the plan is on the card, so don't expect to find the same one twice.
+
+Every PR that touches `app/`, `config/`, `db/`, or `lib/` gets its core surface captured automatically by the Gatekeeper: every page-rendering route, filled from seeded demo data, as a still image, at two viewports (see `lib/ui_capture/core_targets.rb`). Your `## Capture plan` section is for a ticket-specific page worth its own close-up instead of being folded into the automatic pass's contact sheet — a target here is a page to capture, nothing more. Each entry follows `script/ui_capture/example.json`'s shape: `name`, `kind` (currently always `still`), and `path`. A target whose `path` matches a core page replaces it, so it gets its own full-size file instead of a spot in the grid.
+
+(Video capture — a recording of a multi-step flow, not just a page — is deferred to the evidence-page ticket that will carry visual evidence durably; it comes back once that lands.)
+
+If nothing here needs more than the automatic core capture, say so and propose an empty `## Capture plan` (`targets: []`) — that is a normal outcome, not a gap.
+
 ## Step 3 — Write the plan
-Write it out with sections: Goal / **Risk classification** (Step 2.6's output) / **Convention check** (Step 2.5's output) / Decisions (made in advance, with alternatives) / Branch / Commits (ordered, code+specs together, each green) / Open alternatives / Risks. This is text you hand back to the orchestrator — NOT a repo file. The orchestrator appends it to the Notion ticket card; a plan living in `docs/plans/` is the old convention and no longer used.
+Write it out with sections: Goal / **Risk classification** (Step 2.6's output) / **Convention check** (Step 2.5's output) / **Capture plan** (Step 2.7's output) / Decisions (made in advance, with alternatives) / Branch / Commits (ordered, code+specs together, each green) / Open alternatives / Risks. This is text you hand back to the orchestrator — NOT a repo file. The orchestrator appends it to the Notion ticket card; a plan living in `docs/plans/` is the old convention and no longer used.
 
 ### What makes the commit breakdown good
 - The history tells a story: scaffolding/models before the behavior that needs them.
@@ -63,4 +72,4 @@ Write it out with sections: Goal / **Risk classification** (Step 2.6's output) /
 Write the plan with the `simple-english` skill (ASD-STE100, pragmatic mode). It ends up on the Notion ticket card and stays there — write it so a reader who is not a native English speaker gets it right the first time. Load the skill before you draft the plan.
 
 ## What you hand back
-The plan itself (the Goal/Risk classification/Convention check/Decisions/Branch/Commits/Open alternatives/Risks text), your decisions, and any dependency/branch call. Do not create the branch, write code, or write any repo file — keeping roles separate is what keeps the review honest.
+The plan itself (the Goal/Risk classification/Convention check/Capture plan/Decisions/Branch/Commits/Open alternatives/Risks text), your decisions, and any dependency/branch call. Do not create the branch, write code, or write any repo file — keeping roles separate is what keeps the review honest.

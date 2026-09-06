@@ -11,6 +11,7 @@ Re-fetch the Notion knowledge base live at this phase (you run after the merge, 
 2. Follow-up work appeared (open alternatives, a reviewer note, a scope cut) → propose a new backlog card, same shape as existing cards (Epic, Priority, Depends On, done-criteria).
 3. A decision worth recording (non-obvious architectural/domain choice with lasting rationale) → propose a new row in the Decisions database (Title, Date, Status: Active). If it overrides an earlier logged decision, also propose flipping that row's Status to Superseded — don't leave two rows silently disagreeing.
 4. Friction or debt (tooling-vs-style-guide conflict, workaround, fragile fixture, missing framework) → propose a Tech Debt page entry.
+5. The Gatekeeper's UI capture (`## Visual evidence` on the card) taught something real — a selector that broke, a flow that turned out to need a video instead of a still, a page that should just always be part of the automatic core surface → propose a `## Capture notes` addition to the Knowledge Base page. File this only when the evidence taught the next planner something it genuinely needs, not for every run — noise here trains people to skip the section. A note that gets acted on is removed afterward, so don't expect an old one to still be there.
 
 ## Check before you propose
 Fetch and skim the target docs first. Only propose what's genuinely new — don't re-file an existing ticket, restate a style rule, or re-record a logged decision. If already captured, note you checked and skip.

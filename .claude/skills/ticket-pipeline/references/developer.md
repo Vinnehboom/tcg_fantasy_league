@@ -26,6 +26,11 @@ For each commit: write the failing spec, minimum code to pass, refactor green, k
 ## Step 4 — Reassess coverage
 After implementation, look again for paths the plan's specs don't exercise. Add genuinely-missing specs. Don't pad with tests that assert nothing.
 
+## Step 5 — Amend the Capture plan (standing instruction, 2026-09-06)
+Re-read the plan's `## Capture plan` section against what you actually built. The planner wrote it from the ticket alone, before any of this code existed — a target's `path` may not match the real route once the code landed. Fix any target that doesn't match reality. A target is a page to capture, nothing more (video capture is deferred to a later ticket — see references/planner.md's Step 2.7).
+
+Hand back the final list as JSON, in `script/ui_capture/example.json`'s shape. The orchestrator writes this, verbatim, to `tmp/ui-capture/<TASK_ID>.json` for the Gatekeeper to run (see SKILL.md Phase 5, step 1b). An empty `targets: []` list is fine when this ticket adds nothing beyond what the automatic core capture already reaches.
+
 ## The commit gate — every time
 Before EACH commit run the linter and the specs that cover what you touched: the spec file for each file you changed, plus any spec exercising code that calls into it (grep for the class/method name to find those) — not the whole suite. This local gate is there to keep you honest commit-by-commit; it isn't meant to duplicate CI. Both must pass. No commit on a red run or lint failure; no unjustified lint disables. If you can't make them pass, stop and surface it. GitHub CI runs the full suite on every push and is the actual full-suite safety net — the Gatekeeper (skill Phase 5) won't mark a PR ready until it's green there.
 
@@ -38,4 +43,4 @@ Do NOT co-author as Claude. Do NOT append any Co-Authored-By: Claude line, Claud
 Write any prose you produce — the hand-back summary below, a code comment, a commit message body — with the `simple-english` skill (ASD-STE100, pragmatic mode). Load the skill before you draft the text.
 
 ## What you hand back
-The branch name and a short summary of what you built and any deviations. Do not push or open a PR — the reviewer runs first.
+The branch name, a short summary of what you built and any deviations, and the amended Capture plan target list (Step 5). Do not push or open a PR — the reviewer runs first.
