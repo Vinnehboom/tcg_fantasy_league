@@ -1,0 +1,11 @@
+{
+  "boot_command": "script/ui_capture/boot.sh",
+  "core_targets_command": "script/ui_capture/core_targets.sh",
+  "sign_in": {
+    "path": "/users/sign_in",
+    "email_selector": "#user_email",
+    "password_selector": "#user_password",
+    "submit_selector": "input[type=\"submit\"]",
+    "credentials_command": "RAILS_ENV=test bundle exec rails runner 'puts [Demo::DraftSeeder::ADMIN_EMAIL, Demo::DraftSeeder::ADMIN_PASSWORD].join(\"|\")'"
+  }
+}
