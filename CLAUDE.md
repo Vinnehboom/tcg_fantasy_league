@@ -4,9 +4,10 @@
 
 Each rule below exists because Vinnie corrected the same class of mistake
 more than once. Read them before you write code in this repository. They
-are a subset of the Coding Style Guide in Notion (pointer:
-`.claude/coding-style.json`), not a replacement for it. The guide is still
-binding in full.
+are a subset of the Style Rules database in Notion (pointer:
+`.claude/coding-style.json`), not a replacement for it. Every rule there is
+binding, and each row's page body carries the reasoning and the boundaries
+that these one-liners leave out.
 
 Rules 1 to 4 are one cluster, and they are the most corrected rule in this
 repository. A comment is a model reflex. Suppress it.
@@ -28,8 +29,10 @@ repository. A comment is a model reflex. Suppress it.
    the build on this one.)
 
 A rule enters this list when a correction repeats. The `/coding-style`
-skill maintains it. This list and the hot list at the top of the Notion
-guide must stay identical.
+skill maintains it. This list mirrors the `Hot list` column in the Style
+Rules database, shown by its "Read this first" view; the two must agree.
+This copy exists because it auto-loads into every dispatch and it still
+works when Notion is unreachable.
 
 ## Documentation style
 
