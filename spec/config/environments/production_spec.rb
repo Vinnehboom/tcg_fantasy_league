@@ -18,10 +18,6 @@ RSpec.describe 'config/environments/production.rb' do
     expect(auth).to have_received(:authorized?).with(username: 'vinnie', password: 's3cret')
   end
 
-  # Returns the recorded `config.middleware.use Rack::Auth::Basic, realm, &block`
-  # call as [middleware_class, realm, block]. Production cannot be booted here
-  # (no production.key), so the config file is evaluated against recorders
-  # instead - the same approach development_spec.rb takes.
   def registered_basic_auth
     recorded_middleware(evaluate_production_config)
       .find { |arguments, _block| arguments.first == Rack::Auth::Basic }
@@ -32,8 +28,9 @@ RSpec.describe 'config/environments/production.rb' do
     config.middleware.calls
   end
 
-  # Resolve the path, and read the file, before stubbing Rails.application
-  # below - Rails.root itself reads through it.
+  # Production cannot be booted here (no production.key), so the config file is
+  # evaluated against recorders - the same approach development_spec.rb takes.
+  # Read the file before stubbing Rails.application: Rails.root reads through it.
   def evaluate_production_config
     environment_file = Rails.root.join('config/environments/production.rb').read
     config = config_recorder
@@ -49,8 +46,8 @@ RSpec.describe 'config/environments/production.rb' do
   end
 
   # production.rb sets many config.* values this spec does not care about, some
-  # of them nested (config.action_mailer.*). Records the middleware stack and
-  # no-ops/chains through everything else.
+  # of them nested (config.action_mailer.*), so everything but the middleware
+  # stack has to chain through.
   def config_recorder
     middleware = Struct.new(:calls) do
       def use(*arguments, &block)

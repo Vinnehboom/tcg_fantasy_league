@@ -48,8 +48,7 @@ Rails.application.configure do
   # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.
   # config.assume_ssl = true
 
-  # The site is not public yet: every request goes through HTTP basic auth.
-  # `BasicAuth` is resolved inside the block, since this file loads before Zeitwerk.
+  # `BasicAuth` is resolved inside the block: this file loads before Zeitwerk.
   config.middleware.use Rack::Auth::Basic, 'TCG Fantasy League' do |username, password|
     BasicAuth.from_env.authorized?(username: username, password: password)
   end
