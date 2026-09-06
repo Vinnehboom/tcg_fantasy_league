@@ -23,6 +23,23 @@ Things you may want to cover:
 
 * ...
 
+## Production access
+
+Production is behind HTTP basic auth, because the data is not public yet. The
+browser asks for a username and a password on every new session.
+
+Set these two environment variables on the Render service:
+
+* `BASIC_AUTH_USERNAME`
+* `BASIC_AUTH_PASSWORD`
+
+If one of them is empty, production rejects every request with a 401 status.
+This is deliberate: a missing variable must not make the site public. The
+health endpoint at `/up` is behind the same auth. An uptime monitor must send
+the credentials.
+
+Basic auth protects production only. Development and test are not affected.
+
 ## Demo dataset
 
 The demo dataset gives every screen real data to show: players, tournaments,
