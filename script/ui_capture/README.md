@@ -5,9 +5,10 @@ The screenshot driver lives in the `kanban-automation` plugin, in
 shape, the contact sheets, the `attach` rule, and the exit codes. Read that
 one first.
 
-This directory holds only what the driver cannot know: how to boot this app,
-and how to list this app's own pages. `.claude/ui-capture.json` points at
-both, and carries the sign-in surface as well.
+This directory holds only what the driver cannot know on its own: how to
+list this app's own pages. `.claude/ui-capture.json` points at that, at
+this project's own boot values for the plugin's boot harness, and at the
+sign-in surface.
 
 ## Run it
 
@@ -21,20 +22,16 @@ checked out where you run it, not the branch named in `--ticket`.
 
 ## Files
 
-- `run.sh` — a transitional shim. It forwards every argument to the plugin's
-  driver. It exists because the local `.claude/skills/` copies of
-  `ticket-pipeline` still name this path, and the Routines still call those
-  copies. Delete it in the same pull request that deletes those copies. Set
-  `UI_CAPTURE_DRIVER` to point it at a driver by hand.
-- `boot.sh --ticket <id> [--dir <path>] [--stop]` — builds the app once per
-  run and seeds a fresh run database directly (measured at ~12s for a cold
-  `rake demo:seed` — not worth a template database's staleness risk).
-  `--stop` kills the server and drops the run's database. Any failure during
-  a start tears down whatever it already created, even before `--stop` is
-  ever called. `--dir` sets where it keeps its state and logs; `run.sh`
-  passes its own `--out` there, so both agree on one directory to erase
-  afterward. Prints two lines on success: `BASE_URL=...` and
-  `TEST_ENV_NUMBER=...`. `run.sh` exports the second one onward.
+This project has no `boot.sh` or `run.sh` of its own. `boot_command` in
+`.claude/ui-capture.json` names the plugin's boot harness instead
+(`${CLAUDE_PLUGIN_ROOT}/scripts/ui_capture/boot.sh`). This project's own
+build commands, database commands, server command, health path, hydrate
+list, and run-suffix variable name live under that same file's `boot` key.
+See the plugin's `scripts/ui_capture/README.md` for what each of the seven
+values means and how the harness uses them.
+
+The one file this directory does keep:
+
 - `core_targets.sh` — prints this app's core surface as a JSON array: every
   GET route that renders a page, resolved straight from
   `Rails.application.routes.routes` by `UiCapture::CoreTargets` (see
@@ -51,14 +48,16 @@ checked out where you run it, not the branch named in `--ticket`.
 ## Environment notes
 
 - Only `config/credentials/test.key` exists in this environment, so
-  `RAILS_ENV=test` is the only environment that boots. `boot.sh` copies it
-  from the main checkout when a dispatch worktree does not have its own copy.
-- `boot.sh` symlinks `node_modules` from the main checkout when the worktree
-  has none of its own. It finds that checkout through git
+  `RAILS_ENV=test` is the only environment that boots. The harness copies
+  that file from the main checkout when a dispatch worktree does not have
+  its own copy, per this project's `hydrate_files` list.
+- The harness symlinks `node_modules` from the main checkout when the
+  worktree has none of its own. It finds that checkout through git
   (`git rev-parse --path-format=absolute --git-common-dir`'s parent),
   overridable with `UI_CAPTURE_MAIN_CHECKOUT`.
-- Database credentials are never written to disk. `boot.sh` re-reads them
-  from Rails credentials whenever it needs them, including in `--stop` mode.
+- Database credentials are never written to disk. The harness re-reads them
+  through this project's `db_credentials_command` whenever it needs them,
+  including in `--stop` mode.
 - `TEST_ENV_NUMBER` suffixes the database name. `core_targets.sh` stops with
   a clear message when it is not set, because without it the resolution runs
   against the shared, unseeded test database and every `:game`-scoped route
