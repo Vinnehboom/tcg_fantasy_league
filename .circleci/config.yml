@@ -72,6 +72,9 @@ jobs:
           name: Lint
           command: bundle exec rubocop -P
       - run:
+          name: No fixup commits
+          command: bin/no-fixups
+      - run:
           name: Tests
           command: bundle exec rspec --exclude-pattern "features/**/*_spec.rb"
   feature_specs:
