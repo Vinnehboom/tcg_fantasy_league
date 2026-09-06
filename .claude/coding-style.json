@@ -1,5 +1,10 @@
 {
-  "_comment": "Shared pointer to the living coding-style Notion doc. Written to by the coding-style skill, read by ticket-pipeline (and any other skill that wants style guidance) so the page is only hardcoded in one place.",
+  "_comment": "Shared pointers to the living coding-style docs in Notion. Written to by the coding-style skill, read by ticket-pipeline (and any other skill that wants style guidance) so the page is only hardcoded in one place.",
   "notion_page_id": "3ac4af79-fc01-8179-b160-c9bd5ebf1d4a",
-  "notion_page_url": "https://app.notion.com/p/3ac4af79fc018179b160c9bd5ebf1d4a"
+  "notion_page_url": "https://app.notion.com/p/3ac4af79fc018179b160c9bd5ebf1d4a",
+  "rules_database": {
+    "description": "The Style Rules themselves, one row per rule. The row title is the binding rule as a terse imperative; the row's page body holds the reasoning, the boundaries and the exceptions. Columns: Category, Status (Active/Superseded), Hot list, Enforced by, Added. The guide page above keeps the intro, the hot list, and the Change Log.",
+    "notion_database_url": "https://app.notion.com/p/cf898a1435434271bf99486bd3f0d220",
+    "notion_data_source_url": "collection://fd45e2ab-f82f-4383-9d85-c320a2042886"
+  }
 }
