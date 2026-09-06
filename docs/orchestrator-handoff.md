@@ -1,45 +1,74 @@
 # Orchestrator handoff note
 
 Written by `/handoff`. Overwritten at each handoff — this describes the
-present, not the history. Durable lessons belong in `.claude/skills/**`,
-not here.
+present, not the history. Durable lessons belong in the
+`kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
+no longer in `.claude/skills/`.
 
-**Generation:** 8
-**Predecessor session:** `session_01Ft3zXDre9RAkbLa83Ro3W4` (generation 7)
-**Handoff trigger:** the 2026-09-03 16:34 UTC scheduled cycle found
-`cost_usd` at 75.47 against the configured ceiling of 50 — handed off
-instead of running that cycle, per `/kanban-cycle` step 0.
-**Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`. `orchestrator_branch`
-in `.claude/kanban-cycle.json` reads `main` and is current.
+**Generation:** 9
+**Predecessor session:** `session_01NYRRtyEHKss5Uf16DTdEbv` (generation 8)
+**Handoff trigger:** none. Generation 8 had nothing in flight. Vinnie
+asked for a fresh orchestrator after the plugin cutover, so this
+generation starts clean rather than carrying a conversation.
+**Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
+`orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
+current.
 
 Everything not listed below is re-derived live by `/kanban-cycle` (board,
-PRs, active agents) or already written into the skill files. Read those,
-not a summary of them.
+pull requests, active agents) or already written into the plugin's skill
+files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-None outstanding from this generation.
+None.
 
 ## In-flight nuance that live state would misread
 
-None. Both open PRs (#85 C-27, #88 C-7) are in a normal, self-explanatory
-state — green, current with `main`, waiting on Vinnie's review. No
-dispatched agents are active. Nothing here would be misread from live
-state alone.
+None. No pull request is open in `tcg_fantasy_league` or in
+`claude-automation`. No dispatched agent is active. Generation 8 never
+resumed cycles after 2026-09-06, so the board is where the last completed
+cycle left it.
+
+## What changed on 2026-09-06
+
+The orchestration skills now come from the `kanban-automation` plugin.
+Four things follow from that:
+
+- A skill edit goes to `Vinnehboom/claude-automation` as a pull request.
+  Do not edit `.claude/skills/` in this repository. Those copies are
+  superseded and a pull request to delete them is still to come.
+- The UI capture driver moved too. The plugin ships `capture.mjs` and
+  `run.sh` under `scripts/ui_capture/`. This repository keeps
+  `.claude/ui-capture.json`, `script/ui_capture/boot.sh`, and
+  `script/ui_capture/core_targets.sh`.
+- `script/ui_capture/run.sh` is a shim that forwards to the plugin. Delete
+  it in the same pull request that deletes `.claude/skills/`.
+- The plugin arrives by an install, not by a file. A project
+  `.claude/settings.json` that declares `extraKnownMarketplaces` and
+  `enabledPlugins` installs nothing. Those keys are what an install
+  writes. tcg#95 tried to add them and was closed for that reason. Do not
+  re-open it.
 
 ## Pending automation work
 
-- **PR #90** (`handoff-gen7-lessons`) — this generation's own lesson-fold
-  (two `ticket-pipeline` skill lessons from the C-27/C-7 re-entry rounds).
-  No linked Notion ticket, entirely within `.claude/skills/**`, so it
-  qualifies for the whitelisted auto-merge (`maintenance_automerge_paths`
-  in `.claude/kanban-cycle.json`) — the next `/kanban-cycle` triage pass
-  picks it up and merges it on green CI, no action needed beyond that.
-  Not yet confirmed green as of this handoff (opened moments ago).
-- **H-8** (screenshot + fixtures automation, High priority, Not started)
-  gained a "generation 7" section with concrete environment facts from
-  doing the screenshot work by hand three times this session (no dev
-  credentials, the `TEST_ENV_NUMBER` trick for an isolated test DB, assets
-  need building, `chromium-cli` isn't installed but global `playwright`
-  is, the exact Devise-login-via-Playwright race to avoid). Nothing to
-  action — just don't rediscover these when H-8 is eventually picked up.
+- **The environment needs `Vinnehboom/claude-automation` as a source.**
+  The marketplace clone goes through the git proxy of the session, and
+  that proxy allows only the repositories attached to the session. A
+  session with only this repository attached cannot install the plugin,
+  whatever its setup script says. Generation 8 failed this way for days.
+  The failure reads as
+  `Plugin "kanban-automation" not found in marketplace "vinnie-automation"`,
+  which sounds like a stale marketplace. It is an empty one.
+- **The setup script hides its own failure.** Its two marketplace lines
+  carry `|| true`, and those two lines do the network work. When one
+  fails, the only error that reaches anyone is the install's, which names
+  the wrong cause. Vinnie has been asked to remove `|| true`.
+- **Delete the four superseded skill copies** from `.claude/skills/`,
+  KEEPING `simple-english`, which stays in this repository for licensing.
+  The same pull request deletes `script/ui_capture/run.sh`. Do this only
+  after a session proves that the plugin loads.
+- **Rename the Routine prompts** to `/kanban-automation:kanban-cycle`
+  once those copies are gone.
+- **Notion H-14** covers moving the generic part of
+  `script/ui_capture/boot.sh` into the plugin. In progress, not started
+  in code.
