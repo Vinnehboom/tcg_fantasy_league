@@ -1,6 +1,18 @@
 {
-  "boot_command": "script/ui_capture/boot.sh",
+  "boot_command": "${CLAUDE_PLUGIN_ROOT}/scripts/ui_capture/boot.sh",
   "core_targets_command": "script/ui_capture/core_targets.sh",
+  "boot": {
+    "build_commands": ["npm run build", "npm run build:css"],
+    "db_credentials_command": "RAILS_ENV=test bundle exec rails runner 'db = Rails.application.credentials.db; puts [db.name, db.username, db.password].join(\"|\")'",
+    "db_setup_commands": [
+      "RAILS_ENV=test bundle exec rails db:create db:schema:load",
+      "RAILS_ENV=test bundle exec rake demo:seed"
+    ],
+    "server_command": "RAILS_ENV=test bundle exec rails server -e test -b 127.0.0.1 -p {port} -P {pidfile} -d --no-log-to-stdout",
+    "health_path": "/up",
+    "hydrate_files": ["config/credentials/test.key"],
+    "run_suffix_env_var": "TEST_ENV_NUMBER"
+  },
   "sign_in": {
     "path": "/users/sign_in",
     "email_selector": "#user_email",
