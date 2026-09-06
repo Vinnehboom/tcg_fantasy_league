@@ -1,5 +1,36 @@
 # CLAUDE.md
 
+## Coding style: the rules that keep coming back
+
+Each rule below exists because Vinnie corrected the same class of mistake
+more than once. Read them before you write code in this repository. They
+are a subset of the Coding Style Guide in Notion (pointer:
+`.claude/coding-style.json`), not a replacement for it. The guide is still
+binding in full.
+
+Rules 1 to 4 are one cluster, and they are the most corrected rule in this
+repository. A comment is a model reflex. Suppress it.
+
+1. Write no comment that restates the line below it.
+2. Write no decision, no rationale, and no design history in a comment. A
+   comment can still explain a non-obvious workaround or an invariant.
+3. Refer to no decision from code. No ticket id, no Decisions row, no
+   review round, no finding number. State what will break, not which
+   ticket found it. (`Tcg/NoDecisionReferencesInComments` fails the build
+   on this one.)
+4. Write no comment that points at a shared example or a contract module.
+   Its own name and content already say what it covers.
+5. Read constructor state in a service object through a private
+   `attr_reader`. Do not read a bare `@ivar`.
+6. Extract repeated or incidental spec setup into a named helper method.
+7. Send the message. Do not branch on the class or the type of an object.
+8. Squash every `fixup!` commit before you push. (`bin/no-fixups` fails
+   the build on this one.)
+
+A rule enters this list when a correction repeats. The `/coding-style`
+skill maintains it. This list and the hot list at the top of the Notion
+guide must stay identical.
+
 ## Documentation style
 
 When this session writes documentation directly — a Notion page, a PR

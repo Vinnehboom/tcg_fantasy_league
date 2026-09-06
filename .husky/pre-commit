@@ -64,3 +64,14 @@ fi
 if [ -n "$other_ruby_relevant" ] && [ -z "$ruby_files" ]; then
   echo "pre-commit: Gemfile/rubocop-config change with no code changes, skipping local rubocop/rspec (CI runs the full suite on push)"
 fi
+
+added_comments=$(git diff --cached -U0 -- '*.rb' '*.rake' | grep -cE '^\+[[:space:]]*#') || added_comments=0
+
+if [ "$added_comments" -gt 0 ]; then
+  echo "pre-commit: this commit adds $added_comments comment line(s). The four comment rules Vinnie corrects most often:"
+  echo "  1. Do not restate the line below the comment."
+  echo "  2. No decision, no rationale, and no design history in a comment."
+  echo "  3. No reference to a decision: no ticket id, no Decisions row, no review round, no finding number."
+  echo "  4. No comment that points at a shared example or a contract module."
+  echo "  Rubocop fails the build on rule 3. Rules 1, 2 and 4 are yours to hold."
+fi
