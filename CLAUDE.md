@@ -42,7 +42,8 @@ pragmatic mode). Load the skill before you draft the text.
 
 This rule covers the main session only. The `ticket-pipeline` planner,
 developer, and curator subagents get the same instruction directly in
-their own briefs (`.claude/skills/ticket-pipeline/references/`), so it
+their own briefs (the `kanban-automation` plugin's
+`ticket-pipeline/references/`), so it
 reaches them even though they run separately from this session.
 
 ## Automation boundaries

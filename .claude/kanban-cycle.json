@@ -1,5 +1,5 @@
 {
-  "_comment": "Config for the kanban-cycle skill, read at the start of every cycle. To reuse this automation on another project: copy the .claude/skills/kanban-cycle folder there and write a new file like this one pointing at that project's repo/board.",
+  "_comment": "Config for the kanban-cycle skill, read at the start of every cycle. To reuse this automation on another project: install the kanban-automation plugin there and write a new file like this one pointing at that project's repo/board.",
   "_comment_cost_ceiling": "orchestrator_cost_ceiling_usd thresholds get_session's external_metadata.usage.cost_usd, which values the session's tokens at API list prices. On a subscription plan that is NOT a bill — it is just a convenient running total of token volume, and the real constraint is the rate-limit window (see rate_limit_info in the same response). Tune this by how long you want one orchestrator generation to live, not by a spend budget.",
   "repo": "Vinnehboom/tcg_fantasy_league",
   "notion_board_url": "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0?pvs=25",
