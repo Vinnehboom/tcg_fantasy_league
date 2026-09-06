@@ -26,7 +26,7 @@
   "autoMode": {
     "allow": [
       "$defaults",
-      "git push --force or --force-with-lease (or -f) to any branch in this repo EXCEPT main/master — this is routine, expected automation: the kanban-cycle orchestrator skill (.claude/skills/kanban-cycle/SKILL.md) rebases open PR branches onto a newer default-branch tip directly in its own session and force-pushes the result, every cycle. Allow this without asking."
+      "git push --force or --force-with-lease (or -f) to any branch in this repo EXCEPT main/master — this is routine, expected automation: the kanban-cycle orchestrator skill (shipped by the kanban-automation plugin) rebases open PR branches onto a newer default-branch tip directly in its own session and force-pushes the result, every cycle. Allow this without asking."
     ],
     "hard_deny": [
       "$defaults",
