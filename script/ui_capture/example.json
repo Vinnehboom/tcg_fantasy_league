@@ -1,0 +1,6 @@
+{
+  "ticket": "H-8",
+  "targets": [
+    { "name": "score-modifiers-index", "kind": "still", "path": "/admin/score_modifiers" }
+  ]
+}
