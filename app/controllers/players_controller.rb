@@ -2,7 +2,7 @@ class PlayersController < ScopedGameController
 
   def index
     @players = @game.players.joins(:external_scores)
-    @countries = @players.pluck(:country).uniq.sort
+    @countries = @players.where.not(country: [nil, '']).distinct.pluck(:country).sort
     @players = apply_filters(players: @players)
                .group('players.id')
                .order('max(external_scores.score) desc')

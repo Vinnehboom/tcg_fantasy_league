@@ -77,7 +77,7 @@ class RostersController < ScopedGameController
 
   def set_page_variables
     @players = @game.players
-    @countries = @players.pluck(:country).uniq.sort
+    @countries = @players.where.not(country: [nil, '']).distinct.pluck(:country).sort
     filter_players
     @filters = filter_params
     @price_rules = Players::ScalingPriceRule.new
