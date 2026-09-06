@@ -118,7 +118,7 @@ module Scoring
         band_for(field_size).fetch(:multiplier)
       end
 
-      # Placement has no numericality validation yet (C-12), so 0/negatives
+      # Placement has no numericality validation yet, so 0/negatives
       # are storable today — clamp instead of trusting the raw value.
       def tier(placement)
         smallest_power_of_two_at_least(placement.to_i.clamp(1..))
