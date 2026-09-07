@@ -7,6 +7,8 @@ class SalaryDraft < ApplicationRecord
   validates :price_cap, presence: true
   validates :roster_size, presence: true
 
+  enum minimum_age: { unrestricted: 0, eighteen_plus: 18 }
+
   def cost_for(player:)
     Players::CostCalculator.new(pricing_rules: [Players::ScalingPriceRule.new]).calculate_cost(player:, tournament:)
   end

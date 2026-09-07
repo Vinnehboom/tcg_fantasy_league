@@ -77,7 +77,7 @@ module Admin
     end
 
     def salary_draft_params
-      params.require(:salary_draft).permit(:roster_size, :price_cap, :tournament_id, :requires_18_plus)
+      params.require(:salary_draft).permit(:roster_size, :price_cap, :tournament_id, :minimum_age)
     end
 
   end

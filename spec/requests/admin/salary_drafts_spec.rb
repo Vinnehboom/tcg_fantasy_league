@@ -64,21 +64,21 @@ module Admin
         end
       end
 
-      describe 'when requires_18_plus is set' do
+      describe 'when minimum_age is set to eighteen_plus' do
         let(:params) do
           {
             salary_draft: {
               tournament_id: create(:tournament).id,
               roster_size: 5,
               price_cap: 200,
-              requires_18_plus: true
+              minimum_age: :eighteen_plus
             }
           }
         end
 
         it 'creates a draft that requires 18+' do
           post(admin_salary_drafts_path, params:)
-          expect(SalaryDraft.last).to be_requires_18_plus
+          expect(SalaryDraft.last).to be_eighteen_plus
         end
       end
     end
@@ -107,18 +107,18 @@ module Admin
         end
       end
 
-      describe 'when requires_18_plus is set' do
+      describe 'when minimum_age is set to eighteen_plus' do
         let(:params) do
           {
             salary_draft: {
-              requires_18_plus: true
+              minimum_age: :eighteen_plus
             }
           }
         end
 
         it 'flips the draft to requiring 18+' do
           put(admin_salary_draft_path(salary_draft), params:)
-          expect(salary_draft.reload).to be_requires_18_plus
+          expect(salary_draft.reload).to be_eighteen_plus
         end
       end
     end
