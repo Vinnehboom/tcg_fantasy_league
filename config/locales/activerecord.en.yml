@@ -156,6 +156,9 @@ en:
               before_start_date: must be on or after the start date
             start_date:
               overlapping_season: overlaps an existing season for this game
+  profiles:
+    update:
+      success: Profile successfully updated.
   admin:
     salary_drafts:
       create:
