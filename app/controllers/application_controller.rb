@@ -30,4 +30,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def after_sign_in_path_for(resource)
+    return super if resource.country.present? && resource.date_of_birth.present?
+
+    flash[:notice] = t('application.profile_incomplete')
+    edit_profile_path
+  end
+
 end

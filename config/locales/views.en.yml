@@ -115,6 +115,10 @@ en:
         title: Account not created
         message: We're unable to create an account for you at this time.
         back_to_home: Back to home
+  profiles:
+    edit:
+      title: Complete your profile
+      explanation: Please provide your country and date of birth to continue.
   salary_drafts:
     show:
       edit: Edit
@@ -152,3 +156,4 @@ en:
       confirm_submit_roster: Are you sure you want to submit this roster? You will be unable to change the roster after submission.
   application:
     unauthorized: You are not permitted to visit this page.
+    profile_incomplete: Please complete your profile to continue.
