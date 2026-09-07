@@ -15,7 +15,8 @@ class ParticipationPolicy < ApplicationPolicy
     @participation.user == @user &&
       @user.participations.where(draft: @participation.draft).blank? &&
       tournament &&
-      tournament.starting_date > Date.current
+      tournament.starting_date > Date.current &&
+      meets_draft_age_requirement?
   end
 
   def update?
@@ -24,6 +25,15 @@ class ParticipationPolicy < ApplicationPolicy
 
   def destroy?
     admin? || @participation.user == @user
+  end
+
+  private
+
+  def meets_draft_age_requirement?
+    return true unless @participation.draft.requires_18_plus?
+
+    @user.country.present? && @user.date_of_birth.present? &&
+      @user.age >= AgeGate::PRIZE_DRAFT_MINIMUM_AGE
   end
 
 end

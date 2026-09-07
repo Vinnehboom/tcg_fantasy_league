@@ -40,6 +40,43 @@ RSpec.describe ParticipationPolicy, type: :policy do
       it { is_expected.not_to permit(user, user_participation) }
       it { is_expected.not_to permit(admin, admin_participation) }
     end
+
+    context 'when the draft requires 18+' do
+      let(:draft) do
+        create(:salary_draft, requires_18_plus: true, tournament: create(:tournament, starting_date: 2.days.from_now))
+      end
+
+      it 'permits an adult with a country and date of birth on record' do
+        adult = create(:user, :adult)
+        expect(described_class).to permit(adult, build(:participation, user: adult, draft:))
+      end
+
+      it 'denies a minor' do
+        minor = create(:user, :minor)
+        expect(described_class).not_to permit(minor, build(:participation, user: minor, draft:))
+      end
+
+      it 'denies a user missing a country and date of birth' do
+        incomplete_user = build(:user, country: nil, date_of_birth: nil)
+        expect(described_class).not_to permit(incomplete_user, build(:participation, user: incomplete_user, draft:))
+      end
+    end
+
+    context 'when the draft does not require 18+' do
+      let(:draft) do
+        create(:salary_draft, requires_18_plus: false, tournament: create(:tournament, starting_date: 2.days.from_now))
+      end
+
+      it 'permits an adult' do
+        adult = create(:user, :adult)
+        expect(described_class).to permit(adult, build(:participation, user: adult, draft:))
+      end
+
+      it 'permits a minor' do
+        minor = create(:user, :minor)
+        expect(described_class).to permit(minor, build(:participation, user: minor, draft:))
+      end
+    end
   end
 
   permissions :update? do
