@@ -3,6 +3,16 @@ FactoryBot.define do
     email { Faker::Internet.email }
     username { Faker::Internet.username }
     password { 'testtest' }
+    country { 'US' }
+    date_of_birth { 30.years.ago.to_date }
+
+    trait :adult do
+      date_of_birth { 30.years.ago.to_date }
+    end
+
+    trait :minor do
+      date_of_birth { 10.years.ago.to_date }
+    end
 
     trait :with_role do
       transient do
