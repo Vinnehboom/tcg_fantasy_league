@@ -45,6 +45,8 @@ en:
         email: Email
         username: Username
         highscore: Highscore
+        country: Country
+        date_of_birth: Date of birth
       player:
         name: Name
         country: Country

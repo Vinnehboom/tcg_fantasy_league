@@ -110,6 +110,11 @@ en:
       email: Email
       username: Username
       highscore: Lifetime highscore
+    registrations:
+      ineligible:
+        title: Account not created
+        message: We're unable to create an account for you at this time.
+        back_to_home: Back to home
   salary_drafts:
     show:
       edit: Edit
