@@ -32,7 +32,7 @@ class ParticipationPolicy < ApplicationPolicy
   attr_reader :participation
 
   def meets_draft_age_requirement?
-    return true unless participation.draft.requires_18_plus?
+    return true unless participation.draft.eighteen_plus?
 
     user.country.present? && user.date_of_birth.present? &&
       user.age >= AgeGate::PRIZE_DRAFT_MINIMUM_AGE

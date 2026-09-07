@@ -38,10 +38,10 @@ RSpec.describe 'Admin salary drafts' do
       select("#{tournament.game.id} - #{tournament.name}", from: 'salary_draft_tournament_id')
       fill_in 'salary_draft_roster_size', with: 3
       fill_in 'salary_draft_price_cap', with: 500
-      check 'salary_draft_requires_18_plus'
+      select 'eighteen_plus', from: 'salary_draft_minimum_age'
       click_button I18n.t('helpers.submit.create', model: 'Salary draft')
 
-      expect(SalaryDraft.last).to be_requires_18_plus
+      expect(SalaryDraft.last).to be_eighteen_plus
     end
   end
 
@@ -57,13 +57,13 @@ RSpec.describe 'Admin salary drafts' do
     end
 
     it 'flips a draft to requiring 18+' do
-      salary_draft = create(:salary_draft, requires_18_plus: false)
+      salary_draft = create(:salary_draft, minimum_age: :unrestricted)
 
       visit edit_admin_salary_draft_path(salary_draft)
-      check 'salary_draft_requires_18_plus'
+      select 'eighteen_plus', from: 'salary_draft_minimum_age'
       click_button I18n.t('helpers.submit.update', model: 'Salary draft')
 
-      expect(salary_draft.reload).to be_requires_18_plus
+      expect(salary_draft.reload).to be_eighteen_plus
     end
   end
 

@@ -43,7 +43,8 @@ RSpec.describe ParticipationPolicy, type: :policy do
 
     context 'when the draft requires 18+' do
       let(:draft) do
-        create(:salary_draft, requires_18_plus: true, tournament: create(:tournament, starting_date: 2.days.from_now))
+        create(:salary_draft, minimum_age: :eighteen_plus,
+                              tournament: create(:tournament, starting_date: 2.days.from_now))
       end
 
       it 'permits an adult with a country and date of birth on record' do
@@ -64,7 +65,8 @@ RSpec.describe ParticipationPolicy, type: :policy do
 
     context 'when the draft does not require 18+' do
       let(:draft) do
-        create(:salary_draft, requires_18_plus: false, tournament: create(:tournament, starting_date: 2.days.from_now))
+        create(:salary_draft, minimum_age: :unrestricted,
+                              tournament: create(:tournament, starting_date: 2.days.from_now))
       end
 
       it 'permits an adult' do

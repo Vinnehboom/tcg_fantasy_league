@@ -135,7 +135,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_07_150000) do
     t.integer "roster_size"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "requires_18_plus", default: false, null: false
+    t.integer "minimum_age", default: 0, null: false
     t.index ["tournament_id"], name: "index_salary_drafts_on_tournament_id"
   end
 
