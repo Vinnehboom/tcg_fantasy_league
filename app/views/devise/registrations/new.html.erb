@@ -9,6 +9,10 @@
                 input_html: { autocomplete: "email" } %>
 
     <%= f.input :username %>
+    <%= f.input :country, collection: ISO3166::Country.codes.sort_by { |code| ISO3166::Country.new(code).common_name },
+                label_method: ->(code) { ISO3166::Country.new(code).common_name },
+                value_method: :itself %>
+    <%= f.input :date_of_birth, as: :date, start_year: Date.current.year - 100, end_year: Date.current.year %>
     <%= f.input :password, as: :password, input_html: { autocomplete: "new-password" } %>
     <% if @minimum_password_length %>
       <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
