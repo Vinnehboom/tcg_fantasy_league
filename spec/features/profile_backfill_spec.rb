@@ -1,28 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe 'Profile backfill' do
-  def sign_in_without_flash_assertion(user)
-    visit new_user_session_path
-
-    fill_in 'user_email', with: user.email
-    fill_in 'user_password', with: 'testtest'
-    click_button I18n.t('devise.sessions.sign_in')
-  end
-
   it 'redirects to the profile-completion form when the country or date of birth is missing' do
-    user = build(:user, country: nil, date_of_birth: nil)
-    user.save!(validate: false)
+    user = create(:user, :incomplete_profile)
 
-    sign_in_without_flash_assertion(user)
+    sign_in_with(user, expect_signed_in_flash: false)
 
     expect(page).to have_current_path(edit_profile_path)
     expect(page).to have_content('Please complete your profile to continue.')
   end
 
   it 'saves the profile and continues to the normal destination once both fields are filled in' do
-    user = build(:user, country: nil, date_of_birth: nil)
-    user.save!(validate: false)
-    sign_in_without_flash_assertion(user)
+    user = create(:user, :incomplete_profile)
+    sign_in_with(user, expect_signed_in_flash: false)
 
     select 'United States', from: 'user_country'
     select (Date.current.year - 30).to_s, from: 'user_date_of_birth_1i'
@@ -43,9 +33,8 @@ RSpec.describe 'Profile backfill' do
   end
 
   it 're-shows the form with an inline error when the update leaves a field blank' do
-    user = build(:user, country: nil, date_of_birth: nil)
-    user.save!(validate: false)
-    sign_in_without_flash_assertion(user)
+    user = create(:user, :incomplete_profile)
+    sign_in_with(user, expect_signed_in_flash: false)
 
     click_button I18n.t('helpers.submit.update', model: 'User')
 
