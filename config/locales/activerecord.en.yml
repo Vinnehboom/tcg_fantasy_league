@@ -68,6 +68,7 @@ en:
         tournament_id: Tournament
         price_cap: Maximum roster price
         roster_size: Roster size
+        requires_18_plus: Requires 18+
       participation:
         draft: Draft
         draft_id: Draft

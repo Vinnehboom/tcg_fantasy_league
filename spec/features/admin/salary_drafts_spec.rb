@@ -30,6 +30,19 @@ RSpec.describe 'Admin salary drafts' do
       expect(page).to have_content('3')
       expect(page).to have_content('500')
     end
+
+    it 'creates a draft that requires 18+ to participate' do
+      tournament = create(:tournament, starting_date: 1.day.from_now)
+
+      visit new_admin_salary_draft_path
+      select("#{tournament.game.id} - #{tournament.name}", from: 'salary_draft_tournament_id')
+      fill_in 'salary_draft_roster_size', with: 3
+      fill_in 'salary_draft_price_cap', with: 500
+      check 'salary_draft_requires_18_plus'
+      click_button I18n.t('helpers.submit.create', model: 'Salary draft')
+
+      expect(SalaryDraft.last).to be_requires_18_plus
+    end
   end
 
   describe 'edit' do
@@ -41,6 +54,16 @@ RSpec.describe 'Admin salary drafts' do
       click_button I18n.t('helpers.submit.update', model: 'Salary draft')
 
       expect(page).to have_content('750')
+    end
+
+    it 'flips a draft to requiring 18+' do
+      salary_draft = create(:salary_draft, requires_18_plus: false)
+
+      visit edit_admin_salary_draft_path(salary_draft)
+      check 'salary_draft_requires_18_plus'
+      click_button I18n.t('helpers.submit.update', model: 'Salary draft')
+
+      expect(salary_draft.reload).to be_requires_18_plus
     end
   end
 
