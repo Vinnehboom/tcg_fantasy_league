@@ -3,6 +3,7 @@
     <%= f.input :tournament_id, collection: @tournaments, label_method: ->(tournament) { "#{tournament.game.id} - #{tournament.name}"}%>
     <%= f.input :roster_size %>
     <%= f.input :price_cap  %>
+    <%= f.input :requires_18_plus %>
 
     <%= f.button :submit, class: "btn btn-success ms-auto" %>
   <% end %>

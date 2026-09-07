@@ -63,6 +63,24 @@ module Admin
           expect(response).to redirect_to(admin_salary_draft_path(salary_draft))
         end
       end
+
+      describe 'when requires_18_plus is set' do
+        let(:params) do
+          {
+            salary_draft: {
+              tournament_id: create(:tournament).id,
+              roster_size: 5,
+              price_cap: 200,
+              requires_18_plus: true
+            }
+          }
+        end
+
+        it 'creates a draft that requires 18+' do
+          post(admin_salary_drafts_path, params:)
+          expect(SalaryDraft.last).to be_requires_18_plus
+        end
+      end
     end
 
     describe '#update' do
@@ -86,6 +104,21 @@ module Admin
         it 'show the draft information' do
           put(admin_salary_draft_path(salary_draft), params:)
           expect(response).to redirect_to(admin_salary_draft_path(salary_draft))
+        end
+      end
+
+      describe 'when requires_18_plus is set' do
+        let(:params) do
+          {
+            salary_draft: {
+              requires_18_plus: true
+            }
+          }
+        end
+
+        it 'flips the draft to requiring 18+' do
+          put(admin_salary_draft_path(salary_draft), params:)
+          expect(salary_draft.reload).to be_requires_18_plus
         end
       end
     end

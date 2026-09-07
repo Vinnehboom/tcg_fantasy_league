@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_07_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_07_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -135,6 +135,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_07_090000) do
     t.integer "roster_size"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "requires_18_plus", default: false, null: false
     t.index ["tournament_id"], name: "index_salary_drafts_on_tournament_id"
   end
 
