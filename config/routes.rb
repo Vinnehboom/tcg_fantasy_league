@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   root "pages#landing"
 
+  get "privacy" => "pages#privacy"
+  get "terms" => "pages#terms"
+
   namespace :admin do
     root "games#index"
     resources :users

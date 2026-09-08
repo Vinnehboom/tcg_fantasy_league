@@ -102,6 +102,30 @@ en:
       title: TCG Fantasy League
       upcoming_drafts: Upcoming drafts
       top_players: Top scoring users
+    privacy:
+      title: Privacy notice
+      controller_heading: Who we are
+      controller_name: "[Legal entity name]"
+      controller_address: "[Registered address]"
+      contact_heading: How to contact us
+      contact_address: "[Contact address for privacy and data-subject requests]"
+      data_heading: What data we process
+      data_body: We process your account details (email address, username, country, and date of birth), and your activity in salary drafts, rosters, and tournament participations.
+      purpose_heading: Why we process your data
+      purpose_body: We use this data to run your account, run salary drafts and rosters, and show your results and scores.
+      lawful_basis_heading: Our lawful basis
+      lawful_basis_body: We process your account data to perform our contract with you. We process your activity data because we have a legitimate interest in running the game.
+      retention_heading: How long we keep your data
+      retention_body: "[retention period to be confirmed]"
+      recipients_heading: Who receives your data
+      recipients_body: Render hosts our application and our database. Honeybadger receives our error reports. Neither company can use your data for its own purposes.
+      transfers_heading: Transfers outside the UK
+      transfers_body: "[transfers outside the UK to be confirmed]"
+      rights_heading: Your rights
+      rights_body: You have the right to access, correct, erase, and port your data. You also have the right to object to some uses of it. To use any of these rights, contact us at the address above.
+      complaints_heading: How to complain
+      complaints_ico: You can complain to the UK Information Commissioner's Office (ICO) at ico.org.uk.
+      complaints_dpo: "[named data protection contact beyond the ICO to be confirmed]"
   users:
     show:
       title: My profile
