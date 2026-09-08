@@ -107,6 +107,7 @@ en:
       top_players: Top scoring users
     privacy:
       title: Privacy notice
+      draft_notice: This notice is not final. Bracketed sections will be confirmed before launch.
       controller_heading: Who we are
       controller_name: "[Legal entity name]"
       controller_address: "[Registered address]"
@@ -121,9 +122,9 @@ en:
       retention_heading: How long we keep your data
       retention_body: "[retention period to be confirmed]"
       recipients_heading: Who receives your data
-      recipients_body: Render hosts our application and our database. Honeybadger receives our error reports. Neither company can use your data for its own purposes.
+      recipients_body: Render hosts our application and our database. Honeybadger receives our error reports.
       transfers_heading: Transfers outside the UK
-      transfers_body: "[transfers outside the UK to be confirmed]"
+      transfers_body: Render and Honeybadger are based in the United States, so using them can mean your data leaves the UK. We only allow this transfer under a lawful safeguard recognised by UK data protection law, such as the UK's International Data Transfer Addendum.
       rights_heading: Your rights
       rights_body: You have the right to access, correct, erase, and port your data. You also have the right to object to some uses of it. To use any of these rights, contact us at the address above.
       complaints_heading: How to complain
