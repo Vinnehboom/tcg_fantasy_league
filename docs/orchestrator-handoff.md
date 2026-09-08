@@ -5,11 +5,12 @@ present, not the history. Durable lessons belong in the
 `kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
 no longer in `.claude/skills/`.
 
-**Generation:** 9
-**Predecessor session:** `session_01NYRRtyEHKss5Uf16DTdEbv` (generation 8)
-**Handoff trigger:** none. Generation 8 had nothing in flight. Vinnie
-asked for a fresh orchestrator after the plugin cutover, so this
-generation starts clean rather than carrying a conversation.
+**Generation:** 10
+**Predecessor session:** `session_016QVhammDdLMgmuPFVgX7m4` (generation 9)
+**Handoff trigger:** cost ceiling. Generation 9's `get_session` read
+`cost_usd` $109.19 against `orchestrator_cost_ceiling_usd` $50 — step 0
+of `/kanban-cycle` sent it straight to `/handoff` instead of running the
+scheduled 08:00 BST cycle.
 **Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
 `orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
 current.
@@ -20,55 +21,58 @@ files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-None.
+None. All three open pull requests are CI-green and fully reviewed —
+they're waiting on Vinnie's merge, not on an answer from him.
 
 ## In-flight nuance that live state would misread
 
-None. No pull request is open in `tcg_fantasy_league` or in
-`claude-automation`. No dispatched agent is active. Generation 8 never
-resumed cycles after 2026-09-06, so the board is where the last completed
-cycle left it.
-
-## What changed on 2026-09-06
-
-The orchestration skills now come from the `kanban-automation` plugin.
-Four things follow from that:
-
-- A skill edit goes to `Vinnehboom/claude-automation` as a pull request.
-  Do not edit `.claude/skills/` in this repository. Those copies are
-  superseded and a pull request to delete them is still to come.
-- The UI capture driver moved too. The plugin ships `capture.mjs` and
-  `run.sh` under `scripts/ui_capture/`. This repository keeps
-  `.claude/ui-capture.json`, `script/ui_capture/boot.sh`, and
-  `script/ui_capture/core_targets.sh`.
-- `script/ui_capture/run.sh` is a shim that forwards to the plugin. Delete
-  it in the same pull request that deletes `.claude/skills/`.
-- The plugin arrives by an install, not by a file. A project
-  `.claude/settings.json` that declares `extraKnownMarketplaces` and
-  `enabledPlugins` installs nothing. Those keys are what an install
-  writes. tcg#95 tried to add them and was closed for that reason. Do not
-  re-open it.
+- **Only two of the three active triggers belong to this orchestrator.**
+  `list_triggers` shows "Kanban cycle 08:00 BST"
+  (`trig_01GowjVpFmyeFnLqqQNjKwn7`) and "Kanban cycle 17:30 BST"
+  (`trig_01PxbaXUHAH9XbZSRVdwtU6P`) bound to generation 9's session — those
+  two are what step 3 of `/handoff` re-points. **"Dashboard refresh
+  (2-hourly)" (`trig_01BuAxrMKrQ3EDjTMGMEuYDQ`) is bound to a wholly
+  different, separate persistent session (`session_01L2auEoW9GhNxfw46vMnDhV`)**
+  that only refreshes `state/tcg`'s live-derivable fields on a tighter
+  cadence — it is not this orchestrator and re-pointing it would be
+  wrong. Leave it alone. When `/handoff`'s guardrail says "the trigger
+  count must not change," that means the count of triggers bound to
+  *this* session (2), not the full `list_triggers` output (3).
+- **`Vinnehboom/claude-automation#11`** is generation 9's own pending
+  automation-repo pull request (see below) — open, CI not yet observed
+  green. It is a skill-file-only diff under `plugins/*/skills/**`, so
+  the automation repo's own auto-merge rule (`kanban-cycle` SKILL.md
+  step 0b) applies once CI passes; nothing here merges it automatically,
+  a cycle's own triage of the automation repo does. If it's still open
+  next cycle, check its CI and merge it per that rule rather than
+  treating it as ticket-linked work.
+- **`Vinnehboom/tcg_fantasy_league#107` (P-8) just had a review-feedback
+  round pushed** (commit `feaa135`, 2026-09-07 21:44 UTC): all four of
+  Vinnie's inline review comments replied to and resolved (a
+  `requires_18_plus` boolean became a `minimum_age` enum; the hand-rolled
+  country dropdown now uses the `countries` gem's own
+  `all_names_with_codes` helper, which also fixed the "broken
+  translation" comment — same root cause). CI is green on that commit
+  (3/3 CircleCI checks). Nothing further needed unless Vinnie leaves new
+  feedback.
 
 ## Pending automation work
 
-- **The environment needs `Vinnehboom/claude-automation` as a source.**
-  The marketplace clone goes through the git proxy of the session, and
-  that proxy allows only the repositories attached to the session. A
-  session with only this repository attached cannot install the plugin,
-  whatever its setup script says. Generation 8 failed this way for days.
-  The failure reads as
-  `Plugin "kanban-automation" not found in marketplace "vinnie-automation"`,
-  which sounds like a stale marketplace. It is an empty one.
-- **The setup script hides its own failure.** Its two marketplace lines
-  carry `|| true`, and those two lines do the network work. When one
-  fails, the only error that reaches anyone is the install's, which names
-  the wrong cause. Vinnie has been asked to remove `|| true`.
-- **Delete the four superseded skill copies** from `.claude/skills/`,
-  KEEPING `simple-english`, which stays in this repository for licensing.
-  The same pull request deletes `script/ui_capture/run.sh`. Do this only
-  after a session proves that the plugin loads.
-- **Rename the Routine prompts** to `/kanban-automation:kanban-cycle`
-  once those copies are gone.
-- **Notion H-14** covers moving the generic part of
-  `script/ui_capture/boot.sh` into the plugin. In progress, not started
-  in code.
+- **`Vinnehboom/claude-automation#11`** — see above. Folds in one lesson:
+  a Rails `enum` value name (`none`) collided with
+  `ActiveRecord::Relation#none` and raised `ArgumentError` at class-load
+  time. Added to `ticket-pipeline/references/developer.md`.
+- Generation 8's pending items (deleting the superseded `.claude/skills/`
+  copies, renaming the Routine prompts, moving the UI-capture driver to
+  the plugin) are all done — confirmed via `git ls-tree` on `main` and
+  the Routine prompts above. Nothing left from that list.
+
+## Open pull requests (context for the next cycle, not a substitute for reading them live)
+
+- **`Vinnehboom/claude-automation#10`** (H-14) — ready, CI green,
+  `mergeable_state: clean`, two review rounds, squashed to 5 commits.
+  `tcg_fantasy_league#106` depends on this — merge #10 first.
+- **`Vinnehboom/tcg_fantasy_league#106`** (H-14 adoption) — ready,
+  depends on #10 above.
+- **`Vinnehboom/tcg_fantasy_league#107`** (P-8) — ready, CI green, all
+  review threads resolved (see above).
