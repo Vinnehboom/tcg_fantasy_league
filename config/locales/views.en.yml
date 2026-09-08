@@ -7,6 +7,9 @@ en:
         login: Log in
         user_score: "Score: %{score}"
         dashboard: Home
+      footer:
+        privacy_link: Privacy notice
+        terms_link: Terms of Service
     tables:
       actions: Actions
       show: Show
