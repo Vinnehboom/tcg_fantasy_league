@@ -1,6 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe 'Privacy notice' do
+  it 'marks the whole notice as provisional, not final' do
+    visit privacy_path
+
+    expect(page).to have_content('This notice is not final')
+  end
+
   it 'names the data controller with a placeholder identity' do
     visit privacy_path
 
@@ -41,10 +47,11 @@ RSpec.describe 'Privacy notice' do
     expect(page).to have_content('Honeybadger receives our error reports')
   end
 
-  it 'gives a placeholder answer on transfers outside the UK' do
+  it 'states that using Render and Honeybadger sends data outside the UK' do
     visit privacy_path
 
-    expect(page).to have_content('[transfers outside the UK to be confirmed]')
+    expect(page).to have_content('Render and Honeybadger are based in the United States')
+    expect(page).to have_content('International Data Transfer Addendum')
   end
 
   it "states the visitor's rights over their own data" do
