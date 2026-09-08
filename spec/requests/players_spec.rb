@@ -10,6 +10,12 @@ RSpec.describe 'Players' do
       expect(response).to render_template('players/index')
     end
 
+    it 'sends noindex, so search engines do not crawl real players\' names and countries' do
+      get game_players_path(game: game.id)
+
+      expect(response.body).to include('<meta name="robots" content="noindex">')
+    end
+
     context 'when a player has no country' do
       let(:known_country) { create(:player, game:, country: 'JP') }
       let(:blank_country) { create(:player, game:, country: nil) }
