@@ -126,6 +126,10 @@ en:
       complaints_heading: How to complain
       complaints_ico: You can complain to the UK Information Commissioner's Office (ICO) at ico.org.uk.
       complaints_dpo: "[named data protection contact beyond the ICO to be confirmed]"
+    terms:
+      title: Terms of Service
+      placeholder_notice: This page holds placeholder Terms of Service.
+      body: "[Terms of Service placeholder text. Real, reviewed terms will replace this text before launch.]"
   users:
     show:
       title: My profile
