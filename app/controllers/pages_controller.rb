@@ -11,4 +11,12 @@ class PagesController < ApplicationController
     @top_users = User.highscorers(game: @game).page(params['users']).per(10)
   end
 
+  def privacy
+    render layout: 'no_header'
+  end
+
+  def terms
+    render layout: 'no_header'
+  end
+
 end
