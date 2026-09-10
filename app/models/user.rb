@@ -3,9 +3,10 @@ class User < ApplicationRecord
   rolify
 
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # :lockable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
+         :confirmable, :timeoutable
 
   has_many :participations, dependent: :destroy
   has_many :rosters, through: :participations
@@ -41,6 +42,12 @@ class User < ApplicationRecord
       .where.not('roster_players.score': nil)
       .select('users.*, SUM(roster_players.score) AS total')
       .order('total DESC')
+  end
+
+  protected
+
+  def send_devise_notification(notification, *)
+    devise_mailer.send(notification, self, *).deliver_later
   end
 
 end

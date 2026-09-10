@@ -19,7 +19,10 @@ RSpec.describe 'Sign up' do
 
     expect { click_button I18n.t('devise.registrations.sign_up') }.to change(User, :count).by(1)
 
-    expect(page).to have_content(I18n.t('devise.registrations.signed_up'))
+    expect(page).to have_content(
+      'A message with a confirmation link has been sent to your email address. ' \
+      'Please follow the link to activate your account.'
+    )
   end
 
   it 'rejects a signup below the digital consent age for the chosen country' do

@@ -5,9 +5,14 @@ FactoryBot.define do
     password { 'testtest' }
     country { 'US' }
     date_of_birth { 30.years.ago.to_date }
+    confirmed_at { Time.current }
 
     trait :adult do
       date_of_birth { 30.years.ago.to_date }
+    end
+
+    trait :unconfirmed do
+      confirmed_at { nil }
     end
 
     trait :minor do
