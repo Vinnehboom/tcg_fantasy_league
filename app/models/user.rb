@@ -2,8 +2,6 @@ class User < ApplicationRecord
 
   rolify
 
-  # Include default devise modules. Others available are:
-  # :lockable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :confirmable, :timeoutable
@@ -46,6 +44,8 @@ class User < ApplicationRecord
 
   protected
 
+  # Enqueues unconditionally, inside the current transaction. A mail queued
+  # here before that transaction rolls back still gets sent.
   def send_devise_notification(notification, *)
     devise_mailer.send(notification, self, *).deliver_later
   end

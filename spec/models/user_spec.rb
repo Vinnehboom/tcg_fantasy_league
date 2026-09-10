@@ -98,9 +98,9 @@ RSpec.describe User do
   end
 
   describe 'devise mail delivery' do
-    it 'enqueues the confirmation mail instead of delivering it inline' do
+    it 'does not block user creation on the mail actually being delivered' do
       expect { create(:user, :unconfirmed) }.to have_enqueued_job(ActionMailer::MailDeliveryJob)
-      expect(ActionMailer::Base.deliveries).to be_empty
+      expect { perform_enqueued_jobs }.to change(ActionMailer::Base.deliveries, :count).by(1)
     end
   end
 

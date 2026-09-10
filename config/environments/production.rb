@@ -80,6 +80,18 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # Render sets this for every web service at runtime, so a mailer view can build a
+  # full URL (confirmation_url, reset_password_url) without a hardcoded host. The
+  # fallback only matters for a build-time boot (assets:precompile, db:migrate),
+  # where this var may not be set yet, and is never used to send real mail.
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch('RENDER_EXTERNAL_HOSTNAME', 'example.com')
+  }
+
+  # No delivery method is configured below, so a queued mail (deliver_later, on the
+  # in-process :async adapter above) fails in the background worker rather than
+  # sending. The failure does not surface to the request that queued it.
+
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
