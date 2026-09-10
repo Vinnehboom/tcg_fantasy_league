@@ -19,6 +19,21 @@ RSpec.describe 'Password reset' do
         'recovery link at your email address in a few minutes.'
       )
     end
+
+    it 'shows the same neutral message for an email address that is not registered' do
+      visit new_user_password_path
+
+      fill_in 'user_email', with: 'not_registered@example.com'
+
+      expect do
+        perform_enqueued_jobs { click_button 'Send me reset password instructions' }
+      end.not_to change(ActionMailer::Base.deliveries, :count)
+
+      expect(page).to have_content(
+        'If your email address exists in our database, you will receive a password ' \
+        'recovery link at your email address in a few minutes.'
+      )
+    end
   end
 
   describe 'completing a reset from the emailed link' do

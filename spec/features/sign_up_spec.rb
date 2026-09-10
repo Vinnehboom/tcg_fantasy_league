@@ -7,15 +7,19 @@ RSpec.describe 'Sign up' do
     select '1', from: 'user_date_of_birth_3i'
   end
 
-  it 'creates a new user with valid details' do
+  def sign_up_with(email:, country:, years_ago:, username: email.split('@').first)
     visit new_user_registration_path
 
-    fill_in 'user_email', with: 'new_player@example.com'
-    fill_in 'user_username', with: 'new_player'
-    select 'United States', from: 'user_country'
-    select_date_of_birth(years_ago: 30)
+    fill_in 'user_email', with: email
+    fill_in 'user_username', with: username
+    select country, from: 'user_country'
+    select_date_of_birth(years_ago:)
     fill_in 'user_password', with: 'testtest'
     fill_in 'user_password_confirmation', with: 'testtest'
+  end
+
+  it 'creates a new user with valid details' do
+    sign_up_with(email: 'new_player@example.com', country: 'United States', years_ago: 30)
 
     expect { click_button I18n.t('devise.registrations.sign_up') }.to change(User, :count).by(1)
 
@@ -26,14 +30,7 @@ RSpec.describe 'Sign up' do
   end
 
   it 'rejects a signup below the digital consent age for the chosen country' do
-    visit new_user_registration_path
-
-    fill_in 'user_email', with: 'too_young@example.com'
-    fill_in 'user_username', with: 'too_young'
-    select 'United Kingdom', from: 'user_country'
-    select_date_of_birth(years_ago: 10)
-    fill_in 'user_password', with: 'testtest'
-    fill_in 'user_password_confirmation', with: 'testtest'
+    sign_up_with(email: 'too_young@example.com', country: 'United Kingdom', years_ago: 10)
 
     expect { click_button I18n.t('devise.registrations.sign_up') }.not_to change(User, :count)
 
@@ -42,27 +39,13 @@ RSpec.describe 'Sign up' do
   end
 
   it 'accepts a 14-year-old in the UK, where the digital consent age is 13' do
-    visit new_user_registration_path
-
-    fill_in 'user_email', with: 'gb_teen@example.com'
-    fill_in 'user_username', with: 'gb_teen'
-    select 'United Kingdom', from: 'user_country'
-    select_date_of_birth(years_ago: 14)
-    fill_in 'user_password', with: 'testtest'
-    fill_in 'user_password_confirmation', with: 'testtest'
+    sign_up_with(email: 'gb_teen@example.com', country: 'United Kingdom', years_ago: 14)
 
     expect { click_button I18n.t('devise.registrations.sign_up') }.to change(User, :count).by(1)
   end
 
   it 'rejects a 14-year-old in France, where the digital consent age is 15' do
-    visit new_user_registration_path
-
-    fill_in 'user_email', with: 'fr_teen@example.com'
-    fill_in 'user_username', with: 'fr_teen'
-    select 'France', from: 'user_country'
-    select_date_of_birth(years_ago: 14)
-    fill_in 'user_password', with: 'testtest'
-    fill_in 'user_password_confirmation', with: 'testtest'
+    sign_up_with(email: 'fr_teen@example.com', country: 'France', years_ago: 14)
 
     expect { click_button I18n.t('devise.registrations.sign_up') }.not_to change(User, :count)
 
@@ -90,14 +73,7 @@ RSpec.describe 'Sign up' do
   end
 
   it 'blocks sign-in for a freshly signed-up, still-unconfirmed user' do
-    visit new_user_registration_path
-
-    fill_in 'user_email', with: 'unconfirmed@example.com'
-    fill_in 'user_username', with: 'unconfirmed'
-    select 'United States', from: 'user_country'
-    select_date_of_birth(years_ago: 30)
-    fill_in 'user_password', with: 'testtest'
-    fill_in 'user_password_confirmation', with: 'testtest'
+    sign_up_with(email: 'unconfirmed@example.com', country: 'United States', years_ago: 30)
     click_button I18n.t('devise.registrations.sign_up')
 
     visit new_user_session_path
@@ -106,7 +82,7 @@ RSpec.describe 'Sign up' do
     click_button I18n.t('devise.sessions.sign_in')
 
     expect(page).to have_content('You have to confirm your email address before continuing.')
-    expect(page).not_to have_content(I18n.t('devise.sessions.signed_in'))
+    expect(page).not_to have_content('Signed in successfully.')
   end
 
   def eligible_signup_params(email:)
@@ -123,14 +99,7 @@ RSpec.describe 'Sign up' do
   end
 
   it 'refuses an immediate retry after a rejection, even with a truthful date of birth' do
-    visit new_user_registration_path
-
-    fill_in 'user_email', with: 'retry_attempt@example.com'
-    fill_in 'user_username', with: 'retry_attempt'
-    select 'United Kingdom', from: 'user_country'
-    select_date_of_birth(years_ago: 10)
-    fill_in 'user_password', with: 'testtest'
-    fill_in 'user_password_confirmation', with: 'testtest'
+    sign_up_with(email: 'retry_attempt@example.com', country: 'United Kingdom', years_ago: 10)
     click_button I18n.t('devise.registrations.sign_up')
 
     visit new_user_registration_path

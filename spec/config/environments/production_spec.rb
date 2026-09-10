@@ -18,6 +18,17 @@ RSpec.describe 'config/environments/production.rb' do
     expect(auth).to have_received(:authorized?).with(username: 'vinnie', password: 's3cret')
   end
 
+  it "builds a mailer URL from Render's own hostname" do
+    allow(ENV).to receive(:fetch).and_call_original
+    allow(ENV).to receive(:fetch)
+      .with('RENDER_EXTERNAL_HOSTNAME', anything)
+      .and_return('tcg-fantasy-league.onrender.com')
+
+    calls = evaluate_production_config.action_mailer.calls
+
+    expect(calls).to include([:default_url_options=, [{ host: 'tcg-fantasy-league.onrender.com' }]])
+  end
+
   def registered_basic_auth
     recorded_middleware(evaluate_production_config)
       .find { |arguments, _block| arguments.first == Rack::Auth::Basic }
@@ -46,8 +57,8 @@ RSpec.describe 'config/environments/production.rb' do
   end
 
   # production.rb sets many config.* values this spec does not care about, some
-  # of them nested (config.action_mailer.*), so everything but the middleware
-  # stack has to chain through.
+  # of them nested, so everything but the middleware stack and action_mailer
+  # has to chain through.
   def config_recorder
     middleware = Struct.new(:calls) do
       def use(*arguments, &block)
@@ -55,7 +66,7 @@ RSpec.describe 'config/environments/production.rb' do
       end
     end.new([])
 
-    Struct.new(:middleware) do
+    Struct.new(:middleware, :action_mailer) do
       def method_missing(*)
         self
       end
@@ -63,6 +74,18 @@ RSpec.describe 'config/environments/production.rb' do
       def respond_to_missing?(*)
         true
       end
-    end.new(middleware)
+    end.new(middleware, call_recorder)
+  end
+
+  def call_recorder
+    Struct.new(:calls) do
+      def method_missing(name, *arguments)
+        calls << [name, arguments]
+      end
+
+      def respond_to_missing?(*)
+        true
+      end
+    end.new([])
   end
 end
