@@ -143,11 +143,12 @@ en:
       contact_heading: How to contact us
       contact_address: "[Contact address for privacy and data-subject requests]"
       data_heading: What data we hold about you
-      data_body: We hold your name, your country, your finishing places in tournaments, and your ranking points or rating over time.
+      data_body: We hold your name, your country, the identifier that the source uses for you, your finishing places in tournaments, and your ranking points or rating over time.
       source_heading: Where the data came from
       source_body: We take Pokémon player data from the public rankings and results of Limitless TCG, at limitlesstcg.com. Every game we add brings its own public source, and we name that source here.
       purpose_heading: Why we use your data
       purpose_body: We run a fantasy game. Our members pick real competitive players, and we score those picks against real tournament results.
+      lawful_basis_heading: Our lawful basis
       lawful_basis_body: Our lawful basis is legitimate interests. Our interest is to run a fantasy game about public competitive results. We hold no data about you beyond the public record of your play.
       retention_heading: How long we keep your data
       retention_body: "[retention period for player data to be confirmed]"
@@ -156,7 +157,8 @@ en:
       transfers_heading: Transfers outside the UK
       transfers_body: Render and Honeybadger are based in the United States, so using them can mean your data leaves the UK. We only allow this transfer under a lawful safeguard recognised by UK data protection law, such as the UK's International Data Transfer Addendum.
       rights_heading: Your rights
-      rights_body: You have the right to access, correct, erase, restrict, and port your data. You also have the right to object to our use of it.
+      rights_body: You have the right to access, correct, erase, and restrict your data. You also have the right to object to our use of it.
+      rights_portability: Data portability is a right only where the processing rests on consent or on a contract, so it does not apply here. Write to us anyway and we will send you a copy of what we hold.
       object_heading: How to object, and what happens then
       object_route: Write to the contact address above and tell us that you object. We answer within one month.
       object_outcome: We then stop using your data, and we remove you from the site, unless we can show compelling legitimate grounds that override your rights.
