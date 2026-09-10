@@ -40,6 +40,18 @@ RSpec.describe 'Privacy notice' do
     expect(page).to have_content('[retention period to be confirmed]')
   end
 
+  it 'states how long it keeps the raw response of an import' do
+    visit privacy_path
+
+    expect(page).to have_content('We keep the raw response for 24 hours after the import')
+  end
+
+  it 'states how often it erases an expired raw response' do
+    visit privacy_path
+
+    expect(page).to have_content('A job that runs every hour then erases the raw response')
+  end
+
   it 'names Render and Honeybadger as recipients of the data' do
     visit privacy_path
 
