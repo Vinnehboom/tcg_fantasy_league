@@ -97,6 +97,13 @@ RSpec.describe User do
     it { is_expected.to eq(50.0) }
   end
 
+  describe 'devise mail delivery' do
+    it 'enqueues the confirmation mail instead of delivering it inline' do
+      expect { create(:user, :unconfirmed) }.to have_enqueued_job(ActionMailer::MailDeliveryJob)
+      expect(ActionMailer::Base.deliveries).to be_empty
+    end
+  end
+
   describe '.highscorers' do
     let(:game) { create(:game) }
     let(:users) { create_list(:user, 3) }

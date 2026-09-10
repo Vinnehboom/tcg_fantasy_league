@@ -89,6 +89,26 @@ RSpec.describe 'Sign up' do
     end
   end
 
+  it 'blocks sign-in for a freshly signed-up, still-unconfirmed user' do
+    visit new_user_registration_path
+
+    fill_in 'user_email', with: 'unconfirmed@example.com'
+    fill_in 'user_username', with: 'unconfirmed'
+    select 'United States', from: 'user_country'
+    select_date_of_birth(years_ago: 30)
+    fill_in 'user_password', with: 'testtest'
+    fill_in 'user_password_confirmation', with: 'testtest'
+    click_button I18n.t('devise.registrations.sign_up')
+
+    visit new_user_session_path
+    fill_in 'user_email', with: 'unconfirmed@example.com'
+    fill_in 'user_password', with: 'testtest'
+    click_button I18n.t('devise.sessions.sign_in')
+
+    expect(page).to have_content('You have to confirm your email address before continuing.')
+    expect(page).not_to have_content(I18n.t('devise.sessions.signed_in'))
+  end
+
   def eligible_signup_params(email:)
     {
       'user[email]' => email,
