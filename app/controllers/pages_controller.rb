@@ -19,4 +19,8 @@ class PagesController < ApplicationController
     render layout: 'no_header'
   end
 
+  def player_information
+    render layout: 'no_header'
+  end
+
 end

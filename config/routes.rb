@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   get "privacy" => "pages#privacy"
   get "terms" => "pages#terms"
+  get "player-information" => "pages#player_information", as: :player_information
 
   namespace :admin do
     root "games#index"
