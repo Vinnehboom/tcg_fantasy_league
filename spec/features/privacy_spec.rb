@@ -60,6 +60,14 @@ RSpec.describe 'Privacy notice' do
     expect(page).to have_content('right to access, correct, erase, and port your data')
   end
 
+  it 'links to the separate notice published for the players it tracks' do
+    visit privacy_path
+
+    click_link I18n.t('pages.privacy.player_information_link')
+
+    expect(page).to have_current_path(player_information_path)
+  end
+
   it 'names the ICO and gives a placeholder for any named complaints contact' do
     visit privacy_path
 

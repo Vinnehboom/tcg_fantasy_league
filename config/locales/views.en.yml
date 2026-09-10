@@ -115,6 +115,9 @@ en:
       contact_address: "[Contact address for privacy and data-subject requests]"
       data_heading: What data we process
       data_body: We process your account details (email address, username, country, and date of birth), and your activity in salary drafts, rosters, and tournament participations.
+      player_information_heading: Players we track
+      player_information_body: This notice covers your own account. We also hold data about competitive players who have no account with us. A separate notice covers that data.
+      player_information_link: Information for players we track
       purpose_heading: Why we process your data
       purpose_body: We use this data to run your account, run salary drafts and rosters, and show your results and scores.
       lawful_basis_heading: Our lawful basis
@@ -165,6 +168,10 @@ en:
       title: Terms of Service
       placeholder_notice: This page holds placeholder Terms of Service.
       body: "[Terms of Service placeholder text. Real, reviewed terms will replace this text before launch.]"
+  players:
+    index:
+      player_information_notice: We list real competitive players here. We did not get this data from the players it describes.
+      player_information_link: Read the information we publish for these players
   users:
     show:
       title: My profile

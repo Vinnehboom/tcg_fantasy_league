@@ -2,6 +2,11 @@
   <meta name="robots" content="noindex">
 <% end %>
 
+<p class="player-information-notice">
+  <%= t('.player_information_notice') %>
+  <%= link_to t('.player_information_link'), player_information_path %>
+</p>
+
 <%= render partial: "shared/player_filters", locals: { url: game_players_path(game: @game, page: params[:page]) } %>
 
 <%= render partial: "table", locals: { players: @players } %>

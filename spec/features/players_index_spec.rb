@@ -16,6 +16,14 @@ RSpec.describe 'Players index', :js do
     expect(player_rows.last).to include(low_scorer.name)
   end
 
+  it 'links to the information notice published for the players it lists' do
+    visit game_players_path(game:)
+
+    click_link I18n.t('players.index.player_information_link')
+
+    expect(page).to have_current_path(player_information_path)
+  end
+
   it 'filters players by country as the visitor picks one, with no manual submit' do
     # Countries are sorted alphabetically for the select's options, so the browser
     # auto-selects 'JP' on load (no blank/prompt option exists). Giving `other` the
