@@ -102,6 +102,7 @@ RSpec.configure do |config|
   config.include Features::UserSignInHelper, type: :feature
   config.include RSpecHtmlMatchers
   config.include ActiveSupport::Testing::TimeHelpers
+  config.include ActiveJob::TestHelper
 
   # add sign in helpers for request specs
 

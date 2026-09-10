@@ -10,10 +10,14 @@ RSpec.describe 'Password reset' do
 
       fill_in 'user_email', with: user.email
 
-      expect { click_button 'Send me reset password instructions' }
-        .to change(ActionMailer::Base.deliveries, :count).by(1)
+      expect do
+        perform_enqueued_jobs { click_button 'Send me reset password instructions' }
+      end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
-      expect(page).to have_content(I18n.t('devise.passwords.send_instructions'))
+      expect(page).to have_content(
+        'If your email address exists in our database, you will receive a password ' \
+        'recovery link at your email address in a few minutes.'
+      )
     end
   end
 
@@ -21,7 +25,7 @@ RSpec.describe 'Password reset' do
     before do
       visit new_user_password_path
       fill_in 'user_email', with: user.email
-      click_button 'Send me reset password instructions'
+      perform_enqueued_jobs { click_button 'Send me reset password instructions' }
     end
 
     it 'sets a new password the user can then sign in with' do
