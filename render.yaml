@@ -26,3 +26,21 @@ services:
         sync: false
       - key: WEB_CONCURRENCY
         value: 2 # sensible default
+
+  # Render's own scheduler fires this, so the retention window holds without a
+  # crontab inside the web instance. A cron service needs a paid instance type.
+  - type: cron
+    name: tcg_fantasy_league_retention
+    runtime: ruby
+    buildCommand: "bundle install"
+    # perform_now, not perform_later: the queue adapter is in-process, so a job
+    # handed to it dies with the cron process and erases nothing.
+    startCommand: "bundle exec rails runner 'ExternalData::RetentionJob.perform_now'"
+    schedule: "0 * * * *"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tcg-fantasy-league-production
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
