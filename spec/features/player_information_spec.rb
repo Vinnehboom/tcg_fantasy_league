@@ -49,14 +49,14 @@ RSpec.describe 'Player information notice' do
     expect(page).to have_content('[retention period for player data to be confirmed]')
   end
 
-  it 'names Render and Honeybadger as recipients of the data' do
-    expect(page).to have_content('Render hosts our application and our database')
-    expect(page).to have_content('Honeybadger receives our error reports')
+  it 'gives a placeholder for who receives the data' do
+    expect(page).to have_css('h2', exact_text: 'Who receives your data')
+    expect(page).to have_content('is still being decided and will be confirmed here before launch')
   end
 
-  it 'states that using Render and Honeybadger sends data outside the UK' do
-    expect(page).to have_content('Render and Honeybadger are based in the United States')
-    expect(page).to have_content('International Data Transfer Addendum')
+  it 'gives a placeholder for whether data transfers outside the UK' do
+    expect(page).to have_css('h2', exact_text: 'Transfers outside the UK')
+    expect(page).to have_content('depends on the final hosting decision, and will be confirmed here before launch')
   end
 
   it "states the player's rights over their own data" do

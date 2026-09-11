@@ -153,9 +153,9 @@ en:
       retention_heading: How long we keep your data
       retention_body: "[retention period for player data to be confirmed]"
       recipients_heading: Who receives your data
-      recipients_body: Render hosts our application and our database. Honeybadger receives our error reports.
+      recipients_body: "[Who receives this data, and where it is hosted, is still being decided and will be confirmed here before launch.]"
       transfers_heading: Transfers outside the UK
-      transfers_body: Render and Honeybadger are based in the United States, so using them can mean your data leaves the UK. We only allow this transfer under a lawful safeguard recognised by UK data protection law, such as the UK's International Data Transfer Addendum.
+      transfers_body: "[Whether this data transfers outside the UK depends on the final hosting decision, and will be confirmed here before launch.]"
       rights_heading: Your rights
       rights_body: You have the right to access, correct, erase, and restrict your data. You also have the right to object to our use of it.
       rights_portability: Data portability is a right only where the processing rests on consent or on a contract, so it does not apply here. Write to us anyway and we will send you a copy of what we hold.
