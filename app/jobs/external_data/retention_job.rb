@@ -3,6 +3,7 @@ module ExternalData
   class RetentionJob < ApplicationJob
 
     DEFAULT_RETENTION_HOURS = 24
+    MINIMUM_RETENTION_HOURS = 1
 
     def perform
       ExternalRequest.with_discarded.discarded.delete_all
@@ -30,9 +31,16 @@ module ExternalData
     end
 
     def retention_hours(game:)
-      configured = game.default_setting&.settings&.dig('retention', 'external_request_hours')
+      hours = Integer(configured_hours(game:), exception: false)
 
-      Integer(configured, exception: false)&.clamp(1..) || DEFAULT_RETENTION_HOURS
+      hours&.clamp(MINIMUM_RETENTION_HOURS..) || DEFAULT_RETENTION_HOURS
+    end
+
+    def configured_hours(game:)
+      settings = Hash.try_convert(game.default_setting&.settings) || {}
+      retention = Hash.try_convert(settings['retention']) || {}
+
+      retention['external_request_hours']
     end
 
   end
