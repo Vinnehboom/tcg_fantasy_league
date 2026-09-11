@@ -15,13 +15,7 @@ RSpec.describe 'config/schedule.rb' do
       .not_to include('ExternalData::ImportTournamentsJob.perform_later')
   end
 
-  it 'enqueues the external request retention job' do
-    expect(job_list.generate_cron_output).to include("#{ExternalData::RetentionJob.name}.perform_later")
-  end
-
-  it 'runs the retention job at the top of every hour' do
-    retention_line = job_list.generate_cron_output.lines.grep(/#{ExternalData::RetentionJob.name}/).sole
-
-    expect(retention_line).to start_with('0 * * * *')
+  it 'schedules no job here: the deploy blueprint owns every schedule' do
+    expect(job_list.generate_cron_output).to be_empty
   end
 end
