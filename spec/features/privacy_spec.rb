@@ -52,6 +52,12 @@ RSpec.describe 'Privacy notice' do
     expect(page).to have_content('A job that runs every hour then erases the raw response')
   end
 
+  it 'names the same window the retention job applies by default' do
+    visit privacy_path
+
+    expect(page).to have_content("for #{ExternalData::RetentionJob::DEFAULT_RETENTION_HOURS} hours after the import")
+  end
+
   it 'names Render and Honeybadger as recipients of the data' do
     visit privacy_path
 
