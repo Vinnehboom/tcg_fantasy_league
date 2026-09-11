@@ -124,7 +124,7 @@ en:
       lawful_basis_body: We process your account data to perform our contract with you. We process your activity data because we have a legitimate interest in running the game.
       retention_heading: How long we keep your data
       retention_body: "[retention period to be confirmed]"
-      retention_import_logs_body: We keep a log of every import we run from an external service. The raw response in that log holds player names and results. We keep the raw response for 24 hours after the import. A job that runs every hour then erases the raw response. The log entry stays as a record that the import ran.
+      retention_import_logs_body: We keep a log of every import we run from an external service. The raw response in that log holds player names and results. We keep the raw response for 24 hours after the import. A job that runs every hour then erases the raw response. We remove the whole log entry when we no longer need it.
       recipients_heading: Who receives your data
       recipients_body: Render hosts our application and our database. Honeybadger receives our error reports.
       transfers_heading: Transfers outside the UK
@@ -153,6 +153,7 @@ en:
       lawful_basis_body: Our lawful basis is legitimate interests. Our interest is to run a fantasy game about public competitive results. We hold no data about you beyond the public record of your play.
       retention_heading: How long we keep your data
       retention_body: "[retention period for player data to be confirmed]"
+      retention_import_logs_body: We keep a log of every import we run from an external service. The raw response in that log holds your name and your results. We keep the raw response for 24 hours after the import. A job that runs every hour then erases the raw response. We remove the whole log entry when we no longer need it.
       recipients_heading: Who receives your data
       recipients_body: "[Who receives this data, and where it is hosted, is still being decided and will be confirmed here before launch.]"
       transfers_heading: Transfers outside the UK
