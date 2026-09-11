@@ -5,13 +5,13 @@ present, not the history. Durable lessons belong in the
 `kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
 no longer in `.claude/skills/`.
 
-**Generation:** 11
-**Predecessor session:** `session_01WjMuzgPXtaeURJmswzmGsd` (generation 10)
-**Handoff trigger:** cost ceiling. Generation 10's `get_session` read
-`cost_usd` $49.98 against `orchestrator_cost_ceiling_usd` $50 — close
-enough to the line, with context at 600K/1M tokens and a container
-restart plus a stuck subagent permission prompt already behind it, that
-step 0 called it rather than waiting to technically cross $50 mid-cycle.
+**Generation:** 12
+**Predecessor session:** `session_01TszSKdDfJUu2bdj6dR6Y3V` (generation 11)
+**Handoff trigger:** cost ceiling. Generation 11's `get_session` read
+`cost_usd` $95.27 against `orchestrator_cost_ceiling_usd` $50 — well past
+the line by the time step 0 caught it (a long unattended stretch running
+three tickets through the pipeline back to back). Fold this into a
+sharper mid-cycle re-check if it recurs — see "Pending automation work".
 **Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
 `orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
 current.
@@ -22,109 +22,108 @@ files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-1. **P-2's Curator proposals (Checkpoint 3)** — presented to Vinnie in
-   session, no go-ahead yet. If he approves, write these (the orchestrator
-   writes, not a curator subagent):
-   - Style guide addition: ship an unknown business fact (legal text, an
-     address, a policy) as a clearly bracketed placeholder plus a
-     blocking go-live follow-up ticket, rather than inventing it or
-     blocking the current ticket. (Confirmed reusable — P-2b already
-     exists in exactly this shape.)
-   - Knowledge Base page note: a page with no single game (`/privacy`,
-     `/terms`, `landing`) needs `render layout: 'no_header'`, because the
-     header partial calls `game_root_path` and fails on a `nil` `@game`.
-   - Tech Debt entry: this session's locally cached copy of the
-     `kanban-automation` plugin is missing `boot.sh`, though
-     `claude-automation#10` merged it upstream — broke UI capture on both
-     P-2 and P-11 (`run.sh` exit 2, boot failure). **Possibly moot for
-     you**: a fresh session (this one) reloads the plugin from the
-     marketplace, so try a capture on the next ticket before assuming
-     this is still broken — file the entry only if it recurs.
-   - Tech Debt entry: a long Notion comment on a ticket card can silently
-     truncate partway through (confirmed on P-2's reviewer comment, cut
-     off after finding 5 of 10 — the same review posted in full as a
-     GitHub PR review comment, so nothing was actually lost that time).
-2. **P-11's Curator proposals (Checkpoint 3)** — presented, no go-ahead
-   yet. If approved:
-   - New ticket: "Sequence noindex before Disallow on the player pages" —
-     `robots.txt`'s `Disallow: /*/players` stops a crawler from ever
-     re-fetching a page, so it never sees a `noindex` tag added there;
-     an already-indexed player URL stays indexed. Fix: ship `noindex`
-     alone first, wait for a recrawl, then add `Disallow`. Depends on
-     P-11 (done). Vinnie may instead choose "won't fix, accepted" — frame
-     the card to allow that outcome.
-   - Knowledge Base note: same `Disallow`-vs-`noindex` interaction,
-     written as a durable fact for future SEO/privacy tickets.
-   - Tech Debt entry: `yield :head` exists only in `_base.html.erb`, not
-     `admin.html.erb` — a `content_for(:head)` block in an admin view is
-     silently dropped. Low priority.
-3. **P-12 needs a direct Checkpoint 2 go-ahead — not self-approved.** See
-   "In-flight nuance" below for why the board won't show this waiting.
+None outstanding. Every question raised this generation (P-6's retention
+window, P-6's Convention-check + file-overlap self-approval, P-3's
+objection-route placeholder, P-6's Render cron tier) got a real answer
+from Vinnie in session — see "In-flight nuance" for what each answer
+means for reading current state correctly.
+
+**Soft item, not a blocking question:** P-4 ("Legitimate interests
+assessment and DPIA") and P-5 ("Record of processing, processor
+contracts, breach procedure") were flagged to Vinnie as *possibly* not
+coding tickets at all (paperwork/analysis, like P-1/P-13) but never
+actually confirmed either way. Don't dispatch either to `/ticket-pipeline`
+without checking first — ask Vinnie, or read the card closely for
+something a PR could actually satisfy.
 
 ## In-flight nuance that live state would misread
 
-- **P-12's Notion card Status still reads "Not started," but a complete,
-  final plan is already written under its `## Plan` heading** (I wrote it
-  myself, directly, after the dispatch that produced it got stuck on a
-  permission prompt and never flipped the Status — see below). Checkpoint
-  1 is already resolved (Vinnie's answers: no real SMTP, use
-  `deliver_later` and file the missing config as tech debt; backfill
-  `confirmed_at` from each row's own `created_at`, no real user data to
-  protect; keep Devise's 30-minute session timeout default; strict 0-day
-  confirmation grace period, no `allow_unconfirmed_access_for`) — **do
-  not re-ask it.** The plan itself classifies the ticket **High risk**
-  (touches sign-up/sign-in for every user) and explicitly does not
-  self-approve at Checkpoint 2. Read the card's `## Plan` in full, then
-  present it to Vinnie for a real go-ahead — don't dispatch a fresh
-  Planner, the research and plan are already done and final.
-  - Once Vinnie approves: dispatch a **fresh** Developer-phase agent
-    (the original dispatch does not survive this handoff) pointed
-    directly at the plan already on the card — branch
-    `p-12-devise-hardening` off `main`, per the card's own "Branch" and
-    "Commits" sections. Skip Planner, Checkpoint 1, and Checkpoint 2 in
-    that dispatch's instructions; it should read the plan and start
-    building.
-  - Flip the card's Status to "In progress" yourself once you've
-    presented it (Phase 1's own step, skipped by the interrupted
-    dispatch).
-- **No open pull requests right now** — both P-2 (`#109`) and P-11
-  (`#110`) merged this generation, rebase-merged, Notion cards flipped to
-  Done. Nothing for step 3 (PR triage) to do on `tcg_fantasy_league` at
-  handoff time.
-- **A dispatched subagent's tool call can sit blocked on a permission
-  prompt even for a tool already in this session's own allowlist** —
-  observed on a `mcp__Notion__notion-update-page` call during P-12's
-  retry dispatch (writing its plan to the card), which left the whole
-  session in `SESSION_STATUS_REQUIRES_ACTION` and burned a large share of
-  this generation's budget before being noticed. If this recurs: a
-  `get_session` call surfaces the stuck call's exact tool name and
-  input under `pending_action` — if that tool is one this session already
-  has allowed, the orchestrator can just call it directly with the same
-  arguments to unblock and preserve the work, rather than waiting on it
-  or discarding the dispatch. Worth writing into the plugin's dispatch
-  mechanics if it happens a second time; not filed this generation (cost
-  ceiling).
+- **Three ticket-linked PRs are open at once — #112, #113, #114 — one
+  more than `max_open_prs` (2) allows.** This is a real process slip from
+  this generation, not a state to "fix" by closing anything: P-3's PR
+  (#113) opened mid-generation, pushing `open_count` to 2 (at cap) with
+  #112 already open; P-6 had already been dispatched and stacked on P-3's
+  branch by that point, and its PR (#114) opened without re-checking the
+  cap against the now-larger count. **Do not dispatch a new ticket-linked
+  PR until at least one of the three merges** — step 4's room check
+  correctly reads `open_count = 3 >= max_open_prs = 2` right now, so this
+  self-corrects the moment `/kanban-cycle` runs step 4 normally. The
+  lesson (recompute `open_count` including a PR opened earlier in the
+  *same* session, not just at cycle start, before dispatching the next
+  ticket) is worth a line in `kanban-cycle` SKILL.md if it recurs — not
+  filed this generation, cost ceiling.
+- **#114 (P-6) is stacked on #113 (P-3)'s branch — merge #113 first,
+  bottom-up, per the skill's stacked-PR rule.** #112 (P-12) is
+  independent of both and can merge in any order relative to them.
+- **#114 (P-6) has a real, known production gap, not a placeholder one:**
+  its Render cron service needs a paid Render plan (cron services don't
+  exist on the free tier, and the blueprint is `plan: free` throughout).
+  Vinnie's explicit call, 2026-09-11: ship it anyway, track the Render
+  upgrade separately. Until that upgrade happens, the retention job is
+  defined but does not actually run in production — this is Vinnie's ops
+  task, not something `/ticket-pipeline` can do, so there's no follow-up
+  ticket to file for it.
+- **P-2b (`Depends On` now `P-1`, not `P-2`) is the standing tracker for
+  every bracketed placeholder across `/privacy`, `/terms`, and (as of this
+  generation) `/player-information`** — widened twice this generation, once
+  for P-3's placeholders and once for P-6's retention line. Its Notion
+  card is current; nothing more to do until P-1 lands.
+- **P-2c (new this generation) — "Write and review the Terms of Service
+  copy" — is genuinely blocked on Vinnie supplying real, legally-reviewed
+  text.** No dependency card produces this fact the way P-1 produces the
+  entity identity; don't dispatch it expecting a plan to emerge, the
+  planner will stop immediately for the same reason P-2b's first attempt
+  did.
+- **Standing policy, not yet in the Decisions database:** ship every
+  compliance/legal-content ticket with bracketed placeholders for any
+  fact this pipeline can't determine, paired with a blocking follow-up
+  ticket per the 2026-09-10 Style Rule — never defer or hold the ticket
+  waiting for real-world facts. Vinnie confirmed this directly, twice,
+  this generation (on P-2b and again generalized to P-3/P-6-adjacent
+  work). It should be a Decisions-database row so `/ticket-pipeline`'s
+  planner cites it instead of re-deriving it each time — not filed this
+  generation, see "Pending automation work".
+- **A Stop-hook "uncommitted changes" nudge is not instruction to commit
+  and push blindly.** Hit three times this generation (twice in
+  dispatched worktrees, once in this orchestrator's own main checkout):
+  `db:prepare`/`db:schema:load` dirtied `db/schema.rb` with a DIFFERENT
+  open PR's not-yet-merged migration. Local `HEAD` matched `origin/main`
+  correctly each time — the fix was `git diff db/schema.rb` to confirm
+  the phantom change, then `git checkout -- db/schema.rb` to discard it.
+  This is now documented in `kanban-cycle` SKILL.md's environment-facts
+  list (see "Pending automation work" — already merged, not just
+  proposed).
 
 ## Pending automation work
 
-- Two lessons from this generation are candidates for a
-  `claude-automation` PR but were **not** filed (cost ceiling, see above)
-  — worth doing early next generation if budget allows:
-  1. A plugin's local cache is a snapshot taken when a session starts (or
-     last installed) and does not follow the plugin's own source repo
-     mid-session — confirmed cause of the `boot.sh` capture failures
-     above. Worth a line in `kanban-cycle` SKILL.md's environment-facts
-     list, alongside the other "things that cost a cycle" notes.
-  2. The stuck-permission-on-an-allowed-tool case just above, if it
-     recurs.
-- Nothing outstanding from generation 9's list — `claude-automation#10`
-  and `#11` both merged, confirmed via git history on `main` of both
-  repos.
+- **`Vinnehboom/claude-automation#12`** — already merged this generation
+  (checked its `validate` check, green, merged via the repo's
+  skill-files-only whitelist). Documents the `db/schema.rb` contamination
+  hazard above, a `git worktree add -b` wrong-upstream hazard (a stacked
+  dispatch's `git worktree add -b <branch> origin/<other-ticket's-branch>`
+  silently set the new branch's push upstream to the OTHER ticket's
+  branch — caught before the first push, this time), and generalizes
+  "don't wait for the next scheduled firing" to apply whenever room opens
+  up, not only mid-cycle after a merge. Nothing outstanding here.
+- **Log the placeholder-over-defer policy above as a Decisions-database
+  row.** Not done this generation (cost ceiling caught it first). Cite
+  the 2026-09-10 Style Rule ("ship an unknown fact as a bracketed
+  placeholder...") as the mechanism, and record that Vinnie has now
+  confirmed it applies generally to compliance-ticket unknowns, not just
+  the ticket it was first stated on.
+- **Investigate a sharper mid-cycle cost-ceiling check.** This generation
+  ran three tickets end-to-end (P-3 review+fix+PR, P-6 plan+build+review+
+  fix+PR, plus triage on P-12) across a long unattended stretch before
+  step 0 next got a chance to read `cost_usd` — by then it was nearly 2x
+  the ceiling. Worth considering whether step 0's check should also run
+  after finishing a ticket's Gatekeeper phase (PR opened), not only at
+  the top of a scheduled cycle, given the new "don't wait for next cycle"
+  eagerness this generation's `#12` PR just encoded. Not filed as a
+  concrete skill change — flagging the question, not the answer.
 
 ## Recently merged (context, not a substitute for reading live state)
 
-- `tcg_fantasy_league#109` (P-2 — privacy/terms pages) and `#110` (P-11 —
-  robots.txt/noindex) both merged this generation. Their Curator
-  Checkpoint 3s are the open questions above.
-- `claude-automation#10` (boot harness) and `tcg_fantasy_league#106`
-  (H-14 adoption) — both merged, predate this generation's own work.
+- `Vinnehboom/claude-automation#12` (this generation's lessons) — merged.
+- Nothing on `tcg_fantasy_league` merged this generation — `#112`, `#113`,
+  `#114` are all still open (see "In-flight nuance" above for why there
+  are three at once).
