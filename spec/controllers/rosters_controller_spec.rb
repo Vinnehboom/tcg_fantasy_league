@@ -23,6 +23,14 @@ RSpec.describe RostersController do
       expect(assigns(:players).last(2)).to include(player1, player2)
     end
 
+    it 'does not show a suppressed player' do
+      visible = create(:player, game:, country: 'US')
+      suppressed = create(:player, :suppressed, game:, country: 'US')
+      get :edit, params: { id: roster.id, game: game.id }
+      expect(assigns(:players)).to include(visible)
+      expect(assigns(:players)).not_to include(suppressed)
+    end
+
     it 'does not show players the user has already drafted' do
       azul = create(:player, game:, country: 'US')
       create(:player, game:, country: 'NO')
