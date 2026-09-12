@@ -80,6 +80,19 @@ RSpec.describe 'Admin salary drafts' do
       expect(page).to have_link(I18n.t('admin.salary_drafts.show.edit'))
       expect(page).to have_link(I18n.t('admin.salary_drafts.show.complete'))
     end
+
+    it 'shows a suppressed roster player as a placeholder, never by their real name' do
+      salary_draft = create(:salary_draft)
+      participation = create(:participation, draft: salary_draft, status: 'submitted')
+      roster = create(:roster, participation:)
+      suppressed_player = create(:player, :without_scores, :suppressed, name: 'Ash Ketchum')
+      create(:roster_player, roster:, player: suppressed_player)
+
+      visit admin_salary_draft_path(salary_draft)
+
+      expect(page).to have_content(I18n.t('players.suppressed_display_name'))
+      expect(page).to have_no_content('Ash Ketchum')
+    end
   end
 
   describe 'complete' do

@@ -7,7 +7,7 @@ module ExternalData
     private
 
     def skip?
-      ::Player.unscoped.find_by(**lookup_attributes)&.suppressed? || false
+      !!::Player.unscoped.find_by(**lookup_attributes)&.suppressed?
     end
 
     def db_class
