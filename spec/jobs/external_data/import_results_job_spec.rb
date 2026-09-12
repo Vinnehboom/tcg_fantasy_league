@@ -46,6 +46,27 @@ module ExternalData
         end
       end
 
+      context 'when the placement belongs to an already-suppressed player' do
+        before do
+          allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)
+            .with(tournament_id: '0070').and_return(1)
+          create(:player, :suppressed, game: tournament.game, external_id: '/players/1', name: 'Existing Name')
+        end
+
+        it 'does not create a result row, on this run or a subsequent one' do
+          perform_import.call
+          perform_import.call
+
+          expect(::Result.count).to eq(0)
+        end
+
+        it 'does not create a duplicate player row' do
+          perform_import.call
+
+          expect(::Player.unscoped.where(external_id: '/players/1', game: tournament.game).count).to eq(1)
+        end
+      end
+
       context 'when the authoritative field size differs from the number of processed results' do
         before do
           allow(ExternalData::Pokemon::Tcg::LabsTournament).to receive(:call)

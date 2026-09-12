@@ -16,6 +16,16 @@ RSpec.describe 'Players index', :js do
     expect(player_rows.last).to include(low_scorer.name)
   end
 
+  it 'excludes a suppressed player from the list' do
+    visible = create(:player, game:, name: 'Ash Ketchum')
+    suppressed = create(:player, :suppressed, game:, name: 'Misty Waterflower')
+
+    visit game_players_path(game:)
+
+    expect(page).to have_content(visible.name)
+    expect(page).to have_no_content(suppressed.name)
+  end
+
   it 'links to the information notice published for the players it lists' do
     visit game_players_path(game:)
 

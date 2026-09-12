@@ -41,6 +41,36 @@ module ExternalData
 
           expect(ExternalRequest.last.kind).to eq('players')
         end
+
+        describe 'when the fetched player is already suppressed' do
+          before { season }
+
+          let(:suppressed_player) do
+            create(:player, :without_scores, :suppressed, game: Game.find('PTCG'),
+                                                          external_id: player.external_id, name: 'Existing Name')
+          end
+
+          it 'leaves the suppression in place across a subsequent import run' do
+            suppressed_player
+            perform_import.call
+            perform_import.call
+
+            expect(::Player.unscoped.where(external_id: player.external_id).count).to eq(1)
+          end
+
+          it 'does not overwrite the existing name' do
+            suppressed_player
+            perform_import.call
+
+            expect(suppressed_player.reload.name).to eq('Existing Name')
+          end
+
+          it 'does not record a new score' do
+            suppressed_player
+
+            expect { perform_import.call }.not_to change(ExternalScore, :count)
+          end
+        end
       end
 
       describe 'when no Game row exists for the given id' do

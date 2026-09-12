@@ -5,6 +5,19 @@ RSpec.describe 'Admin players', :js do
 
   before { sign_in_with(admin) }
 
+  describe 'index' do
+    it 'excludes a suppressed player from the list' do
+      game = create(:game)
+      visible = create(:player, game:, name: 'Ash Ketchum')
+      suppressed = create(:player, :suppressed, game:, name: 'Misty Waterflower')
+
+      visit admin_players_path(game: game.id)
+
+      expect(page).to have_content(visible.name)
+      expect(page).to have_no_content(suppressed.name)
+    end
+  end
+
   describe 'show' do
     it 'attaches a modifier to a player' do
       player = create(:player, name: 'Ash Ketchum')
