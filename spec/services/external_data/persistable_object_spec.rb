@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 module ExternalData
 
   RSpec.describe PersistableObject do
@@ -38,6 +40,31 @@ module ExternalData
         it 'updates the record' do
           example_persistable_instance.save!
           expect(example_class.find_by(external_id:, game:).name).to eq('New player')
+        end
+      end
+
+      describe 'when a subclass skips the object' do
+        let(:skipping_class) do
+          Class.new(described_class) do
+            def db_class = ::Player
+
+            def post_initialize(*); end
+
+            def instance_attributes = { name: 'Should not be saved', country: 'BE' }
+
+            def save_associations(*) = nil
+
+            def skip? = true
+          end
+        end
+        let(:instance) { skipping_class.new(attributes: { game_id: game.id, external_id: }) }
+
+        it 'does not touch the database' do
+          expect { instance.save! }.not_to change(example_class, :count)
+        end
+
+        it 'returns false' do
+          expect(instance.save!).to be false
         end
       end
 
