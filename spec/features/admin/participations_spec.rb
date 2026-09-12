@@ -28,5 +28,17 @@ RSpec.describe 'Admin participations' do
       expect(page).to have_content(participation.draft.roster_size)
       expect(page).to have_content(participation.rosters.first.players.first.name)
     end
+
+    it 'shows a suppressed roster player as a placeholder, never by their real name' do
+      participation = create(:participation)
+      roster = create(:roster, participation:)
+      suppressed_player = create(:player, :without_scores, :suppressed, name: 'Ash Ketchum')
+      create(:roster_player, roster:, player: suppressed_player)
+
+      visit admin_participation_path(participation)
+
+      expect(page).to have_content(I18n.t('players.suppressed_display_name'))
+      expect(page).to have_no_content('Ash Ketchum')
+    end
   end
 end

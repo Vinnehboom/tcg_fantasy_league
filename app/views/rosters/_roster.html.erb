@@ -19,7 +19,7 @@
       <% player = roster_player.player %>
       <tr class="mx-2">
         <td>
-        <%= link_to(player.name, player.external_url ,target: "_blank") %>
+        <%= player_name_link(player) %>
         </td>
         <td>
           <%= player.current_score %>
