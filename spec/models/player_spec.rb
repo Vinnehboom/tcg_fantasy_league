@@ -203,6 +203,63 @@ RSpec.describe Player do
     end
   end
 
+  describe 'the default scope' do
+    it 'excludes a suppressed player from a plain query' do
+      create(:player, :suppressed, name: 'Hidden Player')
+
+      expect(described_class.all).to be_empty
+    end
+
+    it 'includes a player who is not suppressed' do
+      player = create(:player)
+
+      expect(described_class.all).to contain_exactly(player)
+    end
+
+    it 'raises RecordNotFound for a suppressed player\'s id' do
+      suppressed_player = create(:player, :suppressed)
+
+      expect { described_class.find(suppressed_player.id) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
+  describe '.suppressed' do
+    it 'returns only a suppressed player, bypassing the default scope' do
+      suppressed_player = create(:player, :suppressed)
+      create(:player)
+
+      expect(described_class.suppressed).to contain_exactly(suppressed_player)
+    end
+  end
+
+  describe '#suppressed?' do
+    it 'is true once suppressed_at is set' do
+      player = build(:player, suppressed_at: Time.current)
+
+      expect(player).to be_suppressed
+    end
+
+    it 'is false when suppressed_at is nil' do
+      player = build(:player, suppressed_at: nil)
+
+      expect(player).not_to be_suppressed
+    end
+  end
+
+  describe '#display_name' do
+    it 'returns the real name for a player who is not suppressed' do
+      player = build(:player, name: 'Real Name')
+
+      expect(player.display_name).to eq('Real Name')
+    end
+
+    it 'returns a placeholder for a suppressed player, and never the real name' do
+      player = build(:player, name: 'Real Name', suppressed_at: Time.current)
+
+      expect(player.display_name).to eq(I18n.t('players.suppressed_display_name'))
+    end
+  end
+
   describe '#score_difference' do
     let(:player) { create(:player) }
 

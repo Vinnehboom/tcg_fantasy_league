@@ -7,6 +7,15 @@ RSpec.describe PlayerSeason do
   it { is_expected.to have_many(:player_season_modifiers).dependent(:destroy) }
   it { is_expected.to have_many(:score_modifiers).through(:player_season_modifiers) }
 
+  describe '#player, when the player is suppressed' do
+    it 'still resolves to the player instead of nil' do
+      player = create(:player, :suppressed)
+      player_season = create(:player_season, player:)
+
+      expect(player_season.reload.player).to eq(player)
+    end
+  end
+
   describe '#score_modifiers' do
     subject(:score_modifiers) { player_season.reload.score_modifiers }
 

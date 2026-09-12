@@ -1,6 +1,6 @@
 class RosterPlayer < ApplicationRecord
 
-  belongs_to :player
+  belongs_to :player, -> { unscope(where: :suppressed_at) }, inverse_of: false
   belongs_to :roster
   has_one :participation, through: :roster
   has_one :draft, through: :participation
