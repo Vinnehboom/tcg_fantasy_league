@@ -25,7 +25,7 @@
           <%= player.current_score %>
         </td>
         <td>
-          <%= roster_player.decorated_player_cost %>
+          <%= masked_player_cost(roster_player) %>
         </td>
         <% if edit %>
           <td>
@@ -43,7 +43,7 @@
           <%= t('rosters.edit.roster_size') %>
         </td>
         <td>
-          <%= "#{roster.players.count} / #{roster.draft.roster_size}" %>
+          <%= "#{roster.roster_players.count} / #{roster.draft.roster_size}" %>
         </td>
       </tr>
       <tr>

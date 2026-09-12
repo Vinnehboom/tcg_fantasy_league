@@ -13,8 +13,7 @@ class Roster < ApplicationRecord
   validate :roster_cost, on: :update, unless: -> { validation_context == :scoring }
 
   def total_cost
-    roster_players.reject { |roster_player| roster_player.player.suppressed? }
-                  .sum { |roster_player| roster_player.player_cost.to_f }.round(2)
+    roster_players.sum { |roster_player| roster_player.player_cost.to_f }.round(2)
   end
 
   def remaining_cost

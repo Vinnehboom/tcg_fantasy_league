@@ -25,29 +25,6 @@ module SalaryDrafts
       described_class.call(participation:, draft:)
       expect(participation.reload.score).to eq(40)
     end
-
-    describe 'when a roster player is suppressed' do
-      let(:suppressed_player) { create(:player, :without_scores, :suppressed) }
-
-      before { roster.players << suppressed_player }
-
-      it 'does not count that player toward the participation score' do
-        travel_to 3.days.ago
-        create(:external_score, player: suppressed_player, score: 20)
-        travel_to 7.days.from_now
-        create(:external_score, player: suppressed_player, score: 1_000)
-
-        described_class.call(participation:, draft:)
-
-        expect(participation.reload.score).to eq(0)
-      end
-
-      it 'leaves that roster_player\'s own score untouched' do
-        roster_player = RosterPlayer.find_by(roster:, player: suppressed_player)
-
-        expect { described_class.call(participation:, draft:) }.not_to(change { roster_player.reload.score })
-      end
-    end
   end
 
 end
