@@ -7,7 +7,7 @@ module ExternalData
     private
 
     def skip?
-      resolved_player.suppressed?
+      !!existing_player&.suppressed?
     end
 
     def db_class
@@ -30,12 +30,13 @@ module ExternalData
     end
 
     def resolved_player
-      @resolved_player ||= ::Player.unscoped.find_or_create_by!(
-        external_id: player_external_id, game_id: tournament.game_id
-      ) do |player|
-        player.name = player_name
-        player.country = player_country
-      end
+      @resolved_player ||= existing_player || ::Player.create!(
+        external_id: player_external_id, game_id: tournament.game_id, name: player_name, country: player_country
+      )
+    end
+
+    def existing_player
+      @existing_player ||= ::Player.unscoped.find_by(external_id: player_external_id, game_id: tournament.game_id)
     end
 
     def save_associations(*); end

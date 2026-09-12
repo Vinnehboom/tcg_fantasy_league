@@ -16,6 +16,12 @@ module ExternalData
 
     describe '#save!' do
       describe 'when no player exists for that external_id and game yet' do
+        it 'does not create a player merely by checking whether to skip' do
+          result = build_result
+
+          expect { result.send(:skip?) }.not_to change(::Player, :count)
+        end
+
         it 'creates the player' do
           expect { build_result.save! }.to change(::Player, :count).by(1)
         end

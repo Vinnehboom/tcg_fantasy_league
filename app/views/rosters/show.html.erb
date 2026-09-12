@@ -20,8 +20,8 @@
       <td class="fw-bold"><%= t("activerecord.attributes.roster.players") %></td>
       <td>
         <ul>
-          <% @roster.players.each do |player| %>
-            <li><%= link_to(player.name, player.external_url ,target: "_blank") %> - <%= player.current_score %></li>
+          <% @roster.roster_players.each do |roster_player| %>
+            <li><%= player_name_link(roster_player.player) %> - <%= roster_player.player.current_score %></li>
           <% end %>
         </ul>
       </td>
