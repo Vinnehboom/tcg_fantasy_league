@@ -52,6 +52,23 @@ RSpec.describe 'User profile', :js do
         expect(page).to have_css('td.text-center', exact_text: '10.0')
       end
     end
+
+    it 'shows a suppressed roster player as a placeholder, never by their real name' do
+      other_tournament = create(:tournament, game:, name: 'Autumn Cup')
+      other_participation = create(
+        :participation, user:, draft: create(:salary_draft, tournament: other_tournament), status: 'completed'
+      )
+      suppressed_player = create(:player, :without_scores, :suppressed, game:, name: 'Brock Harrison')
+      score_roster(participation: other_participation, score: 5, player: suppressed_player)
+
+      sign_in_with(user)
+      visit game_user_path(id: user.id, game:)
+
+      within('tr', text: other_tournament.name) do
+        expect(page).to have_content(I18n.t('players.suppressed_display_name'))
+        expect(page).to have_no_content('Brock Harrison')
+      end
+    end
   end
 
   context 'when a participation is not completed' do

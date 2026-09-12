@@ -31,6 +31,20 @@ RSpec.describe 'Admin score modifiers' do
     end
   end
 
+  describe 'show' do
+    it 'shows a suppressed player as a placeholder, never by their real name' do
+      player = create(:player, :suppressed, name: 'Ash Ketchum')
+      player_season = player.player_seasons.first
+      score_modifier = create(:multiplier, name: 'legend')
+      create(:player_season_modifier, player_season:, score_modifier:)
+
+      visit admin_score_modifier_path(score_modifier)
+
+      expect(page).to have_content(I18n.t('players.suppressed_display_name'))
+      expect(page).to have_no_content('Ash Ketchum')
+    end
+  end
+
   describe 'show', :js do
     it 'takes a modifier away from a player' do
       player = create(:player, name: 'Ash Ketchum')

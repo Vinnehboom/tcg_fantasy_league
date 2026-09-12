@@ -40,7 +40,7 @@
             <% roster.roster_players.each do |roster_player| %>
               <tr>
                 <td>
-                  <%= link_to roster_player.player.name, roster_player.player.external_url ,target: "_blank", class: 'text-opacity-75' %>
+                  <%= player_name_link(roster_player.player, class: 'text-opacity-75') %>
                 </td>
                 <td>
                   <%= roster_player.score %>

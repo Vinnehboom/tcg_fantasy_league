@@ -7,6 +7,25 @@ RSpec.describe Roster do
   it { is_expected.to have_many(:roster_players) }
   it { is_expected.to have_many(:players) }
 
+  describe '#total_cost' do
+    let(:draft) { create(:salary_draft) }
+    let(:participation) { create(:participation, draft:) }
+    let(:roster) { create(:roster, participation:) }
+    let(:visible_player) { create(:player, :without_scores) }
+    let(:suppressed_player) { create(:player, :without_scores, :suppressed) }
+
+    before do
+      create(:external_score, player: visible_player, score: 500)
+      create(:external_score, player: suppressed_player, score: 500)
+      create(:roster_player, player: visible_player, roster:)
+      create(:roster_player, player: suppressed_player, roster:)
+    end
+
+    it 'excludes a suppressed roster_player\'s cost from the total' do
+      expect(roster.total_cost).to eq(40.0)
+    end
+  end
+
   describe '#roster_size validation' do
     subject { roster }
 

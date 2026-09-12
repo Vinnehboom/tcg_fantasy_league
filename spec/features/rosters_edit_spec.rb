@@ -44,6 +44,24 @@ RSpec.describe 'Roster edit', :js do
     end
   end
 
+  it 'shows a suppressed roster player as a placeholder, never by their real name' do
+    game = create(:game)
+    tournament = create(:tournament, game:, starting_date: 1.year.from_now)
+    salary_draft = create(:salary_draft, tournament:, roster_size: 3, price_cap: 250)
+    user = create(:user, password: 'testtest')
+    roster = create(:roster, participation: create(:participation, user:, draft: salary_draft))
+    suppressed_player = create(:player, :without_scores, :suppressed, game:, name: 'Ash Ketchum')
+    create(:roster_player, roster:, player: suppressed_player)
+
+    sign_in_with(user)
+    visit edit_game_roster_path(id: roster.id, game:)
+
+    within("#roster_#{roster.id}") do
+      expect(page).to have_content(I18n.t('players.suppressed_display_name'))
+      expect(page).to have_no_content('Ash Ketchum')
+    end
+  end
+
   it 'rejects a pick that would exceed the price cap, and keeps the player available' do
     game = create(:game)
     tournament = create(:tournament, game:, starting_date: 1.year.from_now)
