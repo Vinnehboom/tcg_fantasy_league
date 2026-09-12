@@ -5,13 +5,17 @@ present, not the history. Durable lessons belong in the
 `kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
 no longer in `.claude/skills/`.
 
-**Generation:** 12
-**Predecessor session:** `session_01TszSKdDfJUu2bdj6dR6Y3V` (generation 11)
-**Handoff trigger:** cost ceiling. Generation 11's `get_session` read
-`cost_usd` $95.27 against `orchestrator_cost_ceiling_usd` $50 — well past
-the line by the time step 0 caught it (a long unattended stretch running
-three tickets through the pipeline back to back). Fold this into a
-sharper mid-cycle re-check if it recurs — see "Pending automation work".
+**Generation:** 13
+**Predecessor session:** `session_015dfn4jYUVYJrvRStwxbSD7` (generation 12)
+**Handoff trigger:** cost ceiling. Generation 12's `get_session` read
+`cost_usd` $64.41 against `orchestrator_cost_ceiling_usd` $50 — well past
+the line, and caught mid-task rather than at the top of a scheduled
+cycle: cost was $45.96 shortly before, then crossed $50 during a single
+Reviewer dispatch plus the Gatekeeper phase that followed it, both
+within one continuous span of this session's own work, no scheduled
+`/kanban-cycle` boundary in between. See "Pending automation work" —
+this is the second generation in a row to flag that step 0's check needs
+to run more often than once per scheduled cycle.
 **Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
 `orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
 current.
@@ -22,108 +26,81 @@ files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-None outstanding. Every question raised this generation (P-6's retention
-window, P-6's Convention-check + file-overlap self-approval, P-3's
-objection-route placeholder, P-6's Render cron tier) got a real answer
-from Vinnie in session — see "In-flight nuance" for what each answer
-means for reading current state correctly.
-
-**Soft item, not a blocking question:** P-4 ("Legitimate interests
-assessment and DPIA") and P-5 ("Record of processing, processor
-contracts, breach procedure") were flagged to Vinnie as *possibly* not
-coding tickets at all (paperwork/analysis, like P-1/P-13) but never
-actually confirmed either way. Don't dispatch either to `/ticket-pipeline`
-without checking first — ask Vinnie, or read the card closely for
-something a PR could actually satisfy.
+1. **P-14's request-type scope** — the card
+   (https://app.notion.com/p/3d84af79fc01818a93dfc838895b2fd2) asks
+   whether the data-subject request form needs access/rectification/
+   restriction types beyond erasure/objection, or whether erasure/
+   objection alone is enough for now. Not blocking anything yet — P-14
+   is `Not started`, `Depends On` P-7, which is itself not yet merged.
+   Raise it again once P-7 merges and P-14 becomes the next candidate,
+   if it's still unanswered by then.
 
 ## In-flight nuance that live state would misread
 
-- **Three ticket-linked PRs are open at once — #112, #113, #114 — one
-  more than `max_open_prs` (2) allows.** This is a real process slip from
-  this generation, not a state to "fix" by closing anything: P-3's PR
-  (#113) opened mid-generation, pushing `open_count` to 2 (at cap) with
-  #112 already open; P-6 had already been dispatched and stacked on P-3's
-  branch by that point, and its PR (#114) opened without re-checking the
-  cap against the now-larger count. **Do not dispatch a new ticket-linked
-  PR until at least one of the three merges** — step 4's room check
-  correctly reads `open_count = 3 >= max_open_prs = 2` right now, so this
-  self-corrects the moment `/kanban-cycle` runs step 4 normally. The
-  lesson (recompute `open_count` including a PR opened earlier in the
-  *same* session, not just at cycle start, before dispatching the next
-  ticket) is worth a line in `kanban-cycle` SKILL.md if it recurs — not
-  filed this generation, cost ceiling.
-- **#114 (P-6) is stacked on #113 (P-3)'s branch — merge #113 first,
-  bottom-up, per the skill's stacked-PR rule.** #112 (P-12) is
-  independent of both and can merge in any order relative to them.
-- **#114 (P-6) has a real, known production gap, not a placeholder one:**
-  its Render cron service needs a paid Render plan (cron services don't
-  exist on the free tier, and the blueprint is `plan: free` throughout).
-  Vinnie's explicit call, 2026-09-11: ship it anyway, track the Render
-  upgrade separately. Until that upgrade happens, the retention job is
-  defined but does not actually run in production — this is Vinnie's ops
-  task, not something `/ticket-pipeline` can do, so there's no follow-up
-  ticket to file for it.
-- **P-2b (`Depends On` now `P-1`, not `P-2`) is the standing tracker for
-  every bracketed placeholder across `/privacy`, `/terms`, and (as of this
-  generation) `/player-information`** — widened twice this generation, once
-  for P-3's placeholders and once for P-6's retention line. Its Notion
-  card is current; nothing more to do until P-1 lands.
-- **P-2c (new this generation) — "Write and review the Terms of Service
-  copy" — is genuinely blocked on Vinnie supplying real, legally-reviewed
-  text.** No dependency card produces this fact the way P-1 produces the
-  entity identity; don't dispatch it expecting a plan to emerge, the
-  planner will stop immediately for the same reason P-2b's first attempt
-  did.
-- **Standing policy, not yet in the Decisions database:** ship every
-  compliance/legal-content ticket with bracketed placeholders for any
-  fact this pipeline can't determine, paired with a blocking follow-up
-  ticket per the 2026-09-10 Style Rule — never defer or hold the ticket
-  waiting for real-world facts. Vinnie confirmed this directly, twice,
-  this generation (on P-2b and again generalized to P-3/P-6-adjacent
-  work). It should be a Decisions-database row so `/ticket-pipeline`'s
-  planner cites it instead of re-deriving it each time — not filed this
-  generation, see "Pending automation work".
-- **A Stop-hook "uncommitted changes" nudge is not instruction to commit
-  and push blindly.** Hit three times this generation (twice in
-  dispatched worktrees, once in this orchestrator's own main checkout):
-  `db:prepare`/`db:schema:load` dirtied `db/schema.rb` with a DIFFERENT
-  open PR's not-yet-merged migration. Local `HEAD` matched `origin/main`
-  correctly each time — the fix was `git diff db/schema.rb` to confirm
-  the phantom change, then `git checkout -- db/schema.rb` to discard it.
-  This is now documented in `kanban-cycle` SKILL.md's environment-facts
-  list (see "Pending automation work" — already merged, not just
-  proposed).
+- **`Vinnehboom/tcg_fantasy_league#116` (P-7) opened and reached
+  Gatekeeper-ready in this same generation, minutes before this
+  handoff.** State is accurate and needs no correction (PR `draft:
+  false`, CI green 3/3, Notion card `Status: Review`) — flagging only so
+  you don't need to re-derive the history: the branch's real design
+  differs from the plan text still on the card's original `## Plan`
+  section, because a reviewer round caught two real bugs mid-pipeline.
+  The original plan would have excluded a suppressed player's cost from
+  `Roster#total_cost` and `SalaryDrafts::Scorer` — the reviewer found
+  this let a manager exploit the "freed" budget to bypass a draft's real
+  price cap, and separately made the roster-size counter (which still
+  counted the suppressed player) disagree with the cost total (which
+  didn't). Fixed at the root, per Vinnie's own direction given directly
+  in this session: suppression never changes roster/score arithmetic at
+  all — a suppressed player keeps their slot and keeps counting exactly
+  as before. Only display is masked (`display_name` for the name,
+  `masked_player_cost` for the one place a per-row cost renders). This
+  is documented on the card under "Review round 1 — fix pass" and in the
+  PR's own review-comment thread; nothing here needs action, just don't
+  be surprised the shipped code doesn't match the card's original `##
+  Plan` commit-3 description word for word.
+- **No other open PRs.** #112 (P-12), #113 (P-3), #114 (P-6), and #115
+  (maintenance) all merged this generation. #116 (P-7) above is the only
+  one open.
+- **P-7's card Status is `Review`, not `Done`** — normal Gatekeeper
+  state for an open, ready PR waiting on Vinnie's merge, not a lag to
+  correct.
 
 ## Pending automation work
 
-- **`Vinnehboom/claude-automation#12`** — already merged this generation
-  (checked its `validate` check, green, merged via the repo's
-  skill-files-only whitelist). Documents the `db/schema.rb` contamination
-  hazard above, a `git worktree add -b` wrong-upstream hazard (a stacked
-  dispatch's `git worktree add -b <branch> origin/<other-ticket's-branch>`
-  silently set the new branch's push upstream to the OTHER ticket's
-  branch — caught before the first push, this time), and generalizes
-  "don't wait for the next scheduled firing" to apply whenever room opens
-  up, not only mid-cycle after a merge. Nothing outstanding here.
-- **Log the placeholder-over-defer policy above as a Decisions-database
-  row.** Not done this generation (cost ceiling caught it first). Cite
-  the 2026-09-10 Style Rule ("ship an unknown fact as a bracketed
-  placeholder...") as the mechanism, and record that Vinnie has now
-  confirmed it applies generally to compliance-ticket unknowns, not just
-  the ticket it was first stated on.
-- **Investigate a sharper mid-cycle cost-ceiling check.** This generation
-  ran three tickets end-to-end (P-3 review+fix+PR, P-6 plan+build+review+
-  fix+PR, plus triage on P-12) across a long unattended stretch before
-  step 0 next got a chance to read `cost_usd` — by then it was nearly 2x
-  the ceiling. Worth considering whether step 0's check should also run
-  after finishing a ticket's Gatekeeper phase (PR opened), not only at
-  the top of a scheduled cycle, given the new "don't wait for next cycle"
-  eagerness this generation's `#12` PR just encoded. Not filed as a
-  concrete skill change — flagging the question, not the answer.
+- **Not filed, blocked this generation — a sharper mid-cycle
+  cost-ceiling check.** Generation 11 flagged this as a question, not
+  yet a concrete change (see that generation's note, superseded by this
+  one). Generation 12 hit the exact scenario it predicted: `cost_usd`
+  crossed the $50 ceiling between scheduled cycles, inside one
+  continuous stretch of dispatching a Reviewer and then running the
+  Gatekeeper phase, and nothing caught it until a manual check partway
+  through. Concrete change worth making: check `cost_usd` again after a
+  Reviewer hand-back and after a completed Gatekeeper phase, not only at
+  the top of a scheduled `/kanban-cycle`, and run `/handoff` immediately
+  if it's already over rather than waiting for the next scheduled firing
+  to notice.
+- **Why it's not filed:** this generation's `add_repo` call on
+  `Vinnehboom/claude-automation` (`access: "push"`, needed to clone it
+  and open a PR with the fix above) was denied by the auto-mode
+  classifier under reason `Permission Grant`, right as `/handoff`
+  started. A subsequent plain `get_session` call was denied the same
+  way; `list_triggers` and `create_session` were not. Unclear whether
+  this is specific to this session's state at that moment or a new
+  standing restriction — **try `add_repo`/`get_session` yourself before
+  assuming the block persists**, rather than skipping step 1 on the
+  strength of this note alone. If it's denied again, that's two
+  generations in a row unable to file a lesson upstream — surface that
+  to Vinnie directly rather than working around it a third time.
+- Generation 11's own pending items — logging the placeholder-over-defer
+  policy as a Decisions-database row, and this same cost-ceiling
+  question — the first is done (see the Decisions database, "Ship
+  compliance tickets with bracketed placeholders, not deferrals," filed
+  2026-09-11); the second is restated above, now with confirming
+  evidence instead of a prediction.
 
 ## Recently merged (context, not a substitute for reading live state)
 
-- `Vinnehboom/claude-automation#12` (this generation's lessons) — merged.
-- Nothing on `tcg_fantasy_league` merged this generation — `#112`, `#113`,
-  `#114` are all still open (see "In-flight nuance" above for why there
-  are three at once).
+- `tcg_fantasy_league#112` (P-12), `#113` (P-3), `#114` (P-6), `#115`
+  (maintenance, handoff note) — all merged this generation.
+- Nothing on `Vinnehboom/claude-automation` merged this generation (no
+  PR was open there before the `add_repo` block above).
