@@ -29,16 +29,18 @@ RSpec.describe 'Admin participations' do
       expect(page).to have_content(participation.rosters.first.players.first.name)
     end
 
-    it 'shows a suppressed roster player as a placeholder, never by their real name' do
+    it 'shows a suppressed roster player as a placeholder, with the name and cost masked' do
       participation = create(:participation)
       roster = create(:roster, participation:)
       suppressed_player = create(:player, :without_scores, :suppressed, name: 'Ash Ketchum')
+      create(:external_score, player: suppressed_player, score: 500)
       create(:roster_player, roster:, player: suppressed_player)
 
       visit admin_participation_path(participation)
 
       expect(page).to have_content(I18n.t('players.suppressed_display_name'))
       expect(page).to have_no_content('Ash Ketchum')
+      expect(page).to have_css('td', exact_text: '—')
     end
   end
 end

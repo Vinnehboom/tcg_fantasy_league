@@ -21,8 +21,35 @@ RSpec.describe Roster do
       create(:roster_player, player: suppressed_player, roster:)
     end
 
-    it 'excludes a suppressed roster_player\'s cost from the total' do
-      expect(roster.total_cost).to eq(40.0)
+    it 'still counts a suppressed roster_player\'s cost, the same as before they were suppressed' do
+      expect(roster.total_cost).to eq(80.0)
+    end
+  end
+
+  describe 'validations, when the roster already holds a suppressed player' do
+    let(:draft) { create(:salary_draft, roster_size: 2, price_cap: 50) }
+    let(:participation) { create(:participation, draft:) }
+    let(:roster) { create(:roster, participation:) }
+    let(:suppressed_player) { create(:player, :without_scores, :suppressed) }
+
+    before do
+      create(:external_score, player: suppressed_player, score: 500)
+      create(:roster_player, player: suppressed_player, roster:)
+    end
+
+    it 'still counts the suppressed player toward the roster size, refusing a roster this would overfill' do
+      roster.roster_players.new(player: create(:player, :without_scores))
+      roster.roster_players.new(player: create(:player, :without_scores))
+
+      expect(roster).not_to be_valid
+    end
+
+    it 'still counts the suppressed player\'s cost toward the price cap, refusing to add over it' do
+      new_player = create(:player, :without_scores)
+      create(:external_score, player: new_player, score: 500)
+      roster.roster_players.new(player: new_player)
+
+      expect(roster).not_to be_valid
     end
   end
 
