@@ -173,6 +173,7 @@ en:
       placeholder_notice: This page holds placeholder Terms of Service.
       body: "[Terms of Service placeholder text. Real, reviewed terms will replace this text before launch.]"
   players:
+    suppressed_display_name: Suppressed player
     index:
       player_information_notice: We list real competitive players here. We did not get this data from the players it describes.
       player_information_link: Read the information we publish for these players

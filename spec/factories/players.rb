@@ -29,5 +29,9 @@ FactoryBot.define do
     trait :without_scores do
       with_score { false }
     end
+
+    trait :suppressed do
+      suppressed_at { Time.current }
+    end
   end
 end

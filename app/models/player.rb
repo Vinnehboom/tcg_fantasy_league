@@ -2,6 +2,11 @@ class Player < ApplicationRecord
 
   attr_accessor :cost
 
+  scope :not_suppressed, -> { where(suppressed_at: nil) }
+  scope :suppressed, -> { unscope(where: :suppressed_at).where.not(suppressed_at: nil) }
+
+  default_scope { not_suppressed }
+
   validates :name, presence: true
   validates :external_id, presence: true
   belongs_to :game
@@ -34,6 +39,16 @@ class Player < ApplicationRecord
 
   def decorated_cost
     format('%0.02f', cost)
+  end
+
+  def suppressed?
+    suppressed_at.present?
+  end
+
+  def display_name
+    return I18n.t('players.suppressed_display_name') if suppressed?
+
+    name
   end
 
   def score_difference(date:, other_date:)

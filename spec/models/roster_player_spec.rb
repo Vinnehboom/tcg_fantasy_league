@@ -4,6 +4,15 @@ RSpec.describe RosterPlayer do
   it { is_expected.to belong_to(:roster) }
   it { is_expected.to belong_to(:player) }
 
+  describe '#player, when the player is suppressed' do
+    it 'still resolves to the player instead of nil' do
+      player = create(:player, :suppressed)
+      roster_player = create(:roster_player, player:)
+
+      expect(roster_player.reload.player).to eq(player)
+    end
+  end
+
   describe '#player_cost' do
     let(:player) { create(:player, :without_scores) }
     let(:draft) { create(:salary_draft) }

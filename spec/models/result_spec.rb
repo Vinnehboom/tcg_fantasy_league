@@ -5,6 +5,15 @@ RSpec.describe Result do
   it { is_expected.to belong_to(:tournament) }
   it { is_expected.to validate_presence_of(:placement) }
 
+  describe '#player, when the player is suppressed' do
+    it 'still resolves to the player instead of nil' do
+      player = create(:player, :suppressed)
+      result = create(:result, player:)
+
+      expect(result.reload.player).to eq(player)
+    end
+  end
+
   describe 'uniqueness' do
     subject { build(:result, player:, tournament:).save }
 
