@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 module ExternalData
 
   RSpec.describe Result do
@@ -64,6 +66,26 @@ module ExternalData
 
           player = ::Player.find_by(external_id: '/players/9', game_id: game.id)
           expect(::Result.find_by(player:, tournament:).placement).to eq(1)
+        end
+      end
+
+      describe 'when the placement belongs to a suppressed player' do
+        let(:suppressed_player) do
+          create(:player, :suppressed, external_id: '/players/9', game:, name: 'Existing Player', country: 'FR')
+        end
+
+        before { suppressed_player }
+
+        it 'does not create a result row' do
+          expect { build_result(player_name: 'Scraped Name').save! }.not_to change(::Result, :count)
+        end
+
+        it 'does not create a duplicate player row' do
+          expect { build_result(player_name: 'Scraped Name').save! }.not_to change(::Player.unscoped, :count)
+        end
+
+        it 'returns false' do
+          expect(build_result(player_name: 'Scraped Name').save!).to be false
         end
       end
 

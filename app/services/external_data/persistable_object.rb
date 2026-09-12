@@ -11,6 +11,8 @@ module ExternalData
     end
 
     def save!
+      return false if skip?
+
       db_record = db_class.find_or_initialize_by(**lookup_attributes)
       db_record.assign_attributes(instance_attributes)
       db_record.save!
@@ -19,6 +21,10 @@ module ExternalData
     end
 
     private
+
+    def skip?
+      false
+    end
 
     def lookup_attributes
       { external_id:, game_id: }

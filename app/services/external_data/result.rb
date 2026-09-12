@@ -6,6 +6,10 @@ module ExternalData
 
     private
 
+    def skip?
+      resolved_player.suppressed?
+    end
+
     def db_class
       ::Result
     end
@@ -26,7 +30,9 @@ module ExternalData
     end
 
     def resolved_player
-      ::Player.find_or_create_by!(external_id: player_external_id, game_id: tournament.game_id) do |player|
+      @resolved_player ||= ::Player.unscoped.find_or_create_by!(
+        external_id: player_external_id, game_id: tournament.game_id
+      ) do |player|
         player.name = player_name
         player.country = player_country
       end

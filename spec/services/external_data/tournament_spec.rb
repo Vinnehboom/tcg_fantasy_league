@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 module ExternalData
 
   RSpec.describe Tournament do
