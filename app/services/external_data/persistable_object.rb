@@ -4,6 +4,8 @@ module ExternalData
 
     attr_accessor :game_id, :external_id
 
+    def self.preload(objects); end
+
     def initialize(attributes: {})
       @external_id = attributes[:external_id]
       @game_id = attributes[:game_id]
@@ -27,8 +29,12 @@ module ExternalData
     end
 
     def existing_record
-      db_class.find_by(**lookup_attributes)
+      return @existing_record if defined?(@existing_record)
+
+      @existing_record = db_class.find_by(**lookup_attributes)
     end
+
+    attr_writer :existing_record
 
     def lookup_attributes
       { external_id:, game_id: }

@@ -4,14 +4,18 @@ module ExternalData
 
     attr_accessor :name, :external_points, :country, :season
 
+    def self.preload(objects)
+      return if objects.empty?
+
+      found = ::Player.where(game_id: objects.first.game_id, external_id: objects.map(&:external_id))
+                      .index_by { |record| [record.external_id, record.game_id] }
+      objects.each { |object| object.send(:existing_record=, found[[object.external_id, object.game_id]]) }
+    end
+
     private
 
     def skip?
       !!existing_record&.suppressed?
-    end
-
-    def existing_record
-      @existing_record ||= ::Player.find_by(**lookup_attributes)
     end
 
     def db_class
