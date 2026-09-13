@@ -147,6 +147,32 @@ RSpec.describe 'Trimmed resources' do
     end
   end
 
+  describe 'game-scoped salary drafts' do
+    it 'routes index' do
+      assert_routable(method: :get, path: '/PTCG/salary_drafts', to: 'salary_drafts#index', game: 'PTCG')
+    end
+
+    it 'routes show' do
+      assert_routable(method: :get, path: '/PTCG/salary_drafts/1', to: 'salary_drafts#show', game: 'PTCG', id: '1')
+    end
+
+    it 'does not route create' do
+      assert_not_routable(method: :post, path: '/PTCG/salary_drafts')
+    end
+
+    it 'does not route edit' do
+      assert_not_routable(method: :get, path: '/PTCG/salary_drafts/1/edit')
+    end
+
+    it 'does not route update' do
+      assert_not_routable(method: :patch, path: '/PTCG/salary_drafts/1')
+    end
+
+    it 'does not route destroy' do
+      assert_not_routable(method: :delete, path: '/PTCG/salary_drafts/1')
+    end
+  end
+
   describe 'game-scoped rosters' do
     it 'routes show' do
       assert_routable(method: :get, path: '/PTCG/rosters/1', to: 'rosters#show', game: 'PTCG', id: '1')
