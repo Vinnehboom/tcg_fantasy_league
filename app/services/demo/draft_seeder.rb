@@ -62,7 +62,8 @@ module Demo
 
     def price_cap_for(tournament)
       calculator = Players::CostCalculator.new(pricing_rules: [Players::ScalingPriceRule.new])
-      top_costs = tournament.game.players.map { |player| calculator.calculate_cost(player:, tournament:) }
+      top_costs = tournament.game.players.not_suppressed
+                            .map { |player| calculator.calculate_cost(player:, tournament:) }
                             .sort.last(ROSTER_SIZE)
       (top_costs.sum + PRICE_CAP_HEADROOM).round(2)
     end
@@ -104,7 +105,7 @@ module Demo
     end
 
     def chosen_players(tournament:, offset:)
-      tournament.game.players.order(:external_id).to_a.rotate(offset).first(ROSTER_SIZE)
+      tournament.game.players.not_suppressed.order(:external_id).to_a.rotate(offset).first(ROSTER_SIZE)
     end
 
   end

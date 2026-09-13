@@ -7,7 +7,11 @@ module ExternalData
     private
 
     def skip?
-      !!::Player.unscoped.find_by(**lookup_attributes)&.suppressed?
+      !!existing_record&.suppressed?
+    end
+
+    def existing_record
+      @existing_record ||= ::Player.find_by(**lookup_attributes)
     end
 
     def db_class

@@ -76,7 +76,7 @@ class RostersController < ScopedGameController
   end
 
   def set_page_variables
-    @players = @game.players
+    @players = @game.players.not_suppressed
     @countries = @players.where.not(country: [nil, '']).distinct.pluck(:country).sort
     filter_players
     @filters = filter_params
@@ -86,6 +86,7 @@ class RostersController < ScopedGameController
   def filter_players
     max_score = @roster.reload.draft.score_for(cost: @roster.remaining_cost)
     @players = Player
+               .not_suppressed
                .joins(latest_scores_join)
                .where.not(id: @roster.player_ids)
     unless @roster.remaining_cost == @roster.draft.price_cap

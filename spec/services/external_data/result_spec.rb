@@ -87,7 +87,7 @@ module ExternalData
         end
 
         it 'does not create a duplicate player row' do
-          expect { build_result(player_name: 'Scraped Name').save! }.not_to change(::Player.unscoped, :count)
+          expect { build_result(player_name: 'Scraped Name').save! }.not_to change(::Player, :count)
         end
 
         it 'returns false' do

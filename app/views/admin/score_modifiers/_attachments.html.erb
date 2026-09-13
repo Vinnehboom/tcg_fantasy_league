@@ -12,7 +12,7 @@
     <tbody>
       <% player_season_modifiers.each do |player_season_modifier| %>
         <tr>
-          <td><%= player_season_modifier.player_season.player.display_name %></td>
+          <td><%= player_season_modifier.player_season.player.name %></td>
           <td><%= player_season_modifier.player_season.season.label %></td>
           <td>
             <% if policy(player_season_modifier).destroy? %>
