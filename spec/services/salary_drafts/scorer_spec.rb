@@ -25,6 +25,23 @@ module SalaryDrafts
       described_class.call(participation:, draft:)
       expect(participation.reload.score).to eq(40)
     end
+
+    describe 'when a roster player was suppressed after being drafted' do
+      let(:suppressed_player) { create(:player, :without_scores, :suppressed) }
+
+      before { roster.players << suppressed_player }
+
+      it 'still scores that player like any other roster player' do
+        travel_to 3.days.ago
+        create(:external_score, player: suppressed_player, score: 20)
+        travel_to 7.days.from_now
+        create(:external_score, player: suppressed_player, score: 60)
+
+        described_class.call(participation:, draft:)
+
+        expect(participation.reload.score).to eq(40)
+      end
+    end
   end
 
 end
