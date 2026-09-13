@@ -9,6 +9,10 @@ module Demo
     # game always draw from the same pool.
     SEED = ExternalData::Synthetic::Adapter::DEFAULT_SEED
 
+    # ScoreModifier carries no game_id, so the same two rows attach to a
+    # player in every game rather than one fresh pair per game.
+    MODIFIER_FACTORIES = { multiplier: 'hot streak', bonus: 'winner' }.freeze
+
     def call
       raise_outside_the_sandbox!
       Demo::Games::ALL.each { |entry| seed_game(entry) }
@@ -22,6 +26,7 @@ module Demo
       adapter = synthetic_adapter(game:, entry:)
       import_players(game:, adapter:)
       import_tournaments(game:, adapter:)
+      attach_score_modifiers(game:)
     end
 
     def ensure_game(entry)
@@ -44,6 +49,27 @@ module Demo
 
     def import_tournaments(game:, adapter:)
       ExternalData::ImportTournamentsJob.perform_now(game_id: game.id, adapter:)
+    end
+
+    def attach_score_modifiers(game:)
+      player_season = modifier_player_season(game:)
+      return unless player_season
+
+      MODIFIER_FACTORIES.each { |factory, name| ensure_modifier_attached(player_season:, factory:, name:) }
+    end
+
+    def modifier_player_season(game:)
+      season = game.current_season
+      return nil unless season
+
+      season.player_seasons.joins(:player).order('players.external_id').first
+    end
+
+    def ensure_modifier_attached(player_season:, factory:, name:)
+      score_modifier = ::ScoreModifier.find_by(type: factory.to_s.camelize, name:) ||
+                       FactoryBot.create(factory, name:)
+      ::PlayerSeasonModifier.find_by(player_season:, score_modifier:) ||
+        FactoryBot.create(:player_season_modifier, player_season:, score_modifier:)
     end
 
   end

@@ -56,5 +56,29 @@ RSpec.describe Demo::Seeder do
 
       expect(Tournament.order(:external_id).pluck(:starting_date)).not_to eq(first_dates)
     end
+
+    it 'creates one Multiplier and one Bonus, covering both score modifier subtypes' do
+      described_class.call
+
+      expect(ScoreModifier.pluck(:type)).to contain_exactly('Multiplier', 'Bonus')
+    end
+
+    it "attaches a score modifier to a player's season, for every game" do
+      described_class.call
+
+      Demo::Games::ALL.each do |entry|
+        game = Game.find(entry.id)
+        modifiers = PlayerSeasonModifier.joins(:player_season).where(player_seasons: { season: game.current_season })
+        expect(modifiers).not_to be_empty
+      end
+    end
+
+    it 'is idempotent: a second call adds no ScoreModifier or PlayerSeasonModifier rows' do
+      described_class.call
+
+      expect do
+        described_class.call
+      end.not_to(change { [ScoreModifier.count, PlayerSeasonModifier.count] })
+    end
   end
 end
