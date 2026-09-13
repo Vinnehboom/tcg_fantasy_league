@@ -23,7 +23,7 @@ RSpec.describe 'Players index', :js do
     visit game_players_path(game:)
 
     expect(page).to have_content(visible.name)
-    expect(page).to have_no_content(suppressed.name)
+    expect(page).to have_no_content(suppressed.raw_name)
   end
 
   it 'links to the information notice published for the players it lists' do

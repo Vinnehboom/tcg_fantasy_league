@@ -9,7 +9,7 @@ module Admin
     end
 
     def show
-      @player = Player.find(params[:id])
+      @player = Player.not_suppressed.find(params[:id])
       @player_seasons = @player.player_seasons
                                .includes(season: :game, player_season_modifiers: :score_modifier)
                                .references(:season)
@@ -22,7 +22,7 @@ module Admin
     def players_for(game)
       return Player.none unless game
 
-      game.players.order(:name)
+      game.players.not_suppressed.order(:name)
     end
 
   end

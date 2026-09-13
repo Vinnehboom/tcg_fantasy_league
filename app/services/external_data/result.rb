@@ -36,7 +36,7 @@ module ExternalData
     end
 
     def existing_player
-      @existing_player ||= ::Player.unscoped.find_by(external_id: player_external_id, game_id: tournament.game_id)
+      @existing_player ||= ::Player.find_by(external_id: player_external_id, game_id: tournament.game_id)
     end
 
     def save_associations(*); end

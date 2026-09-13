@@ -55,14 +55,14 @@ module ExternalData
             perform_import.call
             perform_import.call
 
-            expect(::Player.unscoped.where(external_id: player.external_id).count).to eq(1)
+            expect(::Player.where(external_id: player.external_id).count).to eq(1)
           end
 
           it 'does not overwrite the existing name' do
             suppressed_player
             perform_import.call
 
-            expect(suppressed_player.reload.name).to eq('Existing Name')
+            expect(suppressed_player.reload.raw_name).to eq('Existing Name')
           end
 
           it 'does not record a new score' do

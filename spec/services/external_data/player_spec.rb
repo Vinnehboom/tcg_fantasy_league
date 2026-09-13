@@ -21,13 +21,13 @@ module ExternalData
       end
 
       it 'does not create a new player row' do
-        expect { scraped_player.save! }.not_to change(::Player.unscoped, :count)
+        expect { scraped_player.save! }.not_to change(::Player, :count)
       end
 
       it 'does not update the existing player\'s attributes' do
         scraped_player.save!
 
-        expect(suppressed_player.reload).to have_attributes(name: 'Existing Player', country: 'FR')
+        expect(suppressed_player.reload).to have_attributes(raw_name: 'Existing Player', country: 'FR')
       end
 
       it 'does not record a new score' do

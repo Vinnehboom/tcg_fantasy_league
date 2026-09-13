@@ -19,7 +19,7 @@
       </td>
       <td>
         <% roster = participation.rosters&.first %>
-        <%= roster && roster.roster_players&.map { |roster_player| roster_player.player.display_name } %>
+        <%= roster && roster.roster_players&.map { |roster_player| roster_player.player.name } %>
       </td>
       <td>
         <%= link_to([:admin, participation], class: 'text-opacity-75') do %>

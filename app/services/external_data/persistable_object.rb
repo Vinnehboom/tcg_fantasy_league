@@ -13,7 +13,7 @@ module ExternalData
     def save!
       return false if skip?
 
-      db_record = db_class.find_or_initialize_by(**lookup_attributes)
+      db_record = existing_record || db_class.new(**lookup_attributes)
       db_record.assign_attributes(instance_attributes)
       db_record.save!
       save_associations(record: db_record)
@@ -24,6 +24,10 @@ module ExternalData
 
     def skip?
       false
+    end
+
+    def existing_record
+      db_class.find_by(**lookup_attributes)
     end
 
     def lookup_attributes

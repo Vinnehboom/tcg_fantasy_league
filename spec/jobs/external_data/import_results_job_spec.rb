@@ -63,7 +63,7 @@ module ExternalData
         it 'does not create a duplicate player row' do
           perform_import.call
 
-          expect(::Player.unscoped.where(external_id: '/players/1', game: tournament.game).count).to eq(1)
+          expect(::Player.where(external_id: '/players/1', game: tournament.game).count).to eq(1)
         end
       end
 

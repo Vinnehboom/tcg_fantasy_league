@@ -1,7 +1,7 @@
 class PlayersController < ScopedGameController
 
   def index
-    @players = @game.players.joins(:external_scores)
+    @players = @game.players.not_suppressed.joins(:external_scores)
     @countries = @players.where.not(country: [nil, '']).distinct.pluck(:country).sort
     @players = apply_filters(players: @players)
                .group('players.id')

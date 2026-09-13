@@ -30,7 +30,7 @@ module Demo
     end
 
     def backdate_scores(game:, entry:)
-      game.players.find_each { |player| backdate_player(game:, player:, entry:) }
+      game.players.not_suppressed.find_each { |player| backdate_player(game:, player:, entry:) }
     end
 
     def backdate_player(game:, player:, entry:)

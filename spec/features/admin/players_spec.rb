@@ -14,7 +14,7 @@ RSpec.describe 'Admin players', :js do
       visit admin_players_path(game: game.id)
 
       expect(page).to have_content(visible.name)
-      expect(page).to have_no_content(suppressed.name)
+      expect(page).to have_no_content(suppressed.raw_name)
     end
   end
 
