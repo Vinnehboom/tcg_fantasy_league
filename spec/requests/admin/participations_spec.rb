@@ -26,3 +26,25 @@ module Admin
   end
 
 end
+
+RSpec.describe 'A verb /admin/participations does not implement' do
+  let(:participation) { create(:participation) }
+
+  it 'redirects create to root instead of reaching any controller action' do
+    post '/admin/participations'
+
+    expect(response).to redirect_to(root_path)
+  end
+
+  it 'redirects update to root instead of reaching any controller action' do
+    patch "/admin/participations/#{participation.id}"
+
+    expect(response).to redirect_to(root_path)
+  end
+
+  it 'redirects destroy to root instead of reaching any controller action' do
+    delete "/admin/participations/#{participation.id}"
+
+    expect(response).to redirect_to(root_path)
+  end
+end
