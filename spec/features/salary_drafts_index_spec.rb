@@ -17,4 +17,15 @@ RSpec.describe 'Salary drafts index', :js do
       expect(page).to have_content(salary_draft.price_cap.to_s)
     end
   end
+
+  it 'offers no control to add a draft, even to an admin' do
+    admin = create(:user, :with_role)
+    game = create(:game)
+    create(:tournament, game:, starting_date: 1.year.from_now)
+    sign_in_with(admin)
+
+    visit game_salary_drafts_path(game:)
+
+    expect(page).to have_no_link(href: %r{/new\z})
+  end
 end

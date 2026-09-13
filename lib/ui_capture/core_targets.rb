@@ -46,10 +46,9 @@ module UiCapture
       KEPT_DEVISE_ROUTES.fetch(controller, []).include?(route.defaults[:action].to_s)
     end
 
-    # `resources` in config/routes.rb declares the full set of RESTful
-    # routes against several controllers that only implement some of them
-    # (e.g. PlayersController has `index` only); the route exists and would
-    # 404 if visited.
+    # A route existing in the table doesn't mean its controller defines the
+    # action - a route can 404 on visit even though it resolved. Guard
+    # against that here instead of trusting the route table on its own.
     def action_implemented?(route)
       controller_class(route)&.action_methods&.include?(route.defaults[:action].to_s) || false
     end
