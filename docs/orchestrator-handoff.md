@@ -5,17 +5,17 @@ present, not the history. Durable lessons belong in the
 `kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
 no longer in `.claude/skills/`.
 
-**Generation:** 13
-**Predecessor session:** `session_015dfn4jYUVYJrvRStwxbSD7` (generation 12)
-**Handoff trigger:** cost ceiling. Generation 12's `get_session` read
-`cost_usd` $64.41 against `orchestrator_cost_ceiling_usd` $50 — well past
-the line, and caught mid-task rather than at the top of a scheduled
-cycle: cost was $45.96 shortly before, then crossed $50 during a single
-Reviewer dispatch plus the Gatekeeper phase that followed it, both
-within one continuous span of this session's own work, no scheduled
-`/kanban-cycle` boundary in between. See "Pending automation work" —
-this is the second generation in a row to flag that step 0's check needs
-to run more often than once per scheduled cycle.
+**Generation:** 14
+**Predecessor session:** `session_0129DEZ2Kz8y8qqMjGFd73nt` (generation 13)
+**Handoff trigger:** cost ceiling. `get_session` read `cost_usd` $93.38
+against `orchestrator_cost_ceiling_usd` $50 — nearly double, caught at the
+top of the 17:30 BST scheduled cycle (not mid-task this time; the
+mid-cycle re-check from generation 12/13's own lesson wasn't exercised
+because nothing hit it before the scheduled boundary did). This generation
+ran three tickets end-to-end back to back (P-7 review re-entry + a
+follow-up fix, H-12, H-14, H-15) in one long interactive stretch with
+Vinnie live in the session — that volume, not a single runaway dispatch,
+is what drove the cost.
 **Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
 `orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
 current.
@@ -26,81 +26,85 @@ files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-1. **P-14's request-type scope** — the card
-   (https://app.notion.com/p/3d84af79fc01818a93dfc838895b2fd2) asks
-   whether the data-subject request form needs access/rectification/
-   restriction types beyond erasure/objection, or whether erasure/
-   objection alone is enough for now. Not blocking anything yet — P-14
-   is `Not started`, `Depends On` P-7, which is itself not yet merged.
-   Raise it again once P-7 merges and P-14 becomes the next candidate,
-   if it's still unanswered by then.
+1. **P-14's scope** (https://app.notion.com/p/3d84af79fc01818a93dfc838895b2fd2)
+   — two things, both still open:
+   - Request types beyond erasure/objection (access/rectification/
+     restriction?) — open since generation 12.
+   - A narrower ask from generation 13: Vinnie asked on P-7's PR review
+     for a super-admin-only lookup of suppressed players via policy
+     scopes. This sits next to, but isn't obviously the same feature as,
+     P-14's queue — the card's own 2026-09-11 answer says the existing
+     admin role is fine for working the queue. Both are recorded on the
+     card under "Note, 2026-09-13"; whoever plans P-14 needs to ask
+     Vinnie directly if it's still unclear which access model covers
+     which part.
+   P-14's dependency (P-7) merged this generation, so P-14 is now a real
+   candidate the next cycle may pick up — this question is more relevant
+   now than when generation 12 first raised it, not less.
 
 ## In-flight nuance that live state would misread
 
-- **`Vinnehboom/tcg_fantasy_league#116` (P-7) opened and reached
-  Gatekeeper-ready in this same generation, minutes before this
-  handoff.** State is accurate and needs no correction (PR `draft:
-  false`, CI green 3/3, Notion card `Status: Review`) — flagging only so
-  you don't need to re-derive the history: the branch's real design
-  differs from the plan text still on the card's original `## Plan`
-  section, because a reviewer round caught two real bugs mid-pipeline.
-  The original plan would have excluded a suppressed player's cost from
-  `Roster#total_cost` and `SalaryDrafts::Scorer` — the reviewer found
-  this let a manager exploit the "freed" budget to bypass a draft's real
-  price cap, and separately made the roster-size counter (which still
-  counted the suppressed player) disagree with the cost total (which
-  didn't). Fixed at the root, per Vinnie's own direction given directly
-  in this session: suppression never changes roster/score arithmetic at
-  all — a suppressed player keeps their slot and keeps counting exactly
-  as before. Only display is masked (`display_name` for the name,
-  `masked_player_cost` for the one place a per-row cost renders). This
-  is documented on the card under "Review round 1 — fix pass" and in the
-  PR's own review-comment thread; nothing here needs action, just don't
-  be surprised the shipped code doesn't match the card's original `##
-  Plan` commit-3 description word for word.
-- **No other open PRs.** #112 (P-12), #113 (P-3), #114 (P-6), and #115
-  (maintenance) all merged this generation. #116 (P-7) above is the only
-  one open.
-- **P-7's card Status is `Review`, not `Done`** — normal Gatekeeper
+- **Three PRs open, all waiting on Vinnie's ordinary review/merge — no
+  hidden blockers, but one has a non-obvious eligibility note:**
+  - `tcg_fantasy_league#118` (H-15) — CI green, isolated review found 0
+    BLOCKING findings. Nothing unusual.
+  - `tcg_fantasy_league#119` (H-14) — CI green. The isolated reviewer
+    caught a real bug outside the ticket's own scope during this same
+    round: a route-segment constraint the developer added as a side
+    effect could have raised `UrlGenerationError` on the public landing
+    page for any lowercase-id `Game`. Reverted in the same PR, with a
+    request spec pinning the actual (harmless) fall-through behavior it
+    was trying to prevent. Already fixed — nothing to do, just don't be
+    surprised the diff includes a routes.rb constraint change that reads
+    unrelated to "trim over-declared routes" at first glance.
+  - `Vinnehboom/claude-automation#14` (H-12) — CI green, review round
+    clean (4 BLOCKING found and fixed, 12/13 NON-BLOCKING addressed).
+    **Does not qualify for this repo's skill-files auto-merge** — it
+    touches `plugins/kanban-automation/scripts/ui_capture/**`, outside
+    `plugins/*/skills/**` — so it genuinely needs Vinnie's manual review,
+    this isn't a stuck-auto-merge situation to investigate.
+- **`Vinnehboom/claude-automation#15`** — this generation's own lesson PR
+  (see "Pending automation work"), just opened, likely still unmerged.
+  Entire diff is under `plugins/*/skills/**`, so it should auto-merge on
+  its own once `validate` goes green — no action needed unless it's
+  still open and red next cycle.
+- **P-7 (`tcg_fantasy_league#116`) merged this generation.** Notion card
+  is `Done`. Nothing further.
+- **H-12/H-14/H-15's Notion cards are all `Review`** — normal Gatekeeper
   state for an open, ready PR waiting on Vinnie's merge, not a lag to
   correct.
+- **H-16** (https://app.notion.com/p/3da4af79fc01817f96a3e607616c0da3) is
+  a new ticket filed this generation — a follow-up on the N+1 preload
+  fix landed on P-7 (layer 2: batching `Player#record_score!` and
+  `ExternalData::Result`'s per-record queries, deliberately deferred
+  since it needs its own design, not a copy of the layer-1 preload).
+  `Not started`, no dependency, ready whenever a slot opens.
 
 ## Pending automation work
 
-- **Not filed, blocked this generation — a sharper mid-cycle
-  cost-ceiling check.** Generation 11 flagged this as a question, not
-  yet a concrete change (see that generation's note, superseded by this
-  one). Generation 12 hit the exact scenario it predicted: `cost_usd`
-  crossed the $50 ceiling between scheduled cycles, inside one
-  continuous stretch of dispatching a Reviewer and then running the
-  Gatekeeper phase, and nothing caught it until a manual check partway
-  through. Concrete change worth making: check `cost_usd` again after a
-  Reviewer hand-back and after a completed Gatekeeper phase, not only at
-  the top of a scheduled `/kanban-cycle`, and run `/handoff` immediately
-  if it's already over rather than waiting for the next scheduled firing
-  to notice.
-- **Why it's not filed:** this generation's `add_repo` call on
-  `Vinnehboom/claude-automation` (`access: "push"`, needed to clone it
-  and open a PR with the fix above) was denied by the auto-mode
-  classifier under reason `Permission Grant`, right as `/handoff`
-  started. A subsequent plain `get_session` call was denied the same
-  way; `list_triggers` and `create_session` were not. Unclear whether
-  this is specific to this session's state at that moment or a new
-  standing restriction — **try `add_repo`/`get_session` yourself before
-  assuming the block persists**, rather than skipping step 1 on the
-  strength of this note alone. If it's denied again, that's two
-  generations in a row unable to file a lesson upstream — surface that
-  to Vinnie directly rather than working around it a third time.
-- Generation 11's own pending items — logging the placeholder-over-defer
-  policy as a Decisions-database row, and this same cost-ceiling
-  question — the first is done (see the Decisions database, "Ship
-  compliance tickets with bracketed placeholders, not deferrals," filed
-  2026-09-11); the second is restated above, now with confirming
-  evidence instead of a prediction.
+- **Filed this generation:** `Vinnehboom/claude-automation#15` —
+  clarifies the Reviewer brief's worktree write path (a dispatched
+  reviewer can only write into its own worktree, never the developer's)
+  and documents a confirmed hazard: a reviewer's own worktree can be
+  cleaned up before the orchestrator's next turn copies the review file
+  out, even on a clean completed run, because `docs/pipeline-cache/` is
+  gitignored and worktree cleanup doesn't distinguish "nothing changed"
+  from "changed something untracked." Hit twice this generation (H-12,
+  H-15) — both times the reviewer's inline hand-back message was what
+  actually survived, not the file. `add_repo`/`get_session` worked fine
+  this generation (no repeat of generation 12's `Permission Grant`
+  block), so this one filed cleanly.
+- **Anecdotal, not confirmed as a standing block:** `register_repo_root`
+  (used to load the automation repo's own CLAUDE.md/skills) was denied
+  under `Permission Grant` once this generation, mid-session, even
+  though `add_repo` on the same repo had succeeded earlier. Didn't block
+  anything (registering the repo root isn't required to edit and push a
+  file in it) — just try it normally next time rather than assuming
+  either outcome.
 
 ## Recently merged (context, not a substitute for reading live state)
 
-- `tcg_fantasy_league#112` (P-12), `#113` (P-3), `#114` (P-6), `#115`
-  (maintenance, handoff note) — all merged this generation.
-- Nothing on `Vinnehboom/claude-automation` merged this generation (no
-  PR was open there before the `add_repo` block above).
+- `tcg_fantasy_league#116` (P-7) — merged this generation.
+- `Vinnehboom/claude-automation#13` (mid-cycle cost-ceiling re-check,
+  filed at this generation's own handoff-in) and `#14`'s predecessor
+  work — already merged before this generation's main work began.
