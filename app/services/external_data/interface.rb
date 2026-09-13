@@ -49,6 +49,7 @@ module ExternalData
       errors = []
       count = objects.count
       processed = 0
+      objects.first.class.preload(objects) if objects.any?
       objects.each do |object|
         processed += 1 if object.save!
       rescue ActiveRecord::RecordInvalid => e

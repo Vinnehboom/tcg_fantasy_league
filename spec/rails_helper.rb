@@ -103,6 +103,7 @@ RSpec.configure do |config|
   config.include RSpecHtmlMatchers
   config.include ActiveSupport::Testing::TimeHelpers
   config.include ActiveJob::TestHelper
+  config.include QueryCounting
 
   # add sign in helpers for request specs
 

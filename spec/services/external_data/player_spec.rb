@@ -5,6 +5,29 @@ module ExternalData
   RSpec.describe Player do
     it_behaves_like 'PersistableObjectInterface', described_class
 
+    describe '.preload' do
+      let(:game) { create(:game) }
+      let!(:existing_player) { create(:player, game:, external_id: '/players/1', name: 'Existing') }
+      let(:existing_object) do
+        described_class.new(attributes: { game_id: game.id, external_id: '/players/1', name: 'Scraped' })
+      end
+      let(:new_object) do
+        described_class.new(attributes: { game_id: game.id, external_id: '/players/2', name: 'Brand New' })
+      end
+
+      before { described_class.preload([existing_object, new_object]) }
+
+      it 'resolves an existing player without a further query' do
+        expect(count_queries(pattern: /FROM "players"/) { existing_object.send(:existing_record) }).to eq(0)
+        expect(existing_object.send(:existing_record)).to eq(existing_player)
+      end
+
+      it 'resolves a brand new player to nil without a further query' do
+        expect(count_queries(pattern: /FROM "players"/) { new_object.send(:existing_record) }).to eq(0)
+        expect(new_object.send(:existing_record)).to be_nil
+      end
+    end
+
     describe '#save!, when a player already exists and is suppressed' do
       let(:game) { create(:game) }
       let(:season) { create(:season) }

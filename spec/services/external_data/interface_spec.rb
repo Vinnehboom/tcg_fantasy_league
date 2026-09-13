@@ -57,6 +57,10 @@ RSpec.describe ExternalData::Interface do
             expect(Player.find_by(name: player.name).country).to eq(player.country)
           end
 
+          it 'looks up the batch of existing players in one query, not once per player' do
+            expect(count_queries(pattern: /FROM "players"/) { interface.update_players }).to eq(1)
+          end
+
           describe 'when the external score has been updated' do
             let(:interface) { described_class.new(game:, adapter: fake_adapter(players: [player])) }
 
@@ -82,6 +86,10 @@ RSpec.describe ExternalData::Interface do
 
           it 'returns how many players were processed' do
             expect(interface.update_players).to eq(players.length)
+          end
+
+          it 'looks up the batch of players in one query, not once per player' do
+            expect(count_queries(pattern: /FROM "players"/) { interface.update_players }).to eq(1)
           end
         end
       end
@@ -142,6 +150,10 @@ RSpec.describe ExternalData::Interface do
             interface.update_upcoming_tournaments
             expect(Tournament.find_by(name: tournament.name).starting_date).to eq(tournament.starting_date)
           end
+
+          it 'looks up the batch of existing tournaments in one query, not once per tournament' do
+            expect(count_queries(pattern: /FROM "tournaments"/) { interface.update_upcoming_tournaments }).to eq(1)
+          end
         end
 
         describe 'when the tournament data does not exist yet' do
@@ -151,6 +163,10 @@ RSpec.describe ExternalData::Interface do
 
           it 'returns how many tournaments were processed' do
             expect(interface.update_upcoming_tournaments).to eq(tournaments.length)
+          end
+
+          it 'looks up the batch of tournaments in one query, not once per tournament' do
+            expect(count_queries(pattern: /FROM "tournaments"/) { interface.update_upcoming_tournaments }).to eq(1)
           end
         end
       end
