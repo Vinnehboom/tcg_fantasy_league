@@ -14,8 +14,8 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root "games#index"
-    resources :users
-    resources :participations
+    resources :users, only: %i[index show]
+    resources :participations, only: %i[index show]
     resources :salary_drafts do
       post :complete, on: :member
     end
@@ -34,14 +34,24 @@ Rails.application.routes.draw do
     end
   end
 
-  scope ':game', as: 'game', constraints: { game: %r{[^/]+} } do
+  # A verb the admin namespace above doesn't declare for a given path falls
+  # through to here, and a bare [^/]+ constraint would accept any string as
+  # :game - including the literal "admin", silently landing an admin-only
+  # verb on this public controller instead of 404ing. Every real Game id is
+  # uppercase (see the Game factory and every seeded id in the codebase), so
+  # requiring that shape both matches real usage and rules "admin" out.
+  # Don't replace this with a regexp lookahead that excludes "admin" by
+  # name instead: Rails' route matcher doesn't support lookaheads in a
+  # requirement and fails deep inside route recognition (a NoMethodError,
+  # not a clean non-match) the first time a path exercises one.
+  scope ':game', as: 'game', constraints: { game: /[A-Z0-9]+/ } do
     root "pages#home"
-    resources :players
-    resources :tournaments
-    resources :users
+    resources :players, only: :index
+    resources :tournaments, only: :index
+    resources :users, only: :show
     resources :salary_drafts
     resources :participations, only: %i[destroy create show index update]
-    resources :rosters
+    resources :rosters, only: %i[show edit create update destroy]
   end
 
 end
