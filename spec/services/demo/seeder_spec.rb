@@ -40,14 +40,6 @@ RSpec.describe Demo::Seeder do
       expect(Tournament.pluck(:starting_date)).to all(be >= 7.days.from_now.to_date)
     end
 
-    it 'is idempotent: a second call adds no Game, Season, Player or ExternalScore rows' do
-      described_class.call
-
-      expect do
-        described_class.call
-      end.not_to(change { [Game.count, Season.count, Player.count, ExternalScore.count] })
-    end
-
     it 'refreshes upcoming tournament dates on a second call, since they are offsets from today' do
       described_class.call
       first_dates = Tournament.order(:external_id).pluck(:starting_date)
@@ -57,28 +49,32 @@ RSpec.describe Demo::Seeder do
       expect(Tournament.order(:external_id).pluck(:starting_date)).not_to eq(first_dates)
     end
 
+    it 'is idempotent: a second call adds no new row for any seeded model' do
+      described_class.call
+
+      expect do
+        described_class.call
+      end.not_to(change do
+        [Game.count, Season.count, Player.count, ExternalScore.count, ScoreModifier.count, PlayerSeasonModifier.count]
+      end)
+    end
+
     it 'creates one Multiplier and one Bonus, covering both score modifier subtypes' do
       described_class.call
 
       expect(ScoreModifier.pluck(:type)).to contain_exactly('Multiplier', 'Bonus')
     end
 
-    it "attaches a score modifier to a player's season, for every game" do
+    it 'attaches both modifier subtypes to the player the admin player page shows first, for every game' do
       described_class.call
 
       Demo::Games::ALL.each do |entry|
         game = Game.find(entry.id)
-        modifiers = PlayerSeasonModifier.joins(:player_season).where(player_seasons: { season: game.current_season })
-        expect(modifiers).not_to be_empty
+        first_player = game.players.order(:id).first
+        player_season = first_player.player_seasons.find_by(season: game.current_season)
+
+        expect(player_season.score_modifiers.map(&:type)).to contain_exactly('Multiplier', 'Bonus')
       end
-    end
-
-    it 'is idempotent: a second call adds no ScoreModifier or PlayerSeasonModifier rows' do
-      described_class.call
-
-      expect do
-        described_class.call
-      end.not_to(change { [ScoreModifier.count, PlayerSeasonModifier.count] })
     end
   end
 end
