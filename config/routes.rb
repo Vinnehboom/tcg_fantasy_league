@@ -49,7 +49,7 @@ Rails.application.routes.draw do
     resources :players, only: :index
     resources :tournaments, only: :index
     resources :users, only: :show
-    resources :salary_drafts
+    resources :salary_drafts, only: %i[index show]
     resources :participations, only: %i[destroy create show index update]
     resources :rosters, only: %i[show edit create update destroy]
   end

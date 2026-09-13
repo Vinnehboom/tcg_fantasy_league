@@ -196,9 +196,6 @@ en:
       explanation: Please provide your country and date of birth to continue.
   salary_drafts:
     show:
-      edit: Edit
-      destroy: Remove
-      confirm_destroy: Are you sure you want to remove this draft?
       add_participation: Participate
       log_in_to_participate: Sign in to participate
       view_participation: View participation
