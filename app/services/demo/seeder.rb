@@ -9,9 +9,11 @@ module Demo
     # game always draw from the same pool.
     SEED = ExternalData::Synthetic::Adapter::DEFAULT_SEED
 
-    # ScoreModifier carries no game_id, so the same two rows attach to a
-    # player in every game rather than one fresh pair per game.
-    MODIFIER_FACTORIES = { multiplier: 'hot streak', bonus: 'winner' }.freeze
+    # ScoreModifier carries no game_id: this list is shared across every game.
+    MODIFIER_ATTACHMENTS = [
+      { score_modifier_class: ::Multiplier, factory: :multiplier, name: 'hot streak' },
+      { score_modifier_class: ::Bonus, factory: :bonus, name: 'winner' }
+    ].freeze
 
     def call
       raise_outside_the_sandbox!
@@ -53,21 +55,20 @@ module Demo
 
     def attach_score_modifiers(game:)
       player_season = modifier_player_season(game:)
-      return unless player_season
-
-      MODIFIER_FACTORIES.each { |factory, name| ensure_modifier_attached(player_season:, factory:, name:) }
+      MODIFIER_ATTACHMENTS.each { |attachment| ensure_modifier_attached(player_season:, **attachment) }
     end
 
+    # Orders by player_id, not external_id, so this always picks the same
+    # player that UiCapture::CoreTargets#seeded_record resolves for the
+    # admin player page (Rails' implicit .first is ORDER BY id ASC).
     def modifier_player_season(game:)
-      season = game.current_season
-      return nil unless season
-
-      season.player_seasons.joins(:player).order('players.external_id').first
+      season = game.current_season || raise("#{game.id} has no current season")
+      season.player_seasons.order(:player_id).first ||
+        raise("#{game.id}'s season has no seeded player")
     end
 
-    def ensure_modifier_attached(player_season:, factory:, name:)
-      score_modifier = ::ScoreModifier.find_by(type: factory.to_s.camelize, name:) ||
-                       FactoryBot.create(factory, name:)
+    def ensure_modifier_attached(player_season:, score_modifier_class:, factory:, name:)
+      score_modifier = score_modifier_class.find_by(name:) || FactoryBot.create(factory, name:)
       ::PlayerSeasonModifier.find_by(player_season:, score_modifier:) ||
         FactoryBot.create(:player_season_modifier, player_season:, score_modifier:)
     end
