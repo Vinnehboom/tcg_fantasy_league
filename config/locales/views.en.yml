@@ -111,8 +111,8 @@ en:
       controller_heading: Who we are
       controller_name: "[Legal entity name]"
       controller_address: "[Registered address]"
-      registration_heading: How we are registered
-      registration_body: "[ICO registration number to be confirmed]"
+      registration_heading: How we are registered with the ICO
+      registration_body: "We are not yet registered with the UK Information Commissioner's Office. [Registration number to be confirmed]"
       contact_heading: How to contact us
       contact_address: "[Contact address for privacy and data-subject requests]"
       data_heading: What data we process
