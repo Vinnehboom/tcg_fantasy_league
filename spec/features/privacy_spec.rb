@@ -14,6 +14,12 @@ RSpec.describe 'Privacy notice' do
     expect(page).to have_content('[Registered address]')
   end
 
+  it 'gives a placeholder ICO registration number' do
+    visit privacy_path
+
+    expect(page).to have_content('[ICO registration number to be confirmed]')
+  end
+
   it 'gives a placeholder contact address for privacy requests' do
     visit privacy_path
 
