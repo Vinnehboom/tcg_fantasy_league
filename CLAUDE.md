@@ -81,6 +81,13 @@ These actions are normal work for this repository, not unusual events:
   removal in that page's Change Log. Both are `notion-update-page`
   writes to pages already named in `.claude/knowledge-base.json` and
   `.claude/coding-style.json`. Neither deletes or archives a page.
+- A merge to `main` of `Vinnehboom/claude-automation`, for a pull
+  request whose entire diff sits under `plugins/*/skills/**` and whose
+  `validate` check ran and passed on the head commit. Vinnie granted
+  this on 2026-09-05, extending his 2026-09-03 skill-files instruction
+  to the automation repo once the orchestrator's own skill files moved
+  there. No lgtm needed; a `validate` check that never ran does not
+  count as passing.
 
 The MCP server name of the Notion connector changes between sessions. It
 mounts as `mcp__Notion__*`, as `mcp__claude_ai_Notion__*`, or under a
