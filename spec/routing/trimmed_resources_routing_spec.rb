@@ -178,6 +178,50 @@ RSpec.describe 'A resource trimmed to only the actions its controller implements
     end
   end
 
+  describe 'admin/data_subject_requests, scoped to index and show' do
+    it 'reaches index' do
+      expect_route(method: :get, path: '/admin/data_subject_requests', to: 'admin/data_subject_requests#index')
+    end
+
+    it 'reaches show' do
+      expect_route(method: :get, path: '/admin/data_subject_requests/1', to: 'admin/data_subject_requests#show',
+                   id: '1')
+    end
+
+    it 'leaves create unreachable' do
+      expect_no_route(method: :post, path: '/admin/data_subject_requests')
+    end
+
+    it 'leaves edit unreachable' do
+      expect_no_route(method: :get, path: '/admin/data_subject_requests/1/edit')
+    end
+
+    it 'leaves destroy unreachable' do
+      expect_no_route(method: :delete, path: '/admin/data_subject_requests/1')
+    end
+  end
+
+  describe 'data_subject_requests, scoped to new and create' do
+    it 'reaches new' do
+      expect_route(method: :get, path: '/data_subject_requests/new', to: 'data_subject_requests#new')
+    end
+
+    it 'reaches create' do
+      expect_route(method: :post, path: '/data_subject_requests', to: 'data_subject_requests#create')
+    end
+
+    # index is not declared here, but the path still matches something: the
+    # public, game-scoped root route, treating the literal path segment
+    # "data_subject_requests" as its :game.
+    it 'falls through index to the game home route' do
+      expect_route(method: :get, path: '/data_subject_requests', to: 'pages#home', game: 'data_subject_requests')
+    end
+
+    it 'leaves show unreachable' do
+      expect_no_route(method: :get, path: '/data_subject_requests/1')
+    end
+  end
+
   describe 'the game-scoped rosters resource, scoped to everything but index and new' do
     it 'reaches show' do
       expect_route(method: :get, path: '/PTCG/rosters/1', to: 'rosters#show', game: 'PTCG', id: '1')

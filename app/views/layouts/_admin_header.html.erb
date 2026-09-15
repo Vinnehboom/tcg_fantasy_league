@@ -16,6 +16,7 @@
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.player.other'), path: admin_players_path } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.score_modifier.other'), path: admin_score_modifiers_path } %>
         <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.external_request.other'), path: admin_external_requests_path } %>
+        <%= render partial: 'layouts/navlink', locals: { title: t('activerecord.models.data_subject_request.other'), path: admin_data_subject_requests_path } %>
       </ul>
       <div id="user-block" class="text-end d-flex pe-3 me-4">
         <% if current_user %>

@@ -1,0 +1,32 @@
+<% if @data_subject_requests.any? %>
+  <table class="table table-dark table-striped rounded-2 overflow-hidden">
+    <thead>
+      <tr>
+        <th><%= t('activerecord.attributes.data_subject_request.player') %></th>
+        <th><%= t('activerecord.attributes.data_subject_request.request_type') %></th>
+        <th><%= t('activerecord.attributes.data_subject_request.status') %></th>
+        <th><%= t('activerecord.attributes.data_subject_request.created_at') %></th>
+        <th><%= t('views.tables.actions') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @data_subject_requests.each do |data_subject_request| %>
+        <tr>
+          <td><%= data_subject_request.player.name %></td>
+          <td><%= data_subject_request_type_label(data_subject_request.request_type) %></td>
+          <td><%= data_subject_request_status_label(data_subject_request.status) %></td>
+          <td><%= l(data_subject_request.created_at) %></td>
+          <td>
+            <%= link_to([:admin, data_subject_request], class: 'text-opacity-75') do %>
+              <%= bootstrap_icon("eye") %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @data_subject_requests %>
+<% else %>
+  <p><%= t('.no_requests') %></p>
+<% end %>
