@@ -25,6 +25,7 @@ RSpec.describe 'Terms of Service' do
   it 'states the minimum age for a sponsored draft' do
     visit terms_path
 
+    expect(page).to have_content('Some drafts are marked for users aged 18 and over')
     expect(page).to have_content('You must be 18 or older to enter a draft marked this way')
   end
 
@@ -82,7 +83,7 @@ RSpec.describe 'Terms of Service' do
     visit terms_path
 
     expect(page).to have_content('The law of England and Wales governs these terms')
-    expect(page).to have_content('The courts of England and Wales have exclusive jurisdiction')
+    expect(page).to have_content('The courts of England and Wales have jurisdiction')
   end
 
   it 'gives a placeholder contact address for legal notices' do
