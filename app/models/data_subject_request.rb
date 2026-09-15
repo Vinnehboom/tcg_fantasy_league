@@ -13,6 +13,7 @@ class DataSubjectRequest < ApplicationRecord
     transaction do
       update!(status: :actioned, actioned_at: Time.current)
       player.update!(suppressed_at: Time.current) unless player.suppressed?
+      true
     end
   end
 
