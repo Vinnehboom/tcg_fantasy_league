@@ -98,6 +98,13 @@ en:
         trigger_tournaments: Import tournaments
         trigger_success: Import started.
         trigger_failure: Failed to start import.
+  data_subject_requests:
+    new:
+      title: Request to erase or object to your data
+      intro: Use this form if you are a tracked player and want us to stop using your data, or erase it. We first need enough information to find your player row and a way to reach you back.
+      player_label: Which player are you?
+      contact_explanation: Give us a contact email, or describe proof of your identity, so we can follow up. One of the two is required.
+      submit: Submit request
   pages:
     landing:
       title: TCG Fantasy League
