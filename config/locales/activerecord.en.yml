@@ -40,6 +40,9 @@ en:
       bonus:
         one: Bonus
         other: Bonuses
+      data_subject_request:
+        one: Data-subject request
+        other: Data-subject requests
     attributes:
       user:
         email: Email
@@ -122,6 +125,15 @@ en:
         name: Name
         value: Value
         type: Kind
+      data_subject_request:
+        player: Player
+        player_id: Player
+        request_type: Request type
+        status: Status
+        contact_email: Contact email
+        identity_proof: Proof of identity
+        actioned_at: Actioned at
+        created_at: Submitted
     enums:
       external_request:
         kind:
@@ -139,6 +151,12 @@ en:
           "world champion": world champion
           legend: legend
           upcoming: upcoming
+      data_subject_request:
+        request_type:
+          erase_or_object: Erase or object to my data
+        status:
+          queued: Queued
+          actioned: Actioned
     errors:
       models:
         roster:
@@ -156,6 +174,10 @@ en:
               before_start_date: must be on or after the start date
             start_date:
               overlapping_season: overlaps an existing season for this game
+        data_subject_request:
+          attributes:
+            base:
+              contact_email_or_identity_proof_required: Provide a contact email or a description of your proof of identity.
   profiles:
     update:
       success: Profile successfully updated.
@@ -183,6 +205,10 @@ en:
       destroy:
         success: Score modifier successfully deleted.
         failed: Score modifier failed to delete.
+    data_subject_requests:
+      mark_actioned:
+        success: Request marked actioned, and the player's data has been suppressed.
+        failed: Could not mark this request actioned.
     api:
       player_season_modifiers:
         create:
@@ -220,3 +246,7 @@ en:
     destroy:
       success: Participation successfully cancelled.
       failed: Failed to cancel participation, please try again.
+  data_subject_requests:
+    create:
+      success: Thank you. We received your request and will act on it.
+      failed: We could not submit your request. Please check the form and try again.

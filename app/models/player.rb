@@ -2,17 +2,19 @@ class Player < ApplicationRecord
 
   attr_accessor :cost
 
-  scope :not_suppressed, -> { where(suppressed_at: nil) }
-  scope :suppressed, -> { where.not(suppressed_at: nil) }
-
-  validates :name, presence: true
-  validates :external_id, presence: true
   belongs_to :game
   has_many :results, dependent: :destroy
   has_many :external_requests, as: :requestable, dependent: :nullify
   has_many :player_seasons, dependent: :destroy
   has_many :seasons, through: :player_seasons
   has_many :external_scores, through: :player_seasons
+  has_many :data_subject_requests, dependent: :destroy
+
+  scope :not_suppressed, -> { where(suppressed_at: nil) }
+  scope :suppressed, -> { where.not(suppressed_at: nil) }
+
+  validates :name, presence: true
+  validates :external_id, presence: true
 
   def current_score
     external_scores.order('created_at desc').first&.score

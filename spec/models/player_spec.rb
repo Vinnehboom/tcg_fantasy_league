@@ -8,6 +8,7 @@ RSpec.describe Player do
   it { is_expected.to have_many(:external_requests).dependent(:nullify) }
   it { is_expected.to have_many(:player_seasons).dependent(:destroy) }
   it { is_expected.to have_many(:seasons).through(:player_seasons) }
+  it { is_expected.to have_many(:data_subject_requests).dependent(:destroy) }
 
   it { is_expected.to belong_to(:game) }
 
