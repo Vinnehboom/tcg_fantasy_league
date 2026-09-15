@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_12_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_15_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "data_subject_requests", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.integer "request_type", null: false
+    t.integer "status", default: 0, null: false
+    t.string "contact_email"
+    t.text "identity_proof"
+    t.datetime "actioned_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_data_subject_requests_on_player_id"
+    t.index ["status"], name: "index_data_subject_requests_on_status"
+  end
 
   create_table "external_requests", force: :cascade do |t|
     t.string "game_id", null: false
@@ -214,6 +227,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_12_090000) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
+  add_foreign_key "data_subject_requests", "players"
   add_foreign_key "external_requests", "games"
   add_foreign_key "external_scores", "player_seasons"
   add_foreign_key "participations", "salary_drafts", column: "draft_id"
