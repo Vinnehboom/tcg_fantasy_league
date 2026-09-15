@@ -5,17 +5,15 @@ present, not the history. Durable lessons belong in the
 `kanban-automation` plugin (`Vinnehboom/claude-automation`), not here and
 no longer in `.claude/skills/`.
 
-**Generation:** 14
-**Predecessor session:** `session_0129DEZ2Kz8y8qqMjGFd73nt` (generation 13)
-**Handoff trigger:** cost ceiling. `get_session` read `cost_usd` $93.38
-against `orchestrator_cost_ceiling_usd` $50 — nearly double, caught at the
-top of the 17:30 BST scheduled cycle (not mid-task this time; the
-mid-cycle re-check from generation 12/13's own lesson wasn't exercised
-because nothing hit it before the scheduled boundary did). This generation
-ran three tickets end-to-end back to back (P-7 review re-entry + a
-follow-up fix, H-12, H-14, H-15) in one long interactive stretch with
-Vinnie live in the session — that volume, not a single runaway dispatch,
-is what drove the cost.
+**Generation:** 15
+**Predecessor session:** `session_01QNtm6fNP3HWjKwdi4tAe2L` (generation 14)
+**Handoff trigger:** cost ceiling. `get_session` read `cost_usd` $54.40
+against `orchestrator_cost_ceiling_usd` $50, caught mid-cycle (the 08:00
+BST scheduled firing), not at a cycle boundary. This generation ran three
+tickets (P-1, P-13, P-2c) plus a fourth in flight (P-14) in one long
+interactive stretch with Vinnie live in the session, live-fixed two
+Checkpoint-1-driven reviewer findings, and made three plugin/config
+changes — that volume, not a single runaway dispatch, drove the cost.
 **Repo / branch:** `Vinnehboom/tcg_fantasy_league` · `main`.
 `orchestrator_branch` in `.claude/kanban-cycle.json` reads `main` and is
 current.
@@ -26,85 +24,68 @@ files. Read those, not a summary of them.
 
 ## Open questions awaiting the user
 
-1. **P-14's scope** (https://app.notion.com/p/3d84af79fc01818a93dfc838895b2fd2)
-   — two things, both still open:
-   - Request types beyond erasure/objection (access/rectification/
-     restriction?) — open since generation 12.
-   - A narrower ask from generation 13: Vinnie asked on P-7's PR review
-     for a super-admin-only lookup of suppressed players via policy
-     scopes. This sits next to, but isn't obviously the same feature as,
-     P-14's queue — the card's own 2026-09-11 answer says the existing
-     admin role is fine for working the queue. Both are recorded on the
-     card under "Note, 2026-09-13"; whoever plans P-14 needs to ask
-     Vinnie directly if it's still unclear which access model covers
-     which part.
-   P-14's dependency (P-7) merged this generation, so P-14 is now a real
-   candidate the next cycle may pick up — this question is more relevant
-   now than when generation 12 first raised it, not less.
+None outstanding. P-2c's eight Checkpoint-1 questions and P-14's two
+scope questions were both answered directly by Vinnie this generation and
+are recorded on their respective cards.
 
 ## In-flight nuance that live state would misread
 
-- **Three PRs open, all waiting on Vinnie's ordinary review/merge — no
-  hidden blockers, but one has a non-obvious eligibility note:**
-  - `tcg_fantasy_league#118` (H-15) — CI green, isolated review found 0
-    BLOCKING findings. Nothing unusual.
-  - `tcg_fantasy_league#119` (H-14) — CI green. The isolated reviewer
-    caught a real bug outside the ticket's own scope during this same
-    round: a route-segment constraint the developer added as a side
-    effect could have raised `UrlGenerationError` on the public landing
-    page for any lowercase-id `Game`. Reverted in the same PR, with a
-    request spec pinning the actual (harmless) fall-through behavior it
-    was trying to prevent. Already fixed — nothing to do, just don't be
-    surprised the diff includes a routes.rb constraint change that reads
-    unrelated to "trim over-declared routes" at first glance.
-  - `Vinnehboom/claude-automation#14` (H-12) — CI green, review round
-    clean (4 BLOCKING found and fixed, 12/13 NON-BLOCKING addressed).
-    **Does not qualify for this repo's skill-files auto-merge** — it
-    touches `plugins/kanban-automation/scripts/ui_capture/**`, outside
-    `plugins/*/skills/**` — so it genuinely needs Vinnie's manual review,
-    this isn't a stuck-auto-merge situation to investigate.
-- **`Vinnehboom/claude-automation#15`** — this generation's own lesson PR
-  (see "Pending automation work"), just opened, likely still unmerged.
-  Entire diff is under `plugins/*/skills/**`, so it should auto-merge on
-  its own once `validate` goes green — no action needed unless it's
-  still open and red next cycle.
-- **P-7 (`tcg_fantasy_league#116`) merged this generation.** Notion card
-  is `Done`. Nothing further.
-- **H-12/H-14/H-15's Notion cards are all `Review`** — normal Gatekeeper
-  state for an open, ready PR waiting on Vinnie's merge, not a lag to
-  correct.
-- **H-16** (https://app.notion.com/p/3da4af79fc01817f96a3e607616c0da3) is
-  a new ticket filed this generation — a follow-up on the N+1 preload
-  fix landed on P-7 (layer 2: batching `Player#record_score!` and
-  `ExternalData::Result`'s per-record queries, deliberately deferred
-  since it needs its own design, not a copy of the layer-1 preload).
-  `Not started`, no dependency, ready whenever a slot opens.
+- **P-14 dispatch may still be running or may have just finished** —
+  agent `a3f5f1704c4d314fa`, dispatched this generation with both its
+  scope questions already pre-answered (erasure/objection only; the
+  super-admin suppressed-player lookup is a separate feature, not this
+  ticket). Check `ListAgents` first. If it's gone with no PR and no
+  updated card, that's the vanished-worktree failure mode documented in
+  "Dispatch mechanics" — don't assume lost work without checking the
+  card and `git ls-remote` for its branch first.
+- **`tcg_fantasy_league#124` (P-2c) — rebased and pushed at handoff time,
+  CI in progress, not yet marked ready.** Branch
+  `P-2c-terms-of-service`, head `a2369a2`. One reviewer round already ran
+  (1 BLOCKING fixed: a self-contradiction about whether sponsored prize
+  drafts exist today; 3 of 8 NON-BLOCKING also fixed). Check CI on
+  `a2369a2` — if green and main hasn't moved again, just un-draft and
+  flip the card to Review; no second review round needed. This is an AI
+  legal draft, explicitly not lawyer-reviewed — that's stated on the PR
+  and card on purpose, not a gap to fill.
+- **`tcg_fantasy_league#123` merged this generation** — sets
+  `min_open_prs: 2`. Its branch briefly showed 2 phantom extra commits
+  from a stale local `main` ref (this session had not re-fetched after
+  an earlier rebase-merge minted new commit SHAs for already-merged
+  content) — resolved with a clean rebase onto `origin/main` and a
+  force-push. Nothing wrong shipped; noted in case the same stale-ref
+  symptom recurs on another branch.
+- **P-1 and P-13 cards stay `In progress` on purpose** — both are
+  compliance tickets blocked on Vinnie's own real-world action (ICO
+  registration + fee; contacting Limitless/eloshowdown for permission),
+  not on more pipeline work. Their PRs (`#122` merged, P-13 has none by
+  design) and Knowledge Base/Decisions entries are already done. Don't
+  re-dispatch either from board state alone.
+- **Two new standing instructions from Vinnie this generation, both
+  already written into the plugin (see "Pending automation work") —
+  don't re-derive them from this note, read the skill files:**
+  keep `min_open_prs` ticket-linked PRs in flight at all times, topping
+  up immediately when a merge or a resolved Checkpoint 1 opens room; and
+  skip Checkpoint 1 entirely for a compliance-ticket gap that's purely an
+  unknown fact the bracketed-placeholder Decision already resolves —
+  draft it and let him review the result, but still ask on a genuine
+  design fork or real judgment call.
 
 ## Pending automation work
 
-- **Filed this generation:** `Vinnehboom/claude-automation#15` —
-  clarifies the Reviewer brief's worktree write path (a dispatched
-  reviewer can only write into its own worktree, never the developer's)
-  and documents a confirmed hazard: a reviewer's own worktree can be
-  cleaned up before the orchestrator's next turn copies the review file
-  out, even on a clean completed run, because `docs/pipeline-cache/` is
-  gitignored and worktree cleanup doesn't distinguish "nothing changed"
-  from "changed something untracked." Hit twice this generation (H-12,
-  H-15) — both times the reviewer's inline hand-back message was what
-  actually survived, not the file. `add_repo`/`get_session` worked fine
-  this generation (no repeat of generation 12's `Permission Grant`
-  block), so this one filed cleanly.
-- **Anecdotal, not confirmed as a standing block:** `register_repo_root`
-  (used to load the automation repo's own CLAUDE.md/skills) was denied
-  under `Permission Grant` once this generation, mid-session, even
-  though `add_repo` on the same repo had succeeded earlier. Didn't block
-  anything (registering the repo root isn't required to edit and push a
-  file in it) — just try it normally next time rather than assuming
-  either outcome.
+- **Filed this generation, likely already merged (whitelisted,
+  skill-files-only, green `validate`):** `claude-automation#18` (the
+  `min_open_prs` top-up logic in `kanban-cycle` step 4) and
+  `claude-automation#19` (the Checkpoint-1 placeholder-skip instruction
+  in `ticket-pipeline`). Check they merged; if either is still open and
+  red, that's this generation's to fix.
+- **Not yet merged, needs Vinnie's own review (not whitelisted, edits
+  code not just skills/config):** none outstanding from this generation
+  beyond the tickets already listed above.
 
 ## Recently merged (context, not a substitute for reading live state)
 
-- `tcg_fantasy_league#116` (P-7) — merged this generation.
-- `Vinnehboom/claude-automation#13` (mid-cycle cost-ceiling re-check,
-  filed at this generation's own handoff-in) and `#14`'s predecessor
-  work — already merged before this generation's main work began.
+- `tcg_fantasy_league#122` (P-1), `#123` (min_open_prs config) — merged
+  this generation.
+- `Vinnehboom/claude-automation#13` (mid-cycle cost-ceiling check),
+  `#14` (H-12), `#15`, `#16`, `#17` — all merged before or during this
+  generation.
