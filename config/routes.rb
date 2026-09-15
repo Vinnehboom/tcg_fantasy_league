@@ -5,16 +5,16 @@ Rails.application.routes.draw do
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get 'up' => 'rails/health#show', as: :rails_health_check
-  root 'pages#landing'
+  get "up" => "rails/health#show", as: :rails_health_check
+  root "pages#landing"
 
-  get 'privacy' => 'pages#privacy'
-  get 'terms' => 'pages#terms'
-  get 'player-information' => 'pages#player_information', as: :player_information
+  get "privacy" => "pages#privacy"
+  get "terms" => "pages#terms"
+  get "player-information" => "pages#player_information", as: :player_information
   resources :data_subject_requests, only: %i[new create]
 
   namespace :admin do
-    root 'games#index'
+    root "games#index"
     resources :users, only: %i[index show]
     resources :participations, only: %i[index show]
     resources :salary_drafts do
@@ -39,7 +39,7 @@ Rails.application.routes.draw do
   end
 
   scope ':game', as: 'game', constraints: { game: %r{[^/]+} } do
-    root 'pages#home'
+    root "pages#home"
     resources :players, only: :index
     resources :tournaments, only: :index
     resources :users, only: :show
@@ -47,4 +47,5 @@ Rails.application.routes.draw do
     resources :participations, only: %i[destroy create show index update]
     resources :rosters, only: %i[show edit create update destroy]
   end
+
 end

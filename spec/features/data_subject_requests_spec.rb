@@ -40,9 +40,21 @@ RSpec.describe 'Data-subject request form' do
     end
 
     it 'rejects a submission with neither a contact email nor identity proof' do
+      player = create(:player, name: 'Ash Ketchum')
+
+      visit new_data_subject_request_path
+      select "#{player.name} (#{player.game.name})", from: I18n.t('data_subject_requests.new.player_label')
+      click_button I18n.t('data_subject_requests.new.submit')
+
+      expect(page).to have_content(I18n.t('data_subject_requests.create.failed'))
+      expect(DataSubjectRequest.count).to eq(0)
+    end
+
+    it 'rejects a submission with no player selected, instead of defaulting to one' do
       create(:player, name: 'Ash Ketchum')
 
       visit new_data_subject_request_path
+      fill_in 'data_subject_request_contact_email', with: 'ash@example.com'
       click_button I18n.t('data_subject_requests.new.submit')
 
       expect(page).to have_content(I18n.t('data_subject_requests.create.failed'))

@@ -5,10 +5,12 @@
 
   <div class="border-3 border border-light rounded-2 shadow p-3">
     <%= simple_form_for @data_subject_request, url: data_subject_requests_path do |f| %>
+      <%= f.error_notification %>
+
       <%= f.input :player_id, collection: @players,
                                label_method: ->(player) { "#{player.name} (#{player.game.name})" },
                                value_method: :id,
-                               include_blank: false,
+                               prompt: t('.player_prompt'),
                                label: t('.player_label') %>
 
       <%= f.input :request_type, collection: DataSubjectRequest.request_types.keys,
