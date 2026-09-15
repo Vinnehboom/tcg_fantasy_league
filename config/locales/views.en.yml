@@ -177,9 +177,10 @@ en:
       rights_body: You have the right to access, correct, erase, and restrict your data. You also have the right to object to our use of it.
       rights_portability: Data portability is a right only where the processing rests on consent or on a contract, so it does not apply here. Write to us anyway and we will send you a copy of what we hold.
       object_heading: How to object, and what happens then
-      object_route: Write to the contact address above and tell us that you object. We answer within one month.
-      object_outcome: We then stop using your data, and we remove you from the site, unless we can show compelling legitimate grounds that override your rights.
-      object_by_hand: We do this by hand at the moment. If your data comes back after a later import, tell us and we will remove it again.
+      object_route: To object, or to ask us to erase your data, use our
+      object_form_link: data-subject request form
+      object_outcome: We answer within one month. We then stop using your data, and we remove you from the site, unless we can show compelling legitimate grounds that override your rights.
+      object_queue: Your request joins our team's queue for this. If your data comes back after a later import, tell us again and we will remove it again.
       complaints_heading: How to complain
       complaints_ico: You can complain to the UK Information Commissioner's Office (ICO) at ico.org.uk.
       complaints_dpo: "[named data protection contact beyond the ICO to be confirmed]"
