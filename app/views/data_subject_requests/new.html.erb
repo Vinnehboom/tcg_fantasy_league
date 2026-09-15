@@ -1,0 +1,28 @@
+<div class="data-subject-request">
+  <h1><%= t('.title') %></h1>
+
+  <p><%= t('.intro') %></p>
+
+  <div class="border-3 border border-light rounded-2 shadow p-3">
+    <%= simple_form_for @data_subject_request, url: data_subject_requests_path do |f| %>
+      <%= f.input :player_id, collection: @players,
+                               label_method: ->(player) { "#{player.name} (#{player.game.name})" },
+                               value_method: :id,
+                               include_blank: false,
+                               label: t('.player_label') %>
+
+      <%= f.input :request_type, collection: DataSubjectRequest.request_types.keys,
+                                  label_method: ->(type) { data_subject_request_type_label(type) },
+                                  value_method: :itself,
+                                  include_blank: false,
+                                  disabled: true %>
+
+      <p><%= t('.contact_explanation') %></p>
+
+      <%= f.input :contact_email %>
+      <%= f.input :identity_proof %>
+
+      <%= f.button :submit, t('.submit'), class: 'btn btn-success ms-auto' %>
+    <% end %>
+  </div>
+</div>
