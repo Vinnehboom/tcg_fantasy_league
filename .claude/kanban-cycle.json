@@ -4,6 +4,8 @@
   "repo": "Vinnehboom/tcg_fantasy_league",
   "notion_board_url": "https://app.notion.com/p/Kanban-board-3a94af79fc01801ea781c9195643d5a0?pvs=25",
   "max_open_prs": 2,
+  "_comment_min_open_prs": "Vinnie's standing instruction, 2026-09-15: keep at least this many ticket-linked PRs in flight whenever ready work exists to fill them. A cycle (or this session, mid-conversation) that finds open_count below this after triage should dispatch another ready ticket right away, same as the 'pick up the next ticket the moment room opens' principle already in kanban-cycle SKILL.md step 3 — this is a floor to actively top up to, not just a ceiling to react against. Never exceeds max_open_prs (currently equal to it).",
+  "min_open_prs": 2,
   "max_stacked_prs": 2,
   "orchestrator_cost_ceiling_usd": 50,
   "_comment_orchestrator_branch": "The branch carrying the current .claude/skills. A new session clones the repo's DEFAULT branch unless told otherwise, so /handoff must check this out explicitly or the successor comes up without the skills that define its own job. Fixed to main at generation 4's handoff (2026-08-31), 3 generations after this was first flagged wrong — main now carries the current skill files (verified via git ls-tree before making this change). If this ever needs to point elsewhere again, that's a regression to investigate, not a new normal.",
