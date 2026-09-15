@@ -172,7 +172,7 @@ en:
       complaints_dpo: "[named data protection contact beyond the ICO to be confirmed]"
     terms:
       title: Terms of Service
-      draft_notice: This page is not final. Bracketed sections will be confirmed before launch. A lawyer or Vinnie must review this page before it governs real users.
+      draft_notice: This page is not final. Bracketed sections will be confirmed before launch.
       intro_heading: Agreement to these terms
       intro_body: By using TCG Fantasy League, you agree to these terms. If you do not agree to these terms, do not use the service.
       who_we_are_heading: Who we are
@@ -180,13 +180,13 @@ en:
       who_we_are_address: "[Registered address]"
       eligibility_heading: Who can use the service
       eligibility_body: You must meet the minimum sign-up age for your country to create an account. The minimum age is 13 in the United Kingdom and Belgium, 15 in France, and 16 in every other country.
-      eligibility_sponsored_body: Some drafts award a sponsored product as a prize. You must be 18 or older to enter a draft marked this way, wherever you live.
+      eligibility_sponsored_body: Some drafts are marked for users aged 18 and over. You must be 18 or older to enter a draft marked this way, wherever you live.
       account_heading: Your account
       account_body: You must give true information when you register. You must keep your password safe. You are responsible for all activity under your account.
       conduct_heading: Rules for using the service
       conduct_body: You must not cheat, use more than one account for yourself, or act in an abusive way toward another user or toward us. We can suspend or close an account that breaks this rule.
       content_heading: Content you submit
-      content_body: You keep ownership of the content you submit, such as a team name or a roster pick. You give us a license to show this content as part of the service. We do not take ownership of your content.
+      content_body: You keep ownership of the content you submit, such as a username or a roster pick. You give us a license to show this content as part of the service. We do not take ownership of your content.
       sponsored_drafts_heading: Sponsored drafts (reserved)
       sponsored_drafts_body: "[Reserved: sponsored drafts that award a real prize are a planned feature, not live yet. When we offer a sponsored draft, we will present extra terms for that draft before you enter it.]"
       payment_heading: Payment
@@ -202,7 +202,7 @@ en:
       termination_heading: Suspension and termination
       termination_body: We can suspend or close your account if you break these terms, including for cheating, running more than one account, or abusive behavior. You can stop using the service and close your account at any time.
       law_heading: Governing law and disputes
-      law_body: The law of England and Wales governs these terms. The courts of England and Wales have exclusive jurisdiction over any dispute about these terms or the service.
+      law_body: The law of England and Wales governs these terms. The courts of England and Wales have jurisdiction over any dispute about these terms or the service.
       changes_heading: Changes to these terms
       changes_body: We can update these terms. We will post the updated terms on this page. Your continued use of the service after an update means you accept the new terms.
       contact_heading: How to contact us
