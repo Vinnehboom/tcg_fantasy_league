@@ -86,13 +86,13 @@ RSpec.describe 'Player information notice' do
   end
 
   it 'gives an objection route and says what happens after an objection' do
-    expect(page).to have_content('Write to the contact address above and tell us that you object')
+    expect(page).to have_link('data-subject request form', href: new_data_subject_request_path)
     expect(page).to have_content('we remove you from the site')
     expect(page).to have_content('compelling legitimate grounds')
   end
 
-  it 'says a removal is done by hand, so a later import can bring the data back' do
-    expect(page).to have_content('We do this by hand at the moment')
+  it 'says the request joins a queue, so a later import can bring the data back' do
+    expect(page).to have_content("Your request joins our team's queue for this")
   end
 
   it 'names the ICO and gives a placeholder for any named complaints contact' do
