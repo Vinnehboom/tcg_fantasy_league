@@ -25,6 +25,7 @@ Rails.application.routes.draw do
     resources :tournaments, only: %i[index show update]
     resources :players, only: %i[index show]
     resources :score_modifiers
+    resources :data_subject_requests, only: %i[index show]
 
     namespace :api do
       resources :external_imports, only: :create

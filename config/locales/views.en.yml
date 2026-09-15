@@ -98,6 +98,12 @@ en:
         trigger_tournaments: Import tournaments
         trigger_success: Import started.
         trigger_failure: Failed to start import.
+    data_subject_requests:
+      index:
+        no_requests: No requests found yet.
+      show:
+        mark_actioned: Mark actioned
+        confirm_mark_actioned: Are you sure? This suppresses the player's data everywhere it is shown.
   data_subject_requests:
     new:
       title: Request to erase or object to your data

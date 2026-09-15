@@ -1,0 +1,28 @@
+<div class="bg-primary">
+  <table class="table table-dark table-bordered">
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.player') %></td>
+      <td><%= @data_subject_request.player.name %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.request_type') %></td>
+      <td><%= data_subject_request_type_label(@data_subject_request.request_type) %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.status') %></td>
+      <td><%= data_subject_request_status_label(@data_subject_request.status) %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.contact_email') %></td>
+      <td><%= @data_subject_request.contact_email || '—' %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.identity_proof') %></td>
+      <td><%= @data_subject_request.identity_proof || '—' %></td>
+    </tr>
+    <tr>
+      <td class="fw-bold"><%= t('activerecord.attributes.data_subject_request.created_at') %></td>
+      <td><%= l(@data_subject_request.created_at) %></td>
+    </tr>
+  </table>
+</div>
