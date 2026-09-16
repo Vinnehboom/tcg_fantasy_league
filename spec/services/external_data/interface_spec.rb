@@ -118,7 +118,8 @@ RSpec.describe ExternalData::Interface do
         describe 'when every player in the batch already exists' do
           before do
             players.each do |player|
-              create(:player, **player.instance_values.slice!('external_points', 'season'), game_id: game.id)
+              create(:player, :without_scores, **player.instance_values.slice!('external_points', 'season'),
+                     game_id: game.id)
             end
           end
 

@@ -44,7 +44,7 @@ module ExternalData
         )
       end
 
-      def resolved_player_season(object, record)
+      def resolved_player_season(object:, record:)
         object.send(:player_season, record:)
       end
 
@@ -55,15 +55,15 @@ module ExternalData
 
       it 'resolves the player season of an existing player without a further query' do
         counted = count_queries(pattern: /FROM "player_seasons"/) do
-          resolved_player_season(existing_object, existing_player)
+          resolved_player_season(object: existing_object, record: existing_player)
         end
 
         expect(counted).to eq(0)
-        expect(resolved_player_season(existing_object, existing_player)).to eq(player_season)
+        expect(resolved_player_season(object: existing_object, record: existing_player)).to eq(player_season)
       end
 
       it 'resolves the latest score of an existing player without a further query' do
-        resolved = resolved_player_season(existing_object, existing_player)
+        resolved = resolved_player_season(object: existing_object, record: existing_player)
 
         expect(count_queries(pattern: /FROM "external_scores"/) { resolved.latest_score }).to eq(0)
         expect(resolved.latest_score).to eq(250)
@@ -77,6 +77,42 @@ module ExternalData
         new_object.save!
 
         expect(::Player.find_by(external_id: '/players/2', game_id: game.id).current_score).to eq(300)
+      end
+    end
+
+    describe '#save!, when a suppressed player arrives inside a preloaded batch' do
+      let(:game) { create(:game) }
+      let(:season) { create(:season, game:) }
+      let(:scraped_player) do
+        described_class.new(
+          attributes: { game_id: game.id, external_id: '/players/9', name: 'Scraped Name', country: 'ES',
+                        external_points: 500, season: }
+        )
+      end
+
+      before do
+        create(:player, :suppressed, :without_scores, game:, external_id: '/players/9', name: 'Existing Player',
+                                                      country: 'FR')
+        described_class.preload([scraped_player])
+      end
+
+      it 'records no score' do
+        expect { scraped_player.save! }.not_to change(ExternalScore, :count)
+      end
+
+      it 'creates no player season' do
+        expect { scraped_player.save! }.not_to change(::PlayerSeason, :count)
+      end
+
+      it 'leaves the name and the country of the existing player alone' do
+        scraped_player.save!
+
+        expect(::Player.find_by(external_id: '/players/9', game_id: game.id))
+          .to have_attributes(raw_name: 'Existing Player', country: 'FR')
+      end
+
+      it 'returns false' do
+        expect(scraped_player.save!).to be false
       end
     end
 

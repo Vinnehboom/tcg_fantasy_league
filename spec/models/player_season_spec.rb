@@ -71,6 +71,17 @@ RSpec.describe PlayerSeason do
       end
     end
 
+    context 'when the player season is reloaded after a caller supplied a value' do
+      it 'answers from the score rows again, not from the supplied value' do
+        add_score(10)
+        player_season.latest_score = 99
+
+        player_season.reload
+
+        expect(player_season.latest_score).to eq(10)
+      end
+    end
+
     context 'when a caller has supplied nil' do
       it 'treats the player season as having no score, and reads no score row' do
         add_score(10)

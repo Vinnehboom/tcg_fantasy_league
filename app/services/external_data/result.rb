@@ -8,20 +8,20 @@ module ExternalData
       tournament = objects.first.tournament
       return if tournament.nil?
 
-      players = find_players(objects, tournament)
-      index = find_results(players, tournament)
+      players = find_players(objects:, tournament:)
+      index = find_results(players:, tournament:)
       objects.each do |object|
         object.send(:player_index=, players)
         object.send(:record_index=, index)
       end
     end
 
-    def self.find_players(objects, tournament)
+    def self.find_players(objects:, tournament:)
       ::Player.where(game_id: tournament.game_id, external_id: objects.map(&:player_external_id))
               .index_by { |record| record.external_id.to_s }
     end
 
-    def self.find_results(players, tournament)
+    def self.find_results(players:, tournament:)
       return {} if players.empty?
 
       ::Result.where(tournament_id: tournament.id, player_id: players.values.map(&:id))
@@ -50,6 +50,8 @@ module ExternalData
     end
 
     def instance_attributes
+      # Keep the player and the tournament as objects. An id on its own makes
+      # the required belongs_to validation read the record back, once per row.
       { placement:, player: resolved_player, tournament: }
     end
 
