@@ -28,6 +28,58 @@ module ExternalData
       end
     end
 
+    describe '.preload, for the player season and its latest score' do
+      let(:game) { create(:game) }
+      let(:season) { create(:season, game:) }
+      let(:existing_player) { create(:player, :without_scores, game:, external_id: '/players/1') }
+      let(:player_season) { create(:player_season, player: existing_player, season:) }
+      let(:existing_object) do
+        described_class.new(
+          attributes: { game_id: game.id, external_id: '/players/1', name: 'Scraped', external_points: 300, season: }
+        )
+      end
+      let(:new_object) do
+        described_class.new(
+          attributes: { game_id: game.id, external_id: '/players/2', name: 'Brand New', external_points: 300, season: }
+        )
+      end
+
+      def resolved_player_season(object, record)
+        object.send(:player_season, record:)
+      end
+
+      before do
+        create(:external_score, player_season:, score: 250)
+        described_class.preload([existing_object, new_object])
+      end
+
+      it 'resolves the player season of an existing player without a further query' do
+        counted = count_queries(pattern: /FROM "player_seasons"/) do
+          resolved_player_season(existing_object, existing_player)
+        end
+
+        expect(counted).to eq(0)
+        expect(resolved_player_season(existing_object, existing_player)).to eq(player_season)
+      end
+
+      it 'resolves the latest score of an existing player without a further query' do
+        resolved = resolved_player_season(existing_object, existing_player)
+
+        expect(count_queries(pattern: /FROM "external_scores"/) { resolved.latest_score }).to eq(0)
+        expect(resolved.latest_score).to eq(250)
+      end
+
+      it 'reads no score row while it creates the player season of a brand new player' do
+        expect(count_queries(pattern: /FROM "external_scores"/) { new_object.save! }).to eq(0)
+      end
+
+      it 'still records the score of a brand new player' do
+        new_object.save!
+
+        expect(::Player.find_by(external_id: '/players/2', game_id: game.id).current_score).to eq(300)
+      end
+    end
+
     describe '#save!, when a player already exists and is suppressed' do
       let(:game) { create(:game) }
       let(:season) { create(:season) }

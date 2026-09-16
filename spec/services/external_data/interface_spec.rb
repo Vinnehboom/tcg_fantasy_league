@@ -91,6 +91,34 @@ RSpec.describe ExternalData::Interface do
           it 'looks up the batch of players in one query, not once per player' do
             expect(count_queries(pattern: /FROM "players"/) { interface.update_players }).to eq(1)
           end
+
+          it 'reads no score, because a player season it creates cannot hold one yet' do
+            expect(count_queries(pattern: /FROM "external_scores"/) { interface.update_players }).to eq(0)
+          end
+        end
+
+        describe 'when every player in the batch already exists' do
+          before do
+            players.each do |player|
+              create(:player, **player.instance_values.slice!('external_points', 'season'), game_id: game.id)
+            end
+          end
+
+          it 'looks up the batch of existing players in one query, not once per player' do
+            expect(count_queries(pattern: /FROM "players"/) { interface.update_players }).to eq(1)
+          end
+
+          it 'looks up the batch of player seasons in one query, not once per player' do
+            expect(count_queries(pattern: /FROM "player_seasons"/) { interface.update_players }).to eq(1)
+          end
+
+          it 'reads the latest score of the batch in one query, not once per player' do
+            expect(count_queries(pattern: /FROM "external_scores"/) { interface.update_players }).to eq(1)
+          end
+
+          it 'still appends a score for each player whose value changed' do
+            expect { interface.update_players }.to change(ExternalScore, :count).by(players.length)
+          end
         end
       end
 
