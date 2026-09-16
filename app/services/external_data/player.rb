@@ -4,29 +4,20 @@ module ExternalData
 
     attr_accessor :name, :external_points, :country, :season
 
-    def self.preload(objects)
-      return if objects.empty?
-
-      preload_records(objects)
-      preload_player_seasons(objects)
-    end
-
-    def self.preload_records(objects)
-      found = ::Player.where(game_id: objects.first.game_id, external_id: objects.map(&:external_id))
-                      .index_by { |record| [record.external_id, record.game_id] }
-      objects.each { |object| object.send(:existing_record=, found[[object.external_id, object.game_id]]) }
-    end
-
-    def self.preload_player_seasons(objects)
+    def self.preload_associations(objects)
       seasoned = objects.select(&:season)
-      seasoned.each { |object| object.send(:player_season=, nil) }
+      return if seasoned.empty?
 
-      known = seasoned.select { |object| object.send(:existing_record) }
-      return if known.empty?
+      index = build_player_season_index(seasoned.select { |object| object.send(:existing_record) })
+      seasoned.each { |object| object.send(:player_season_index=, index) }
+    end
 
-      found = find_player_seasons(known)
+    def self.build_player_season_index(objects)
+      return {} if objects.empty?
+
+      found = find_player_seasons(objects)
       preload_latest_scores(found.values)
-      known.each { |object| object.send(:player_season=, found[player_season_key(object)]) }
+      found
     end
 
     def self.find_player_seasons(objects)
@@ -36,10 +27,6 @@ module ExternalData
       ).index_by { |player_season| [player_season.player_id, player_season.season_id] }
     end
 
-    def self.player_season_key(object)
-      [object.send(:existing_record).id, object.season.id]
-    end
-
     def self.preload_latest_scores(player_seasons)
       return if player_seasons.empty?
 
@@ -47,12 +34,12 @@ module ExternalData
       player_seasons.each { |player_season| player_season.latest_score = latest[player_season.id]&.score }
     end
 
-    private_class_method :preload_records, :preload_player_seasons, :preload_latest_scores,
-                         :find_player_seasons, :player_season_key
+    private_class_method :preload_associations, :build_player_season_index, :find_player_seasons,
+                         :preload_latest_scores
 
     private
 
-    attr_writer :player_season
+    attr_accessor :player_season_index
 
     def skip?
       !!existing_record&.suppressed?
@@ -81,9 +68,10 @@ module ExternalData
     end
 
     def player_season(record:)
-      return record.player_seasons.find_or_create_by!(season:) unless defined?(@player_season)
+      return record.player_seasons.find_or_create_by!(season:) unless player_season_index
 
-      @player_season ||= record.player_seasons.create!(season:).tap { |created| created.latest_score = nil }
+      player_season_index[[record.id, season.id]] ||=
+        record.player_seasons.create!(season:).tap { |created| created.latest_score = nil }
     end
 
   end

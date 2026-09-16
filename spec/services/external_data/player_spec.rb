@@ -80,6 +80,32 @@ module ExternalData
       end
     end
 
+    describe '.preload, when the batch repeats an external id' do
+      let(:game) { create(:game) }
+      let(:season) { create(:season, game:) }
+      let(:repeated_objects) do
+        ['First name', 'Second name'].map do |name|
+          described_class.new(
+            attributes: { game_id: game.id, external_id: '/players/3', name:, external_points: 400, season: }
+          )
+        end
+      end
+
+      before { described_class.preload(repeated_objects) }
+
+      it 'creates one player for the batch, not one per object' do
+        expect { repeated_objects.each(&:save!) }.to change(::Player, :count).by(1)
+      end
+
+      it 'creates one player season for the batch, not one per object' do
+        expect { repeated_objects.each(&:save!) }.to change(::PlayerSeason, :count).by(1)
+      end
+
+      it 'records the score once, because the second object sees the first one as unchanged' do
+        expect { repeated_objects.each(&:save!) }.to change(::ExternalScore, :count).by(1)
+      end
+    end
+
     describe '#save!, when a player already exists and is suppressed' do
       let(:game) { create(:game) }
       let(:season) { create(:season) }

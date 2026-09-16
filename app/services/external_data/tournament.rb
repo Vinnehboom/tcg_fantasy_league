@@ -4,14 +4,6 @@ module ExternalData
 
     attr_accessor :name, :starting_date, :country, :format
 
-    def self.preload(objects)
-      return if objects.empty?
-
-      found = ::Tournament.where(game_id: objects.first.game_id, external_id: objects.map(&:external_id))
-                          .index_by { |record| [record.external_id, record.game_id] }
-      objects.each { |object| object.send(:existing_record=, found[[object.external_id, object.game_id]]) }
-    end
-
     private
 
     def db_class
