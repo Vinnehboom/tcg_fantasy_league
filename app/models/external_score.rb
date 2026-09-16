@@ -26,6 +26,12 @@ class ExternalScore < ApplicationRecord
       .where(ranked_scores: { rn: 1 })
   }
 
+  scope :latest_per_player_season, lambda { |player_season_ids|
+    where(player_season_id: player_season_ids)
+      .select('DISTINCT ON (player_season_id) player_season_id, score')
+      .order('player_season_id, created_at DESC, id DESC')
+  }
+
   validates :score, presence: true
 
 end
