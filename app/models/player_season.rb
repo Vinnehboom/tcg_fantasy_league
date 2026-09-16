@@ -15,6 +15,11 @@ class PlayerSeason < ApplicationRecord
     @latest_score = external_scores.order(created_at: :desc, id: :desc).first&.score
   end
 
+  def reload(*)
+    remove_instance_variable(:@latest_score) if defined?(@latest_score)
+    super
+  end
+
   def record_score!(score:)
     return if Integer(score) == latest_score
 

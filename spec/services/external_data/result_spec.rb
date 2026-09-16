@@ -95,6 +95,27 @@ module ExternalData
         end
       end
 
+      describe 'when the placement belongs to a suppressed player, inside a preloaded batch' do
+        let(:scraped_result) { build_result(player_name: 'Scraped Name') }
+
+        before do
+          create(:player, :suppressed, :without_scores, external_id: '/players/9', game:, name: 'Existing Player')
+          described_class.preload([scraped_result])
+        end
+
+        it 'creates no result row' do
+          expect { scraped_result.save! }.not_to change(::Result, :count)
+        end
+
+        it 'creates no duplicate player row' do
+          expect { scraped_result.save! }.not_to change(::Player, :count)
+        end
+
+        it 'returns false' do
+          expect(scraped_result.save!).to be false
+        end
+      end
+
       describe 'when the scraped data cannot produce a valid player' do
         it 'raises instead of silently dropping the result' do
           expect { build_result(player_name: nil).save! }.to raise_error(ActiveRecord::RecordInvalid)
