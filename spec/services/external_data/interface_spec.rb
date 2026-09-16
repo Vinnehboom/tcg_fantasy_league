@@ -97,6 +97,24 @@ RSpec.describe ExternalData::Interface do
           end
         end
 
+        describe 'when the adapter returns the same player twice' do
+          let(:repeated) do
+            [
+              { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791', season: },
+              { name: 'Jodie Predovic', country: 'TF', external_id: '/players/5', external_points: '791', season: }
+            ].map { |attributes| ExternalData::Player.new(attributes:) }
+          end
+          let(:interface) { described_class.new(game:, adapter: fake_adapter(players: repeated)) }
+
+          it 'creates one player row, not one per entry' do
+            expect { interface.update_players }.to change(Player, :count).by(1)
+          end
+
+          it 'creates one player season row, not one per entry' do
+            expect { interface.update_players }.to change(PlayerSeason, :count).by(1)
+          end
+        end
+
         describe 'when every player in the batch already exists' do
           before do
             players.each do |player|

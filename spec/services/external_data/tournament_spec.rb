@@ -27,6 +27,30 @@ module ExternalData
         expect(new_object.send(:existing_record)).to be_nil
       end
     end
+
+    describe '.preload, when the batch repeats an external id' do
+      let(:game) { create(:game) }
+      let(:repeated_objects) do
+        ['First name', 'Second name'].map do |name|
+          described_class.new(
+            attributes: { game_id: game.id, external_id: '/tournaments/3', name:,
+                          starting_date: Faker::Date.forward }
+          )
+        end
+      end
+
+      before { described_class.preload(repeated_objects) }
+
+      it 'creates one tournament for the batch, not one per object' do
+        expect { repeated_objects.each(&:save!) }.to change(::Tournament, :count).by(1)
+      end
+
+      it 'leaves the last name of the batch on that tournament' do
+        repeated_objects.each(&:save!)
+
+        expect(::Tournament.find_by(external_id: '/tournaments/3', game_id: game.id).name).to eq('Second name')
+      end
+    end
   end
 
 end
