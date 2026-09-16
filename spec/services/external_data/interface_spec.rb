@@ -299,6 +299,46 @@ RSpec.describe ExternalData::Interface do
         end
       end
 
+      describe 'when every player of the batch already exists' do
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        before do
+          results.each { |result| create(:player, :without_scores, game:, external_id: result.player_external_id) }
+        end
+
+        it 'looks up the players of the batch in one query, not once per result' do
+          expect(count_queries(pattern: /FROM "players"/) { interface.update_results(tournament:) }).to eq(1)
+        end
+
+        it 'looks up the existing result rows in one query on a second import' do
+          interface.update_results(tournament:)
+
+          expect(count_queries(pattern: /FROM "results"/) { interface.update_results(tournament:) }).to eq(1)
+        end
+
+        it 'still creates a result row for each entry' do
+          expect { interface.update_results(tournament:) }.to change(Result, :count).by(results.length)
+        end
+      end
+
+      describe 'when the adapter returns two results for the same new player' do
+        let(:results) do
+          [
+            { player_external_id: '/players/21', player_name: 'One Player', player_country: 'US', placement: 1 },
+            { player_external_id: '/players/21', player_name: 'One Player', player_country: 'US', placement: 2 }
+          ].map { |attributes| ExternalData::Result.new(attributes:) }
+        end
+        let(:interface) { described_class.new(game:, adapter: fake_adapter(results:)) }
+
+        it 'creates one player row, not one per result' do
+          expect { interface.update_results(tournament:) }.to change(Player, :count).by(1)
+        end
+
+        it 'creates one result row, not one per result' do
+          expect { interface.update_results(tournament:) }.to change(Result, :count).by(1)
+        end
+      end
+
       describe 'when the adapter returns no results' do
         let(:interface) { described_class.new(game:, adapter: fake_adapter(results: [])) }
 
