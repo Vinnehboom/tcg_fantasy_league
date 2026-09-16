@@ -61,44 +61,13 @@ RSpec.describe Player do
     end
   end
 
-  describe '#latest_score' do
-    let(:player) { create(:player, :without_scores) }
-    let(:season_one) do
-      create(:season, game: player.game, label: 'S1', start_date: 2.years.ago, end_date: 13.months.ago)
-    end
-    let(:season_two) { create(:season, game: player.game, label: 'S2', start_date: 1.year.ago, end_date: nil) }
-    let(:player_season_one) { create(:player_season, player:, season: season_one) }
-    let(:player_season_two) { create(:player_season, player:, season: season_two) }
-
-    context 'when no season is given' do
-      it 'returns the most recent score regardless of season' do
-        create(:external_score, player_season: player_season_one, score: 10, created_at: 2.days.ago)
-        latest = create(:external_score, player_season: player_season_two, score: 20, created_at: 1.day.ago)
-
-        expect(player.reload.latest_score).to eq(latest.score)
-      end
-    end
-
-    context 'when a season is given' do
-      it 'returns the most recent score within that season' do
-        create(:external_score, player_season: player_season_one, score: 10, created_at: 2.days.ago)
-        latest = create(:external_score, player_season: player_season_one, score: 20, created_at: 1.day.ago)
-        create(:external_score, player_season: player_season_two, score: 99, created_at: Time.current)
-
-        expect(player.reload.latest_score(season: season_one)).to eq(latest.score)
-      end
-
-      it 'returns nil when the player has no score in that season' do
-        create(:external_score, player_season: player_season_one, score: 10)
-
-        expect(player.reload.latest_score(season: season_two)).to be_nil
-      end
-    end
-  end
-
   describe '#record_score!' do
     let(:player) { create(:player, :without_scores) }
     let(:season) { create(:season, game: player.game) }
+
+    def recorded_score_in(season)
+      player.reload.player_seasons.find_by(season:)&.latest_score
+    end
 
     context 'when the player has no score yet' do
       it 'creates a snapshot' do
@@ -108,7 +77,7 @@ RSpec.describe Player do
       it 'lands the score on the given season' do
         player.record_score!(score: 100, season:)
 
-        expect(player.reload.latest_score(season:)).to eq(100)
+        expect(recorded_score_in(season)).to eq(100)
       end
     end
 
