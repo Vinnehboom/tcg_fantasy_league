@@ -1,6 +1,6 @@
 class DataSubjectRequestPolicy < ApplicationPolicy
 
-  def mark_actioned?
+  def update?
     admin? && record.queued?
   end
 

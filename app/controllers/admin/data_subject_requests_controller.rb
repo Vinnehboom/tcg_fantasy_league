@@ -12,14 +12,20 @@ module Admin
       @data_subject_request = DataSubjectRequest.find(params[:id])
     end
 
-    def mark_actioned
+    def update
       @data_subject_request = DataSubjectRequest.find(params[:id])
       authorize @data_subject_request
-      if @data_subject_request.mark_actioned!
+      if update_params[:status] == 'actioned' && @data_subject_request.mark_actioned!
         redirect_to admin_data_subject_request_path(@data_subject_request), notice: t('.success')
       else
         redirect_to admin_data_subject_request_path(@data_subject_request), alert: t('.failed')
       end
+    end
+
+    private
+
+    def update_params
+      params.require(:data_subject_request).permit(:status)
     end
 
   end

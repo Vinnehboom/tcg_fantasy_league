@@ -6,7 +6,7 @@ RSpec.describe DataSubjectRequestPolicy, type: :policy do
   let(:user) { create(:user) }
   let(:admin) { create(:user, :with_role, role: :admin) }
 
-  permissions :mark_actioned? do
+  permissions :update? do
     context 'when the request is still queued' do
       let(:data_subject_request) { create(:data_subject_request) }
 

@@ -1,7 +1,7 @@
-<% if policy(@data_subject_request).mark_actioned? %>
+<% if policy(@data_subject_request).update? %>
   <div class="d-flex p-2 m-2 w-100 justify-content-end">
-    <%= link_to mark_actioned_admin_data_subject_request_path(@data_subject_request),
-                data: { 'turbo-method': :post, 'turbo-confirm': t('.confirm_mark_actioned') },
+    <%= link_to admin_data_subject_request_path(@data_subject_request, data_subject_request: { status: 'actioned' }),
+                data: { 'turbo-method': :patch, 'turbo-confirm': t('.confirm_mark_actioned') },
                 class: 'btn btn-secondary' do %>
       <%= t('.mark_actioned') %>
     <% end %>
