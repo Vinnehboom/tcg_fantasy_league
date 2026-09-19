@@ -206,7 +206,7 @@ en:
         success: Score modifier successfully deleted.
         failed: Score modifier failed to delete.
     data_subject_requests:
-      mark_actioned:
+      update:
         success: Request marked actioned, and the player's data has been suppressed.
         failed: Could not mark this request actioned.
     api:
