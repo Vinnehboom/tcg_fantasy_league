@@ -177,7 +177,7 @@ en:
         data_subject_request:
           attributes:
             base:
-              contact_email_or_identity_proof_required: Provide a contact email or a description of your proof of identity.
+              contact_email_or_identity_proof_required: Provide a contact email or a link to proof of your identity.
   profiles:
     update:
       success: Profile successfully updated.

@@ -8,7 +8,7 @@
       <%= f.error_notification %>
 
       <%= f.input :player_id, collection: @players,
-                               label_method: ->(player) { "#{player.name} (#{player.game.name})" },
+                               label_method: ->(player) { data_subject_request_player_option_label(player) },
                                value_method: :id,
                                prompt: t('.player_prompt'),
                                label: t('.player_label') %>
@@ -22,7 +22,7 @@
       <p><%= t('.contact_explanation') %></p>
 
       <%= f.input :contact_email %>
-      <%= f.input :identity_proof %>
+      <%= f.input :identity_proof, label: t('.identity_proof_label'), hint: t('.identity_proof_hint') %>
 
       <%= f.button :submit, t('.submit'), class: 'btn btn-success ms-auto' %>
     <% end %>

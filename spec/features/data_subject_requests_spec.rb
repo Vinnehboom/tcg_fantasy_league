@@ -14,11 +14,16 @@ RSpec.describe 'Data-subject request form' do
   end
 
   describe 'create' do
+    def select_player(player)
+      label = "#{player.name} (#{player.game.name}, #{player.country})"
+      select label, from: I18n.t('data_subject_requests.new.player_label')
+    end
+
     it 'queues a request when the requester gives a contact email' do
       player = create(:player, name: 'Ash Ketchum')
 
       visit new_data_subject_request_path
-      select "#{player.name} (#{player.game.name})", from: I18n.t('data_subject_requests.new.player_label')
+      select_player(player)
       fill_in 'data_subject_request_contact_email', with: 'ash@example.com'
       click_button I18n.t('data_subject_requests.new.submit')
 
@@ -31,7 +36,7 @@ RSpec.describe 'Data-subject request form' do
       player = create(:player, name: 'Ash Ketchum')
 
       visit new_data_subject_request_path
-      select "#{player.name} (#{player.game.name})", from: I18n.t('data_subject_requests.new.player_label')
+      select_player(player)
       fill_in 'data_subject_request_identity_proof', with: 'My passport number is 123'
       click_button I18n.t('data_subject_requests.new.submit')
 
@@ -43,7 +48,7 @@ RSpec.describe 'Data-subject request form' do
       player = create(:player, name: 'Ash Ketchum')
 
       visit new_data_subject_request_path
-      select "#{player.name} (#{player.game.name})", from: I18n.t('data_subject_requests.new.player_label')
+      select_player(player)
       click_button I18n.t('data_subject_requests.new.submit')
 
       expect(page).to have_content(I18n.t('data_subject_requests.create.failed'))
