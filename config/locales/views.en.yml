@@ -110,7 +110,9 @@ en:
       intro: Use this form if you are a tracked player and want us to stop using your data, or erase it. We first need enough information to find your player row and a way to reach you back.
       player_label: Which player are you?
       player_prompt: Select your player
-      contact_explanation: Give us a contact email, or describe proof of your identity, so we can follow up. One of the two is required.
+      contact_explanation: Give us a contact email, or a link to proof of your identity, so we can follow up. One of the two is required.
+      identity_proof_label: Link to proof of identity
+      identity_proof_hint: Paste a link to a Dropbox, Google Drive, or similar share you control. We do not accept file uploads on this form.
       submit: Submit request
   pages:
     landing:
