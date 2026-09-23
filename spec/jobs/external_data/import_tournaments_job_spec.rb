@@ -46,7 +46,7 @@ module ExternalData
     describe 'against an injected synthetic adapter (the demo composition roots\' path)' do
       let(:game) { create(:game) }
       let(:shape) do
-        ExternalData::Synthetic::Shape.new(
+        Demo::Shape.new(
           score_range: (200..1600), score_curve: Demo::Curves::LADDER,
           player_count: 4, tournament_count: 3
         )

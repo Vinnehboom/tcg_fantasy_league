@@ -14,7 +14,7 @@ RSpec.describe Demo::Games do
 
     it 'gives every entry a Shape, a history curve, and at least one past tournament' do
       entries.each do |entry|
-        expect(entry.shape).to be_a(ExternalData::Synthetic::Shape)
+        expect(entry.shape).to be_a(Demo::Shape)
         expect(entry.history_curve).to respond_to(:call)
         expect(entry.past_tournament_count).to be_positive
       end

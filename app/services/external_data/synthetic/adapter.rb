@@ -4,12 +4,12 @@ module ExternalData
 
     # A game-agnostic adapter that makes no HTTP request: plausible,
     # seed-reproducible data instead. The caller injects the score shape
-    # (see Shape) and the seed.
+    # (see Demo::Shape) and the seed.
     class Adapter
 
       DEFAULT_SEED = 924_601
-      DEFAULT_SHAPE = Shape.new(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
-                                player_count: 64, tournament_count: 3)
+      DEFAULT_SHAPE = Demo::Shape.new(score_range: (200..1600), score_curve: Demo::Curves::LADDER,
+                                      player_count: 64, tournament_count: 3)
       MIN_DAYS_OUT = 7
       RESULTS_PER_TOURNAMENT = 32
       JITTER_SPAN = 12
