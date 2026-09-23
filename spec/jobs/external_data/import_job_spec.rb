@@ -206,6 +206,26 @@ module ExternalData
           expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::HttpError)
         end
       end
+
+      context 'when an adapter is injected' do
+        let(:perform_import) { -> { job_class.perform_now(game_id: game.id, adapter: fake_adapter(players: [])) } }
+
+        context 'when the fetch times out' do
+          let(:error) { ExternalData::JsonApiClient::TimeoutError.new(url: 'https://example.com') }
+
+          it 'propagates the error instead of retrying, since the adapter cannot survive re-enqueue' do
+            expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::TimeoutError)
+          end
+        end
+
+        context 'when the fetch is rate limited' do
+          let(:error) { ExternalData::JsonApiClient::RateLimitError.new(status: 429, url: 'https://example.com') }
+
+          it 'propagates the error instead of retrying, since the adapter cannot survive re-enqueue' do
+            expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::RateLimitError)
+          end
+        end
+      end
     end
   end
 
