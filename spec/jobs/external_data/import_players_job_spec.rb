@@ -86,7 +86,7 @@ module ExternalData
       let(:game) { create(:game) }
       let(:season) { create(:season, game:) }
       let(:shape) do
-        ExternalData::Synthetic::Shape.new(
+        Demo::Shape.new(
           score_range: (200..1600), score_curve: Demo::Curves::LADDER,
           player_count: 5, tournament_count: 2
         )

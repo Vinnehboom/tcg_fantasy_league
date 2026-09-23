@@ -11,7 +11,7 @@ module Demo
         name: 'Pokémon TCG',
         base_uri: 'https://limitlesstcg.com',
         season_label: '2026',
-        shape: ExternalData::Synthetic::Shape.new(
+        shape: Demo::Shape.new(
           score_range: (200..1600), score_curve: Demo::Curves::LADDER,
           player_count: 64, tournament_count: 3
         ),
@@ -23,7 +23,7 @@ module Demo
         name: 'Riftbound',
         base_uri: 'https://example.com/riftbound',
         season_label: '2026',
-        shape: ExternalData::Synthetic::Shape.new(
+        shape: Demo::Shape.new(
           score_range: (1000..1600), score_curve: Demo::Curves::ELO_BAND,
           player_count: 64, tournament_count: 3
         ),

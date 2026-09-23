@@ -6,7 +6,7 @@ RSpec.describe ExternalData::Synthetic::Adapter do
   let(:game) { create(:game) }
 
   def shape_for(score_range:, score_curve:, player_count: 50, tournament_count: 3)
-    ExternalData::Synthetic::Shape.new(score_range:, score_curve:, player_count:, tournament_count:)
+    Demo::Shape.new(score_range:, score_curve:, player_count:, tournament_count:)
   end
 
   it_behaves_like 'an external data adapter'
