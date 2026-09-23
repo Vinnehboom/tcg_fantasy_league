@@ -16,7 +16,14 @@ module ExternalData
     def perform(game_id:, adapter: nil)
       @game_id = game_id
       @adapter = adapter
+      @adapter_injected = !adapter.nil?
       run_import
+    end
+
+    def retry_job(**options)
+      return super unless @adapter_injected
+
+      raise options[:error] || RuntimeError.new("#{self.class.name}: retry requested with an injected adapter")
     end
 
     private
