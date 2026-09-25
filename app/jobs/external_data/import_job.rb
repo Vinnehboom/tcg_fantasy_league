@@ -15,15 +15,14 @@ module ExternalData
     # only works with #perform_now; #perform_later must pass game_id: only.
     def perform(game_id:, adapter: nil)
       @game_id = game_id
-      @adapter = adapter
-      @adapter_injected = !adapter.nil?
+      @injected_adapter = adapter
       run_import
     end
 
     def retry_job(**options)
-      return super unless @adapter_injected
+      return super unless @injected_adapter
 
-      raise options[:error] || RuntimeError.new("#{self.class.name}: retry requested with an injected adapter")
+      raise options.fetch(:error)
     end
 
     private
@@ -53,7 +52,7 @@ module ExternalData
     end
 
     def adapter
-      @adapter ||= game.adapter
+      @adapter ||= @injected_adapter || game.adapter
     end
 
     def kind

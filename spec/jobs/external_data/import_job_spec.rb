@@ -216,6 +216,10 @@ module ExternalData
           it 'propagates the error instead of retrying, since the adapter cannot survive re-enqueue' do
             expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::TimeoutError)
           end
+
+          it 'does not enqueue a retry' do
+            expect { suppress(StandardError) { perform_import.call } }.not_to have_enqueued_job(job_class)
+          end
         end
 
         context 'when the fetch is rate limited' do
@@ -223,6 +227,10 @@ module ExternalData
 
           it 'propagates the error instead of retrying, since the adapter cannot survive re-enqueue' do
             expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::RateLimitError)
+          end
+
+          it 'does not enqueue a retry' do
+            expect { suppress(StandardError) { perform_import.call } }.not_to have_enqueued_job(job_class)
           end
         end
       end
