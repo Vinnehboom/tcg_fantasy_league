@@ -4,7 +4,7 @@ module ExternalData
 
     def perform(tournament_id:, adapter: nil)
       @tournament_id = tournament_id
-      @adapter = adapter
+      @injected_adapter = adapter
       run_import
     end
 

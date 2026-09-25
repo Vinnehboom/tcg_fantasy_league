@@ -99,6 +99,21 @@ module ExternalData
       end
     end
 
+    describe 'retry behavior when an adapter is injected' do
+      let(:tournament) { create(:tournament, game: create(:game, :ptcg), results_source_id: '0070') }
+      let(:adapter) { instance_double(ExternalData::Synthetic::Adapter) }
+      let(:perform_import) { -> { described_class.perform_now(tournament_id: tournament.id, adapter:) } }
+
+      before do
+        allow(adapter).to receive(:field_size).with(tournament:)
+                                              .and_raise(ExternalData::JsonApiClient::TimeoutError.new(url: 'https://example.com'))
+      end
+
+      it 'propagates the error instead of retrying, since the adapter cannot survive re-enqueue' do
+        expect { perform_import.call }.to raise_error(ExternalData::JsonApiClient::TimeoutError)
+      end
+    end
+
     describe 'against an injected synthetic adapter (the demo composition roots\' path)' do
       let(:game) { create(:game) }
       let(:season) { create(:season, game:) }
