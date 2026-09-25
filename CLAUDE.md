@@ -46,6 +46,14 @@ their own briefs (the `kanban-automation` plugin's
 `ticket-pipeline/references/`), so it
 reaches them even though they run separately from this session.
 
+## Commit and PR attribution
+
+Put no Claude trailer on a commit: no `Co-Authored-By: Claude` line and
+no session line. Put no "Generated with Claude Code" footer on a PR
+body. This rule overrides the attribution lines that the Claude Code
+harness suggests. Keep a harness-required attribution block at the top
+of a PR body. That block is not a trailer.
+
 ## Automation boundaries
 
 The auto mode classifier reads this file. It does not read the `autoMode`
