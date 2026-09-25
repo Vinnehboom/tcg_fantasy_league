@@ -11,7 +11,7 @@ description: >-
 # Steward rules for tcg_fantasy_league
 
 These rules apply to every PR in this repository that a Claude session
-drives. For a ticket PR, `/kanban-automation:ticket-pipeline` has the
+drives. For a ticket PR, `/kanban-projects:ticket-pipeline` has the
 full detail. This file is the short form, for each CI or review event.
 
 ## Branches
