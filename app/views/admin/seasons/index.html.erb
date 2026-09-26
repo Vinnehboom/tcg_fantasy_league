@@ -1,5 +1,11 @@
 <h2 class="mb-3"><%= t('.title', game: @game.name) %></h2>
 
+<% if policy(:season).new? %>
+  <div class="d-flex p-2 m-2 w-100 justify-content-end">
+    <%= link_to t('.add'), new_admin_game_season_path(@game), class: 'btn btn-success' %>
+  </div>
+<% end %>
+
 <% if @seasons.any? %>
   <table class="table table-dark table-striped rounded-2 overflow-hidden">
     <thead>

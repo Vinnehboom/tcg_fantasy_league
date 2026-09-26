@@ -28,4 +28,33 @@ RSpec.describe 'Admin seasons' do
       end
     end
   end
+
+  describe 'new' do
+    it 'creates an open season for a game from a label and a start date' do
+      game = create(:game, id: 'RIFT')
+
+      visit admin_game_seasons_path(game)
+      click_link 'New season'
+      fill_in 'season_label', with: 'Riftbound 1'
+      fill_in 'season_start_date', with: '2026-01-01'
+      click_button 'Create Season'
+
+      expect(page).to have_content('Season successfully created.')
+      within('tr', text: 'Riftbound 1') do
+        expect(page).to have_css('td', exact_text: 'Open')
+      end
+    end
+
+    it 'refuses a second open season for the same game' do
+      game = create(:game, :ptcg)
+      create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: nil)
+
+      visit new_admin_game_season_path(game)
+      fill_in 'season_label', with: 'Pokemon 2027'
+      fill_in 'season_start_date', with: '2026-09-01'
+      click_button 'Create Season'
+
+      expect(page).to have_content('overlaps an existing season for this game')
+    end
+  end
 end

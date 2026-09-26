@@ -205,6 +205,10 @@ en:
       destroy:
         success: Score modifier successfully deleted.
         failed: Score modifier failed to delete.
+    seasons:
+      create:
+        success: Season successfully created.
+        failed: Season failed to save.
     data_subject_requests:
       update:
         success: Request marked actioned, and the player's data has been suppressed.
