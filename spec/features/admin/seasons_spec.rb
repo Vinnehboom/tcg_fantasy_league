@@ -17,7 +17,7 @@ RSpec.describe 'Admin seasons' do
     end
 
     it 'lists the seasons of a Riftbound game, with an open season shown as open' do
-      game = create(:game, id: 'RIFT')
+      game = create(:game, :rift)
       create(:season, game:, label: 'Riftbound 1', start_date: Date.new(2026, 1, 1), end_date: nil)
 
       visit admin_game_seasons_path(game)
@@ -31,7 +31,7 @@ RSpec.describe 'Admin seasons' do
 
   describe 'new' do
     it 'creates an open season for a game from a label and a start date' do
-      game = create(:game, id: 'RIFT')
+      game = create(:game, :rift)
 
       visit admin_game_seasons_path(game)
       click_link 'New season'

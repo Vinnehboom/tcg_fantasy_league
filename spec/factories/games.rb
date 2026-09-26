@@ -7,5 +7,9 @@ FactoryBot.define do
     trait :ptcg do
       id { 'PTCG' }
     end
+
+    trait :rift do
+      id { 'RIFT' }
+    end
   end
 end
