@@ -21,7 +21,9 @@ Rails.application.routes.draw do
       post :complete, on: :member
     end
     resources :external_requests, only: %i[index show]
-    resources :games, only: %i[index show], constraints: { id: %r{[^/]+} }
+    resources :games, only: %i[index show], constraints: { id: %r{[^/]+} } do
+      resources :seasons, only: %i[index new create edit update]
+    end
     resources :tournaments, only: %i[index show update]
     resources :players, only: %i[index show]
     resources :score_modifiers
