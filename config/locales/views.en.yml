@@ -102,8 +102,11 @@ en:
     seasons:
       index:
         title: "%{game} seasons"
+        add: New season
         no_seasons: This game has no seasons yet.
         open: Open
+      new:
+        title: "New %{game} season"
     data_subject_requests:
       index:
         no_requests: No requests found yet.
