@@ -11,6 +11,8 @@
   </tr>
 </table>
 
+<%= link_to t('.seasons'), admin_game_seasons_path(@game), class: 'btn btn-primary m-2' %>
+
 <div class="p-2 m-2"
      data-controller="external-import-trigger"
      data-external-import-trigger-url-value="<%= admin_api_external_imports_path %>"

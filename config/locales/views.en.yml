@@ -98,6 +98,12 @@ en:
         trigger_tournaments: Import tournaments
         trigger_success: Import started.
         trigger_failure: Failed to start import.
+        seasons: Seasons
+    seasons:
+      index:
+        title: "%{game} seasons"
+        no_seasons: This game has no seasons yet.
+        open: Open
     data_subject_requests:
       index:
         no_requests: No requests found yet.
