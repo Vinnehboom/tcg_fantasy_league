@@ -24,7 +24,7 @@ module Admin
 
         it 'lists only the seasons of that game' do
           create(:season, game:, label: 'Pokemon 2026')
-          create(:season, game: create(:game, id: 'RIFT'), label: 'Riftbound 1')
+          create(:season, game: create(:game, :rift), label: 'Riftbound 1')
 
           get admin_game_seasons_path(game)
 
@@ -113,7 +113,7 @@ module Admin
       context 'when the season belongs to another game' do
         it 'is not found' do
           sign_in admin
-          other_season = create(:season, game: create(:game, id: 'RIFT'))
+          other_season = create(:season, game: create(:game, :rift))
 
           get edit_admin_game_season_path(game, other_season)
 
