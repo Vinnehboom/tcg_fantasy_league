@@ -68,6 +68,11 @@ These actions are normal work for this repository, not unusual events:
   repository except `main` and `master`. The `/kanban-cycle` orchestrator
   rebases each open pull request branch onto a newer default branch tip.
   Then it force-pushes the result. This happens every cycle.
+- A push to the `evidence` branch of this repository. The Gatekeeper
+  of `/ticket-pipeline` commits each round of UI capture files there with
+  `scripts/pr_evidence/publish.sh`, and the ticket PR body embeds them.
+  The branch never merges into `main`. The script only adds commits and
+  never force-pushes.
 - A Notion write to the kanban board, to a ticket card on that board, or
   to a page named in `.claude/knowledge-base.json` or
   `.claude/coding-style.json`. The tools are `notion-update-page`,
