@@ -1,0 +1,11 @@
+<h2 class="mb-3"><%= t('.title', game: @game.name) %></h2>
+
+<div class="border-3 border border-light rounded-2 shadow p-3">
+  <%= simple_form_for @season, url: admin_game_season_path(@game, @season) do |f| %>
+    <%= f.input :label %>
+    <%= f.input :start_date, as: :date, html5: true, disabled: true %>
+    <%= f.input :end_date, as: :date, html5: true %>
+
+    <%= f.button :submit, class: "btn btn-success ms-auto" %>
+  <% end %>
+</div>

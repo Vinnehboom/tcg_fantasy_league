@@ -13,6 +13,7 @@
         <th><%= t('activerecord.attributes.season.label') %></th>
         <th><%= t('activerecord.attributes.season.start_date') %></th>
         <th><%= t('activerecord.attributes.season.end_date') %></th>
+        <th><%= t('views.tables.actions') %></th>
       </tr>
     </thead>
     <tbody>
@@ -21,6 +22,11 @@
           <td><%= season.label %></td>
           <td><%= l(season.start_date) %></td>
           <td><%= season.end_date ? l(season.end_date) : t('.open') %></td>
+          <td>
+            <% if policy(season).edit? %>
+              <%= link_to t('views.tables.edit'), edit_admin_game_season_path(@game, season), class: 'text-light text-opacity-75' %>
+            <% end %>
+          </td>
         </tr>
       <% end %>
     </tbody>
