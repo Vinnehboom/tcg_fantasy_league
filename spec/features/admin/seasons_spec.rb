@@ -57,4 +57,27 @@ RSpec.describe 'Admin seasons' do
       expect(page).to have_content('overlaps an existing season for this game')
     end
   end
+
+  describe 'edit' do
+    it 'closes the open season, then opens the next one' do
+      game = create(:game, :ptcg)
+      create(:season, game:, label: 'Pokemon 2026', start_date: Date.new(2025, 9, 1), end_date: nil)
+
+      visit admin_game_seasons_path(game)
+      within('tr', text: 'Pokemon 2026') { click_link 'Edit' }
+      fill_in 'season_end_date', with: '2026-08-31'
+      click_button 'Update Season'
+      click_link 'New season'
+      fill_in 'season_label', with: 'Pokemon 2027'
+      fill_in 'season_start_date', with: '2026-09-01'
+      click_button 'Create Season'
+
+      within('tr', text: 'Pokemon 2026') do
+        expect(page).to have_css('td', exact_text: '31-08-2026')
+      end
+      within('tr', text: 'Pokemon 2027') do
+        expect(page).to have_css('td', exact_text: 'Open')
+      end
+    end
+  end
 end

@@ -7,7 +7,7 @@ RSpec.describe SeasonPolicy, type: :policy do
   let(:admin) { create(:user, :with_role, role: :admin) }
   let(:season) { create(:season) }
 
-  permissions :new?, :create? do
+  permissions :new?, :create?, :edit?, :update? do
     it { is_expected.not_to permit(user, season) }
     it { is_expected.to permit(admin, season) }
   end

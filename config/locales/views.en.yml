@@ -107,6 +107,8 @@ en:
         open: Open
       new:
         title: "New %{game} season"
+      edit:
+        title: "Edit %{game} season"
     data_subject_requests:
       index:
         no_requests: No requests found yet.

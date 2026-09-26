@@ -209,6 +209,9 @@ en:
       create:
         success: Season successfully created.
         failed: Season failed to save.
+      update:
+        success: Season successfully updated.
+        failed: Season failed to update.
     data_subject_requests:
       update:
         success: Request marked actioned, and the player's data has been suppressed.
