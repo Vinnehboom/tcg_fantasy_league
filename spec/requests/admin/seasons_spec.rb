@@ -100,6 +100,86 @@ module Admin
         end
       end
     end
+
+    describe '#edit' do
+      it 'renders the edit template' do
+        sign_in admin
+
+        get edit_admin_game_season_path(game, create(:season, game:))
+
+        expect(response).to render_template('admin/seasons/edit')
+      end
+
+      context 'when the season belongs to another game' do
+        it 'is not found' do
+          sign_in admin
+          other_season = create(:season, game: create(:game, id: 'RIFT'))
+
+          get edit_admin_game_season_path(game, other_season)
+
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+    end
+
+    describe '#update' do
+      let(:season) { create(:season, game:, label: '2026', start_date: Date.new(2025, 9, 1), end_date: nil) }
+
+      before do
+        sign_in admin
+      end
+
+      context 'with an end date on or after the start date' do
+        let(:params) { { season: { end_date: '2026-08-31' } } }
+
+        it 'closes the season' do
+          patch(admin_game_season_path(game, season), params:)
+
+          expect(season.reload.end_date).to eq(Date.new(2026, 8, 31))
+        end
+
+        it 'goes back to the seasons of the game' do
+          patch(admin_game_season_path(game, season), params:)
+
+          expect(response).to redirect_to(admin_game_seasons_path(game))
+        end
+      end
+
+      context 'with an end date before the start date' do
+        let(:params) { { season: { end_date: '2025-08-31' } } }
+
+        it 'keeps the season open' do
+          patch(admin_game_season_path(game, season), params:)
+
+          expect(season.reload.end_date).to be_nil
+        end
+
+        it 'shows the form again with the date error' do
+          patch(admin_game_season_path(game, season), params:)
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response.body).to include('must be on or after the start date')
+        end
+      end
+
+      context 'with a blank end date on a closed season' do
+        it 'opens the season again' do
+          season.update!(end_date: Date.new(2026, 8, 31))
+
+          patch admin_game_season_path(game, season), params: { season: { end_date: '' } }
+
+          expect(season.reload.end_date).to be_nil
+        end
+      end
+
+      context 'with a new start date' do
+        it 'keeps the original start date' do
+          patch admin_game_season_path(game, season), params: { season: { label: '2026', start_date: '2026-01-01' } }
+
+          expect(season.reload.start_date).to eq(Date.new(2025, 9, 1))
+        end
+      end
+    end
   end
 
 end

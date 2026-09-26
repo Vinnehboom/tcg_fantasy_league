@@ -13,6 +13,11 @@ module Admin
       authorize @season
     end
 
+    def edit
+      @season = @game.seasons.find(params[:id])
+      authorize @season
+    end
+
     def create
       @season = @game.seasons.new(create_params)
       authorize @season
@@ -24,6 +29,17 @@ module Admin
       end
     end
 
+    def update
+      @season = @game.seasons.find(params[:id])
+      authorize @season
+      if @season.update(update_params)
+        redirect_to admin_game_seasons_path(@game), notice: t('.success')
+      else
+        flash.now[:error] = t('.failed')
+        render :edit, status: :unprocessable_content
+      end
+    end
+
     private
 
     def set_game
@@ -32,6 +48,10 @@ module Admin
 
     def create_params
       params.require(:season).permit(:label, :start_date, :end_date)
+    end
+
+    def update_params
+      params.require(:season).permit(:label, :end_date)
     end
 
   end
