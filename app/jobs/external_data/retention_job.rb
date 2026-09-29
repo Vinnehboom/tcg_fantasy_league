@@ -4,9 +4,11 @@ module ExternalData
 
     DEFAULT_RETENTION_HOURS = 24
     MINIMUM_RETENTION_HOURS = 1
+    RETENTION_DAYS = 90
 
     def perform
       ExternalRequest.with_discarded.discarded.delete_all
+      ExternalRequest.where(created_at: ...RETENTION_DAYS.days.ago).delete_all
       ::Game.find_each { |game| erase_expired_response_bodies(game:) }
     end
 

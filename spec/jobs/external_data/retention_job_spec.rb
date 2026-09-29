@@ -83,6 +83,60 @@ module ExternalData
         end
       end
 
+      context 'when a request is older than the days the log keeps an entry' do
+        let(:request) { aged_request(age: described_class::RETENTION_DAYS.days + 1.day) }
+
+        before do
+          request
+          run_job
+        end
+
+        it 'removes the row from the database' do
+          expect(ExternalRequest.find_by(id: request.id)).to be_nil
+        end
+      end
+
+      context 'when a request is inside the days the log keeps an entry' do
+        let(:request) { aged_request(age: (described_class::RETENTION_DAYS - 1).days) }
+
+        before do
+          request
+          run_job
+        end
+
+        it 'keeps the row in the database' do
+          expect(ExternalRequest.find_by(id: request.id)).to be_present
+        end
+      end
+
+      context 'when a request sits exactly on the edge of the days the log keeps an entry' do
+        let(:request) { aged_request(age: described_class::RETENTION_DAYS.days) }
+
+        before do
+          freeze_time
+          request
+          run_job
+        end
+
+        it 'keeps the row in the database' do
+          expect(ExternalRequest.find_by(id: request.id)).to be_present
+        end
+      end
+
+      context 'when a request is one second past the edge of the days the log keeps an entry' do
+        let(:request) { aged_request(age: described_class::RETENTION_DAYS.days + 1.second) }
+
+        before do
+          freeze_time
+          request
+          run_job
+        end
+
+        it 'removes the row from the database' do
+          expect(ExternalRequest.find_by(id: request.id)).to be_nil
+        end
+      end
+
       context 'when a request is discarded' do
         let(:request) { create(:external_request, :discarded, game:, response_body: raw_response) }
 
