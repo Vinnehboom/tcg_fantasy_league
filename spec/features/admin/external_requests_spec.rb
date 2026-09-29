@@ -27,5 +27,14 @@ RSpec.describe 'Admin external requests' do
       expect(page).to have_content('Players')
       expect(page).to have_content(external_request.source_url)
     end
+
+    it 'shows no response body' do
+      external_request = create(:external_request, :success, game:)
+
+      visit admin_external_request_path(external_request)
+
+      expect(page).to have_content(external_request.source_url)
+      expect(page).to have_no_content('Response body')
+    end
   end
 end
