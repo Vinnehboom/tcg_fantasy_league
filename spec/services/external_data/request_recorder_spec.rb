@@ -15,9 +15,8 @@ module ExternalData
 
       context 'when the fetch succeeds' do
         subject(:record) do
-          described_class.call(game:, kind: :tournaments, source_url: 'https://example.com/tournaments') do |request|
+          described_class.call(game:, kind: :tournaments, source_url: 'https://example.com/tournaments') do |_request|
             travel(5.seconds)
-            request.response_body = { 'players' => [] }
             fetch_outcome(records_processed: 12, requestable: tournament)
           end
         end
@@ -48,10 +47,6 @@ module ExternalData
 
         it 'records the fetch against its requestable' do
           expect(record.requestable).to eq(tournament)
-        end
-
-        it 'persists the response body the block set' do
-          expect(record.reload.response_body).to eq({ 'players' => [] })
         end
 
         it 'returns the recorded request to the caller' do
@@ -136,9 +131,8 @@ module ExternalData
 
       context 'when the fetch raises' do
         subject(:record) do
-          described_class.call(game:, kind: :players, source_url: 'https://example.com/players') do |request|
+          described_class.call(game:, kind: :players, source_url: 'https://example.com/players') do |_request|
             travel(3.seconds)
-            request.response_body = { 'raw' => 'not found' }
             raise ArgumentError, 'boom'
           end
         end
@@ -161,90 +155,8 @@ module ExternalData
           expect(ExternalRequest.last.duration_seconds).to eq(3)
         end
 
-        it 'persists the response body set before the raise' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.response_body).to eq({ 'raw' => 'not found' })
-        end
-
         it 'reraises the error to the caller' do
           expect { record }.to raise_error(ArgumentError, 'boom')
-        end
-      end
-
-      context 'when the block sets a response body that fails to serialize and raises' do
-        subject(:record) do
-          described_class.call(game:, kind: :players, source_url: 'https://example.com/players') do |request|
-            travel(6.seconds)
-            request.response_body = { 'raw' => "\xFF\xFE".dup.force_encoding('UTF-8') }
-            raise ArgumentError, 'boom'
-          end
-        end
-
-        it 'still closes the row as a failure instead of leaving it running' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.status).to eq('failure')
-        end
-
-        it 'stores the original error, not a JSON serialization error' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.error).to eq('ArgumentError: boom')
-        end
-
-        it 'records when the request finished' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.finished_at).not_to be_nil
-        end
-
-        it 'does not persist the unserializable response body' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.response_body).to be_nil
-        end
-
-        it 'reraises the original error to the caller, not the JSON serialization error' do
-          expect { record }.to raise_error(ArgumentError, 'boom')
-        end
-      end
-
-      context 'when the block sets a response body that fails to serialize but the fetch otherwise succeeds' do
-        subject(:record) do
-          described_class.call(game:, kind: :players, source_url: 'https://example.com/players') do |request|
-            travel(7.seconds)
-            request.response_body = { 'raw' => "\xFF\xFE".dup.force_encoding('UTF-8') }
-            fetch_outcome(records_processed: 9)
-          end
-        end
-
-        it 'still closes the row instead of leaving it running' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.status).to eq('failure')
-        end
-
-        it 'stores the JSON serialization error that mark_success hit' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.error).to include('JSON::GeneratorError')
-        end
-
-        it 'records when the request finished' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.finished_at).not_to be_nil
-        end
-
-        it 'does not persist the unserializable response body' do
-          suppress(StandardError) { record }
-
-          expect(ExternalRequest.last.response_body).to be_nil
-        end
-
-        it 'reraises the serialization error to the caller' do
-          expect { record }.to raise_error(JSON::GeneratorError)
         end
       end
 

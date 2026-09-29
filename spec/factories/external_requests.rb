@@ -9,7 +9,6 @@ FactoryBot.define do
       status { :success }
       records_processed { rand(1..500) }
       finished_at { Time.current }
-      response_body { { 'count' => records_processed } }
     end
 
     trait :failure do

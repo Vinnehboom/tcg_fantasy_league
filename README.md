@@ -54,9 +54,11 @@ To add the demo dataset, run this command:
 rake demo:seed
 ```
 
-This command is additive and idempotent. Run it more than once. It adds no
-duplicate rows. It also refreshes each game's upcoming tournament dates, so
-they stay a valid number of days in the future.
+This command is additive. You can run it more than once. A second run adds no
+duplicate players, tournaments, drafts or scores. Each run adds one entry to the
+import log for each import, because the import log records every import. It
+also refreshes each game's upcoming tournament dates, so they stay a valid
+number of days in the future.
 
 CAUTION: `rake demo:reseed` erases every table in the database, including
 the users table. To reset the database and reseed it, run this command:

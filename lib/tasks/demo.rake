@@ -1,5 +1,6 @@
 namespace :demo do
-  desc 'Seed the demo dataset: synthetic players, tournaments, drafts and history. Additive and idempotent.'
+  desc 'Seed the demo dataset: synthetic players, tournaments, drafts and history. Additive. ' \
+       'A second run adds no domain rows, but it adds one import log entry for each import.'
   task seed: :environment do
     Demo::Seeder.call
     Demo::History.call

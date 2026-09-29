@@ -54,16 +54,16 @@ RSpec.describe 'Player information notice' do
     expect(page).to have_content('is still being decided and will be confirmed here before launch')
   end
 
-  it 'states how long it keeps the raw response of an import' do
-    expect(page).to have_content('We keep the raw response for 24 hours after the import')
+  it 'states that the import log holds no player names and no results' do
+    expect(page).to have_content('The log holds no names and no results of players, so it holds nothing about you')
   end
 
-  it 'states how often it erases an expired raw response' do
-    expect(page).to have_content('A job that runs every hour then erases the raw response')
+  it 'states how long it keeps an import log entry' do
+    expect(page).to have_content('We keep each log entry for 90 days after the import')
   end
 
-  it 'names the same window the retention job applies by default' do
-    expect(page).to have_content("for #{ExternalData::RetentionJob::DEFAULT_RETENTION_HOURS} hours after the import")
+  it 'names the same window the retention job applies' do
+    expect(page).to have_content("for #{ExternalData::RetentionJob::RETENTION_DAYS} days after the import")
   end
 
   it 'gives a placeholder for whether data transfers outside the UK' do

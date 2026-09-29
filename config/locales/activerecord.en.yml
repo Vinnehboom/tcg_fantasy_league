@@ -101,7 +101,6 @@ en:
         started_at: Started at
         finished_at: Finished at
         error: Error
-        response_body: Response body
         source_url: Source URL
         discarded_at: Discarded at
         requestable: Requestable
