@@ -1,6 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe Demo::Seeder do
+  def import_kinds_per_game
+    %i[players tournaments]
+  end
+
+  def imports_per_call
+    Demo::Games::ALL.length * import_kinds_per_game.length
+  end
+
   describe '.call' do
     context 'when Rails.env is production' do
       before { allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production')) }
@@ -57,6 +65,12 @@ RSpec.describe Demo::Seeder do
       end.not_to(change do
         [Game.count, Season.count, Player.count, ExternalScore.count, ScoreModifier.count, PlayerSeasonModifier.count]
       end)
+    end
+
+    it 'records one import log entry for each import on every call' do
+      described_class.call
+
+      expect { described_class.call }.to change(ExternalRequest, :count).by(imports_per_call)
     end
 
     it 'creates one Multiplier and one Bonus, covering both score modifier subtypes' do
