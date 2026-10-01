@@ -1,0 +1,14 @@
+{
+  "name": "meal-planner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Recipe, pantry and weekly shopping planner backed by Notion",
+  "type": "module",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "setup:notion": "node bin/setup-notion.js"
+  }
+}
