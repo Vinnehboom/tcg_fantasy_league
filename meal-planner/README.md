@@ -51,27 +51,84 @@ you erase this file, the next setup creates three more databases.
 
 ## What works now
 
-The status page. It shows whether the token is set, whether the three databases exist,
+Recipes. You can add a recipe, read your recipes back from Notion, and see what the app
+understood.
+
+The status page shows whether the token is set, whether the three databases exist,
 whether Notion answers, and how old the cache is.
+
+### Add a recipe
+
+1. Open `http://localhost:3000/recipes`.
+2. Select **Add a recipe**.
+3. Paste the whole recipe into the first box.
+4. Select **Read it into the form**.
+5. Correct the name, the ingredients and the instructions.
+6. Select **Save to Notion**.
+
+The app writes the ingredients and the instructions into the page body in Notion. Each
+one gets its own heading.
+
+### Read your changes back from Notion
+
+You can write a recipe in Notion instead. Then select **Read from Notion** on the
+recipes page. The app reads the body of a page only when that page changed.
+
+If the app cannot read an ingredient line, the recipe gets a flag. The Notion row also
+holds what the app understood, in the **Ingredients read by app** property. Correct the
+line in Notion, then read the recipes again.
+
+### How the app reads an ingredient line
+
+The app reads an amount, a unit and an item from each line:
+
+| You write | The app reads |
+| --- | --- |
+| `400 g pasta` | 400 g of pasta |
+| `400g pasta` | 400 g of pasta |
+| `2 tablespoons olive oil` | 2 tbsp of olive oil |
+| `1 tin chopped tomatoes` | 1 can of chopped tomatoes |
+| `2 cloves garlic` | 2 cloves of garlic |
+| `1 1/2 kg potatoes` | 1.5 kg of potatoes |
+| `2-3 carrots` | 3 carrots, with "2 to 3" as a note |
+| `a pinch of salt` | 1 pinch of salt |
+| `1 onion, finely chopped` | 1 onion, with "finely chopped" as a note |
+| `100 g feta (optional)` | 100 g of feta, with "optional" as a note |
+| `salt and pepper` | salt and pepper, with no amount |
+
+An item with no amount is correct. You add salt to taste, not by weight.
+
+Headings make the reading reliable. The app looks for a heading that names the
+ingredients, and one that names the instructions. **Method**, **Steps** and
+**Directions** all count as the instructions. If a page has no headings, the app reads
+the bullet list as the ingredients and the numbered list as the instructions.
+
+## Tests
+
+Run `npm test`. The command uses the test runner of Node, so it needs no install.
 
 ## Project layout
 
 ```
-server.js              HTTP server and routes
-bin/setup-notion.js    Creates the three Notion databases
-src/config.js          Reads .env and data/config.json
-src/notion/client.js   Notion REST client, with rate limits and retries
-src/notion/schema.js   The property definitions of the three databases
-src/store/cache.js     The local copy of the Notion records
-src/store/json.js      Atomic JSON file reads and writes
-src/web/               Router, page layout, and pages
-data/                  config.json, cache.json, usage log (not in git)
+server.js                       HTTP server and routes
+bin/setup-notion.js             Creates the three Notion databases
+src/config.js                   Reads .env and data/config.json
+src/sync.js                     Reads the Notion records into the cache
+src/notion/client.js            Notion REST client, with rate limits and retries
+src/notion/schema.js            The property definitions of the three databases
+src/notion/recipes.js           Reads and writes recipe pages
+src/recipes/ingredient-line.js  Reads one ingredient line into amount, unit and item
+src/recipes/body.js             Reads and writes the body of a recipe page
+src/recipes/paste.js            Reads a pasted recipe into name, ingredients and steps
+src/store/cache.js              The local copy of the Notion records
+src/store/json.js               Atomic JSON file reads and writes
+src/web/                        Router, page layout, and pages
+data/                           config.json and cache.json (not in git)
 ```
 
 ## Still to build
 
-- Recipes: list, add, edit, and an easy paste-a-recipe form
-- Pantry: stock levels and one name for each ingredient
+- Pantry: stock levels, and one name for each ingredient
 - Weekly plan: chosen recipes, and a shopping list that subtracts the pantry stock
 - Averages: how much of each ingredient you use each week
 - Suggestions: a proposed week that uses up the pantry and keeps the food varied

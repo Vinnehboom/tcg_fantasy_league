@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "setup:notion": "node bin/setup-notion.js"
+    "setup:notion": "node bin/setup-notion.js",
+    "test": "node --test"
   }
 }
