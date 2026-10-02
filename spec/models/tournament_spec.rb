@@ -10,6 +10,20 @@ RSpec.describe Tournament do
 
   it { is_expected.to belong_to(:game) }
 
+  describe '#results_imported?' do
+    let(:tournament) { create(:tournament) }
+
+    it 'is true when the tournament has a result' do
+      create(:result, tournament:)
+
+      expect(tournament).to be_results_imported
+    end
+
+    it 'is false when the tournament has no result' do
+      expect(tournament).not_to be_results_imported
+    end
+  end
+
   describe '#season' do
     let(:game) { create(:game) }
     let(:tournament) { create(:tournament, game:, starting_date: Date.new(2026, 3, 1)) }

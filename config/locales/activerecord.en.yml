@@ -189,6 +189,9 @@ en:
       complete:
         success: Salary draft successfully completed and participations processed.
         failed: Salary draft failed to complete.
+        results_missing: The tournament has no results yet. Import them first.
+        season_missing: No season covers the tournament date. Add the season first.
+        field_size_missing: The tournament has no field size. Set the field size first.
       update:
         success: Salary draft successfully updated.
         failed: Salary draft failed to update.

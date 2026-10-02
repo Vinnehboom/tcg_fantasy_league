@@ -162,6 +162,7 @@ module Admin
       end
 
       it 'sets the participations as completed' do
+        create_result
         expect(participation).to be_submitted
         post complete_admin_salary_draft_path(salary_draft)
         expect(participation.reload).to be_completed
@@ -174,6 +175,60 @@ module Admin
         result.update!(placement: 2)
         post complete_admin_salary_draft_path(salary_draft)
         expect(participation.reload.score).to eq(100)
+      end
+
+      describe 'when the tournament has no results' do
+        it 'keeps the participations submitted' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(participation.reload).to be_submitted
+        end
+
+        it 'tells the admin to import the results' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(flash[:alert]).to eq('The tournament has no results yet. Import them first.')
+        end
+      end
+
+      describe 'when no season covers the tournament' do
+        let(:tournament) { create(:tournament, game:, starting_date: 5.years.ago, field_size: 100) }
+
+        before { create_result }
+
+        it 'keeps the participations submitted' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(participation.reload).to be_submitted
+        end
+
+        it 'leaves the roster players unscored' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(roster_player.reload.score).to be_nil
+        end
+
+        it 'tells the admin to add the season' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(flash[:alert]).to eq('No season covers the tournament date. Add the season first.')
+        end
+      end
+
+      describe 'when the tournament has no field size' do
+        let(:tournament) { create(:tournament, game:, starting_date: 3.days.ago, field_size: nil) }
+
+        before { create_result }
+
+        it 'keeps the participations submitted' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(participation.reload).to be_submitted
+        end
+
+        it 'leaves the roster players unscored' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(roster_player.reload.score).to be_nil
+        end
+
+        it 'tells the admin to set the field size' do
+          post complete_admin_salary_draft_path(salary_draft)
+          expect(flash[:alert]).to eq('The tournament has no field size. Set the field size first.')
+        end
       end
     end
   end
