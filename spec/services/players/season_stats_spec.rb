@@ -33,7 +33,8 @@ module Players
 
       context 'when scores carry another season' do
         it 'ignores them' do
-          other_season = create(:season, game:, label: '2025', start_date: 2.years.ago, end_date: 13.months.ago)
+          other_season = create(:season, game:, label: '2025',
+                                         start_date: Date.new(2024, 9, 1), end_date: Date.new(2025, 8, 31))
           player = create(:player, :without_scores, game:)
           create_score(player:, season:, score: 10)
           create_score(player:, season: other_season, score: 999)
