@@ -15,4 +15,12 @@ class Tournament < ApplicationRecord
 
   include ExternalResource
 
+  def results_imported?
+    results.exists?
+  end
+
+  def season
+    game.current_season(on: starting_date)
+  end
+
 end

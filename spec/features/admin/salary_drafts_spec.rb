@@ -97,9 +97,11 @@ RSpec.describe 'Admin salary drafts' do
 
   describe 'complete' do
     it 'scores submitted participations and marks them completed' do
-      tournament = create(:tournament, starting_date: 1.day.ago)
+      tournament = create(:tournament, starting_date: 1.day.ago, field_size: 100)
+      create(:season, game: tournament.game, start_date: 1.year.ago.to_date, end_date: 1.year.from_now.to_date)
       salary_draft = create(:salary_draft, tournament:)
       participation = create(:participation, :with_roster, draft: salary_draft, status: 'submitted')
+      create(:result, tournament:, player: participation.rosters.first.players.first, placement: 1)
 
       visit admin_salary_draft_path(salary_draft)
       click_link I18n.t('admin.salary_drafts.show.complete')

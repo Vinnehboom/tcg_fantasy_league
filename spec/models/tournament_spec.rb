@@ -10,6 +10,49 @@ RSpec.describe Tournament do
 
   it { is_expected.to belong_to(:game) }
 
+  describe '#results_imported?' do
+    let(:tournament) { create(:tournament) }
+
+    it 'is true when the tournament has a result' do
+      create(:result, tournament:)
+
+      expect(tournament).to be_results_imported
+    end
+
+    it 'is false when the tournament has no result' do
+      expect(tournament).not_to be_results_imported
+    end
+  end
+
+  describe '#season' do
+    let(:game) { create(:game) }
+    let(:tournament) { create(:tournament, game:, starting_date: Date.new(2026, 3, 1)) }
+
+    it 'is the season covering the starting date' do
+      season = create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: Date.new(2026, 8, 31))
+
+      expect(tournament.season).to eq(season)
+    end
+
+    it 'is nil when only an earlier season exists' do
+      create(:season, game:, start_date: Date.new(2024, 9, 1), end_date: Date.new(2025, 8, 31))
+
+      expect(tournament.season).to be_nil
+    end
+
+    it 'is nil when only a later season exists' do
+      create(:season, game:, start_date: Date.new(2026, 9, 1), end_date: Date.new(2027, 8, 31))
+
+      expect(tournament.season).to be_nil
+    end
+
+    it 'is an open-ended season that started before the starting date' do
+      season = create(:season, game:, start_date: Date.new(2025, 9, 1), end_date: nil)
+
+      expect(tournament.season).to eq(season)
+    end
+  end
+
   describe '#field_size' do
     describe 'when absent' do
       it 'is a valid tournament' do

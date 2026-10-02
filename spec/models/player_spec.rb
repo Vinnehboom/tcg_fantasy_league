@@ -108,7 +108,7 @@ RSpec.describe Player do
 
     context 'when called for a different season with the same score as the last one' do
       let(:other_season) do
-        create(:season, game: player.game, start_date: 2.years.ago, end_date: 13.months.ago)
+        create(:season, game: player.game, start_date: Date.new(2024, 9, 1), end_date: Date.new(2025, 8, 31))
       end
 
       before { player.record_score!(score: 100, season: other_season) }
@@ -249,26 +249,6 @@ RSpec.describe Player do
       player = build(:player, name: 'Real Name', suppressed_at: Time.current)
 
       expect(player.raw_name).to eq('Real Name')
-    end
-  end
-
-  describe '#score_difference' do
-    let(:player) { create(:player) }
-
-    it 'shows the difference in scores before the given dates' do
-      create(:external_score, player:, score: 20).score
-      travel 5.days
-      create(:external_score, player:, score: 40).score
-      player.reload
-      expect(player.score_difference(date: 1.day.from_now, other_date: 1.day.ago)).to eq(20)
-    end
-
-    it 'works with dates where the player did not have a score' do
-      player.player_seasons.destroy_all
-      travel 5.days
-      create(:external_score, player:, score: 40).score
-      player.reload
-      expect(player.score_difference(date: 1.day.from_now, other_date: 1.day.ago)).to eq(40)
     end
   end
 end
