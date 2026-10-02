@@ -46,12 +46,6 @@ class Player < ApplicationRecord
     self[:name]
   end
 
-  def score_difference(date:, other_date:)
-    score = latest_score_before(date:)
-    other_score = latest_score_before(date: other_date)
-    score - other_score
-  end
-
   include ExternalResource
 
   def external_url
