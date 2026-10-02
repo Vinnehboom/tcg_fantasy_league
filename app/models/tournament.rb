@@ -15,4 +15,8 @@ class Tournament < ApplicationRecord
 
   include ExternalResource
 
+  def season
+    game.current_season(on: starting_date)
+  end
+
 end
