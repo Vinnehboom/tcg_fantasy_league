@@ -49,6 +49,81 @@ You can run `npm run setup:notion` more than once. It skips each database that
 CAUTION: Keep `data/config.json`. It holds the ids of your three Notion databases. If
 you erase this file, the next setup creates three more databases.
 
+## Create the databases by hand
+
+You can build the three databases in Notion yourself. Then you do not need the setup
+command.
+
+Each property name must match the tables below exactly. The app finds a property by its
+name.
+
+### Recipes
+
+| Property | Type | Options to add |
+| --- | --- | --- |
+| `Name` | Title | — |
+| `Rating` | Select | Favourite, Good, Fine, Retire |
+| `Tags` | Multi-select | your own, add them as you go |
+| `Servings` | Number | — |
+| `Prep minutes` | Number | — |
+| `Source` | URL | — |
+| `Ingredients read by app` | Text | — |
+| `Ingredient status` | Select | Read, Needs review |
+| `Last cooked` | Date | — |
+| `Times cooked` | Number | — |
+
+### Pantry
+
+| Property | Type | Options to add |
+| --- | --- | --- |
+| `Item` | Title | — |
+| `Quantity` | Number | — |
+| `Unit` | Select | g, kg, ml, l, tbsp, tsp, piece, clove, slice, can, jar, pack, bunch, pinch |
+| `Category` | Select | Fresh produce, Meat and fish, Dairy, Dry goods, Tins and jars, Frozen, Herbs and spices, Drinks, Other |
+| `Best before` | Date | — |
+| `Notes` | Text | — |
+
+### Shopping weeks
+
+| Property | Type | Options to add |
+| --- | --- | --- |
+| `Week` | Title | — |
+| `Starts on` | Date | — |
+| `Status` | Select | Planned, Shopped, Cooked, Skipped |
+| `Recipes` | Relation to the Recipes database | — |
+| `Shopping notes` | Text | — |
+
+### Write the ids into the configuration
+
+Write `data/config.json` yourself:
+
+```json
+{
+  "databases": {
+    "recipes": "the 32-character id",
+    "pantry": "the 32-character id",
+    "weeks": "the 32-character id"
+  }
+}
+```
+
+The app needs the id of `recipes` to run. It reads the pantry and the weeks in a later
+version.
+
+`.env` still needs `NOTION_TOKEN`. Leave `NOTION_PARENT_PAGE_ID` empty, because only the
+setup command reads it.
+
+### Four points to watch
+
+1. Keep the title column of Recipes named `Name`. The app sorts the query by `Name`.
+   Notion rejects the request when that property is absent.
+2. Rename the title column of Pantry to `Item`. Rename the title column of Shopping
+   weeks to `Week`. Notion names it `Name` in each new database.
+3. Add your integration to each database. Use the `...` menu, then **Connections**. A
+   database inside a connected page inherits that connection.
+4. Copy the id of the database, not the id of the view. The URL of a full-page database
+   holds two ids. Take the one before `?v=`.
+
 ## What works now
 
 Recipes. You can add a recipe, read your recipes back from Notion, and see what the app

@@ -65,7 +65,9 @@ export async function statusPage() {
   <table>
     <tbody>
       <tr><td>Integration token</td><td>${mark(Boolean(token), 'set', 'missing from .env')}</td></tr>
-      <tr><td>Parent page</td><td>${mark(Boolean(parentPageId), 'set', 'missing from .env')}</td></tr>
+      <tr><td>Parent page</td><td>${isConfigured
+        ? '<span class="note">not needed, the databases exist</span>'
+        : mark(Boolean(parentPageId), 'set', 'missing from .env')}</td></tr>
       <tr><td>Databases</td><td>${mark(isConfigured, 'created', 'run npm run setup:notion')}</td></tr>
     </tbody>
   </table>
